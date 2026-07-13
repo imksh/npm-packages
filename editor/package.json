@@ -1,0 +1,77 @@
+{
+  "name": "@imksh/editor",
+  "version": "1.0.2",
+  "description": "A modern, reusable Lexical-based rich text editor for React.",
+  "license": "MIT",
+  "author": "Karan Kumar",
+  "type": "module",
+  "private": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./style.css": "./dist/index.css"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "*.css",
+    "**/*.css"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "editor",
+    "lexical",
+    "rich-text",
+    "wysiwyg",
+    "react",
+    "typescript",
+    "markdown",
+    "html",
+    "text-editor"
+  ],
+  "peerDependencies": {
+    "react": "^18 || ^19",
+    "react-dom": "^18 || ^19",
+    "lexical": "^0.46.0",
+    "@lexical/react": "^0.46.0",
+    "@lexical/code": "^0.46.0",
+    "@lexical/html": "^0.46.0",
+    "@lexical/link": "^0.46.0",
+    "@lexical/list": "^0.46.0",
+    "@lexical/markdown": "^0.46.0",
+    "@lexical/rich-text": "^0.46.0",
+    "@lexical/selection": "^0.46.0",
+    "@lexical/table": "^0.46.0",
+    "@lexical/utils": "^0.46.0",
+    "lucide-react": "^1.21.0",
+    "prismjs": "^1.30.0"
+  },
+  "devDependencies": {
+    "@types/prismjs": "^1.26.6",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imksh/editor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/imksh/editor/issues"
+  },
+  "homepage": "https://github.com/imksh/editor#readme"
+}

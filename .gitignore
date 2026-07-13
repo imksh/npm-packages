@@ -1,0 +1,97 @@
+# ==========================
+# Dependencies
+# ==========================
+node_modules/
+**/node_modules/
+
+# ==========================
+# Build Output
+# ==========================
+dist/
+build/
+coverage/
+**/dist/
+**/build/
+**/coverage/
+
+# ==========================
+# Logs
+# ==========================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ==========================
+# Environment
+# ==========================
+.env
+.env.*
+!.env.example
+
+# ==========================
+# IDE
+# ==========================
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# ==========================
+# OS Files
+# ==========================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ==========================
+# Cache
+# ==========================
+.cache/
+.parcel-cache/
+.turbo/
+.next/
+.nuxt/
+.vite/
+.eslintcache
+
+# ==========================
+# Package Managers
+# ==========================
+.pnpm-store/
+.npm/
+.yarn/
+.yarn/cache/
+.yarn/unplugged/
+
+# ==========================
+# Misc
+# ==========================
+*.tgz
+*.pid
+*.seed
+*.pid.lock
+
+# ==========================
+# Test
+# ==========================
+.nyc_output/
+playwright-report/
+test-results/
+
+# ==========================
+# Temporary
+# ==========================
+tmp/
+temp/
+
+# ==========================
+# Local Secrets
+# ==========================
+*.pem
+*.key
+*.crt
