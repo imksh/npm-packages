@@ -24,7 +24,7 @@ program
   .argument("<project-name>", "Name of the project")
   .option(
     "-t, --template <template>",
-    "Template to use (react, react-ts, node, node-ts, node-prisma, node-prisma-ts, mern, mern-ts, next, next-ts)",
+    "Template to use (react, react-ts, node, node-ts, node-prisma, node-prisma-ts, mern, mern-ts, next, next-ts, react-native, mern-react-native)",
   )
   .option("--skip-install", "Skip installing dependencies")
   .option("--no-git", "Skip initializing a git repository")

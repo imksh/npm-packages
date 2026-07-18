@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========================================
+   LIGHT THEME
+======================================== */
+:root, [data-theme="light"] {
+  --color-base-100: #ffffff;
+  --color-base-200: #f8fafc;
+  --color-base-300: #e2e8f0;
+  --color-base-content: #0f172a;
+
+  --color-primary: #2563eb;
+  --color-primary-content: #ffffff;
+  --color-secondary: #64748b;
+  --color-secondary-content: #ffffff;
+  --color-accent: #00b8a3;
+  --color-accent-content: #ffffff;
+  --color-neutral: #1e293b;
+  --color-neutral-content: #ffffff;
+
+  --color-info: #0ea5e9;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+
+  --rounded-box: 12px;
+  --rounded-btn: 10px;
+  --rounded-badge: 8px;
+}
+
+/* ========================================
+   DARK THEME 
+======================================== */
+[data-theme="dark"] {
+  --color-base-100: #282828;
+  --color-base-200: #242424;
+  --color-base-300: #2d2d2d;
+  --color-base-content: #f5f5f5;
+
+  --color-primary: #2563eb;
+  --color-primary-content: #ffffff;
+  --color-secondary: #3a3a3a;
+  --color-secondary-content: #d4d4d4;
+  --color-accent: #00b8a3;
+  --color-accent-content: #ffffff;
+  --color-neutral: #2d2d2d;
+  --color-neutral-content: #f5f5f5;
+
+  --color-info: #38bdf8;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+
+  --rounded-box: 12px;
+  --rounded-btn: 10px;
+  --rounded-badge: 8px;
+}
+
+/* ========================================
+   CYBERPUNK THEME 
+======================================== */
+[data-theme="cyberpunk"] {
+  --color-base-100: #fff248;
+  --color-base-200: #e8db3a;
+  --color-base-300: #d1c530;
+  --color-base-content: #000000;
+
+  --color-primary: #ff7598;
+  --color-primary-content: #000000;
+  --color-secondary: #75d1f0;
+  --color-secondary-content: #000000;
+  --color-accent: #c07eec;
+  --color-accent-content: #000000;
+  --color-neutral: #423f00;
+  --color-neutral-content: #fff248;
+
+  --color-info: #2094f3;
+  --color-success: #009485;
+  --color-warning: #ff9900;
+  --color-error: #ff5724;
+
+  --rounded-box: 0px;
+  --rounded-btn: 0px;
+  --rounded-badge: 0px;
+}
+
+/* ========================================
+   FOREST THEME 
+======================================== */
+[data-theme="forest"] {
+  --color-base-100: #171212;
+  --color-base-200: #110e0e;
+  --color-base-300: #060404;
+  --color-base-content: #ebecf0;
+
+  --color-primary: #1eb854;
+  --color-primary-content: #ffffff;
+  --color-secondary: #1db88e;
+  --color-secondary-content: #ffffff;
+  --color-accent: #1db8ab;
+  --color-accent-content: #ffffff;
+  --color-neutral: #19362d;
+  --color-neutral-content: #ebecf0;
+
+  --color-info: #66c6ff;
+  --color-success: #87d039;
+  --color-warning: #e2d562;
+  --color-error: #ff6f6f;
+
+  --rounded-box: 16px;
+  --rounded-btn: 8px;
+  --rounded-badge: 4px;
+}
+
+/* ========================================
+   AQUA THEME 
+======================================== */
+[data-theme="aqua"] {
+  --color-base-100: #345da7;
+  --color-base-200: #2b4d8a;
+  --color-base-300: #223e6d;
+  --color-base-content: #c8e1ff;
+
+  --color-primary: #09ecf3;
+  --color-primary-content: #005355;
+  --color-secondary: #966fb3;
+  --color-secondary-content: #000000;
+  --color-accent: #ffe999;
+  --color-accent-content: #000000;
+  --color-neutral: #3b8ea5;
+  --color-neutral-content: #ffffff;
+
+  --color-info: #2563eb;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-error: #dc2626;
+
+  --rounded-box: 1rem;
+  --rounded-btn: 0.5rem;
+  --rounded-badge: 0.5rem;
+}

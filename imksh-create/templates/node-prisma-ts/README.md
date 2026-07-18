@@ -32,8 +32,8 @@ CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 
 # SMTP Settings
-GMAIL_USER=your_email@gmail.com
-GMAIL_PASSCODE=your_app_password
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_password
 
 # Web Push
 VAPID_SUBJECT=mailto:your_email@example.com
@@ -63,6 +63,7 @@ npm run build
 ## API Endpoints
 
 ### Auth Routes (`/api/auth`)
+
 - `POST /signup` - Registers a new user session
 - `POST /login` - Log in user and write token cookie
 - `POST /logout` - Clear token session cookies
@@ -70,4 +71,5 @@ npm run build
 - `PUT /me` - Edit profile info and upload avatars (requires auth)
 
 ### Upload Routes (`/api/upload`)
+
 - `POST /` - Securely uploads image/file to Cloudinary (requires auth)

@@ -34,7 +34,9 @@ export default async function createCommand(projectName, options) {
     'mern',
     'mern-ts',
     'next',
-    'next-ts'
+    'next-ts',
+    'react-native',
+    'mern-react-native'
   ];
   if (!validTemplates.includes(template)) {
     throw new Error(`Invalid template "${template}". Valid templates are: ${validTemplates.join(', ')}`);
