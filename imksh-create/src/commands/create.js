@@ -8,9 +8,11 @@ import { runGit } from '../utils/runGit.js';
 import ora from 'ora';
 
 export default async function createCommand(projectName, options) {
+  const isCurrentDir = projectName === '.';
   const targetDir = path.resolve(process.cwd(), projectName);
+  const actualProjectName = isCurrentDir ? path.basename(process.cwd()) : projectName;
 
-  if (fs.existsSync(targetDir)) {
+  if (!isCurrentDir && fs.existsSync(targetDir)) {
     throw new Error(`Folder ${projectName} already exists. Please choose a different name or delete the folder.`);
   }
 
@@ -45,7 +47,7 @@ export default async function createCommand(projectName, options) {
   info(`\nCreating project in ${targetDir}...`);
   const copySpinner = ora('Copying template...').start();
   try {
-    await copyTemplate(template, targetDir, projectName);
+    await copyTemplate(template, targetDir, actualProjectName);
     copySpinner.succeed('Template copied successfully.');
   } catch (err) {
     copySpinner.fail('Failed to copy template.');
@@ -77,9 +79,11 @@ export default async function createCommand(projectName, options) {
     info('Skipping git initialization.');
   }
 
-  success(`\nProject ${projectName} created successfully!`);
+  success(`\nProject ${actualProjectName} created successfully!`);
   info(`\nTo get started:\n`);
-  info(`  cd ${projectName}`);
+  if (!isCurrentDir) {
+    info(`  cd ${projectName}`);
+  }
   if (options.skipInstall) {
     info(`  npm install`);
   }

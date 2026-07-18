@@ -33,4 +33,10 @@ export async function copyTemplate(templateName, targetDir, projectName) {
   if (fs.existsSync(gitignorePath)) {
     await fs.rename(gitignorePath, path.join(targetDir, '.gitignore'));
   }
+
+  // Copy .env.example to .env if it exists
+  const envExamplePath = path.join(targetDir, '.env.example');
+  if (fs.existsSync(envExamplePath)) {
+    await fs.copy(envExamplePath, path.join(targetDir, '.env'));
+  }
 }

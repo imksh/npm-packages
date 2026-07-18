@@ -1,6 +1,6 @@
 {
   "name": "@imksh/create",
-  "version": "1.0.21",
+  "version": "1.0.24",
   "description": "A production-ready create for scaffolding modern applications.",
   "type": "module",
   "bin": {

@@ -56,6 +56,8 @@ imksh create my-app --template next --skip-install
 - `mern-ts`: Full-stack React client (TS) + Express/Node server (TS) incorporating the new modular structure.
 - `next`: Next.js App Router boilerplate.
 - `next-ts`: Next.js App Router boilerplate with TypeScript.
+- `react-native`: Expo React Native template with NativeWind, Zustand, and React Navigation.
+- `mern-react-native`: Full-stack Expo React Native client + Express/Node server.
 
 ## Adding Templates
 
