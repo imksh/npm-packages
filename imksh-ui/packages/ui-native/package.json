@@ -1,0 +1,39 @@
+{
+  "name": "@imksh/ui-native",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "react-native": "src/index.ts",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint ."
+  },
+  "peerDependencies": {
+    "nativewind": "^4.0.0 || ^2.0.0",
+    "react": "^18.2.0 || ^19.0.0",
+    "react-native": "*"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.5.2"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "eslint": "^10.7.0",
+    "tsup": "^8.2.4",
+    "typescript": "^5.5.3"
+  }
+}
