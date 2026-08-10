@@ -2,7 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { FiZap, FiLayers, FiCpu, FiShield, FiArrowRight } from "react-icons/fi";
+import { FiZap, FiLayers, FiCpu, FiShield } from "react-icons/fi";
 import appConfig from "../config/appConfig";
 import toast from "react-hot-toast";
 import { useState } from "react";

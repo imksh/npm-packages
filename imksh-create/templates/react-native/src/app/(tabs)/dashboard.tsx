@@ -1,11 +1,11 @@
 import { View } from "react-native";
 import React from "react";
-import HomeHeader from "@/components/common/HomeHeader";
+import TabHeader from "@/components/common/TabHeader";
 
 const dashboard = () => {
   return (
     <View>
-      <HomeHeader title="Dashboard" icon="apps-outline" />
+      <TabHeader title="Dashboard" showMenuButton={false} />
     </View>
   );
 };

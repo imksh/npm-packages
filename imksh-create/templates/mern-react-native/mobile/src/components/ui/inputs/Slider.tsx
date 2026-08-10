@@ -1,8 +1,9 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import CommunitySlider from "@react-native-community/slider";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../../constants/Colors";
+import { Txt } from "../../common/Typography";
 
 export interface SliderProps {
   value: number;
@@ -28,8 +29,8 @@ export default function Slider({
     <View className="mb-4 w-full">
       {label && (
         <View className="flex-row justify-between mb-2">
-          <Text style={{ color: theme.baseContent, fontWeight: "500" }}>{label}</Text>
-          <Text style={{ color: theme.secondary }}>{value}</Text>
+          <Txt color={theme.baseContent} weight="semibold">{label}</Txt>
+          <Txt color={theme.secondary}>{value}</Txt>
         </View>
       )}
       <CommunitySlider

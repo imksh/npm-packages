@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, StyleProp, ViewStyle, Text } from "react-native";
+import { View, StyleProp, ViewStyle } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -7,6 +7,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../../constants/Colors";
+import { Txt } from "../../common/Typography";
 
 export interface ProgressBarProps {
   progress: number; // 0 to 100
@@ -33,8 +34,8 @@ export default function ProgressBar({ progress, color, height = 8, label, style 
     <View style={[{ width: "100%", marginBottom: label ? 16 : 0 }, style]}>
       {label && (
         <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 6 }}>
-          <Text style={{ color: theme.baseContent, fontSize: 13, fontWeight: "500" }}>{label}</Text>
-          <Text style={{ color: theme.secondary, fontSize: 13 }}>{Math.round(progress)}%</Text>
+          <Txt color={theme.baseContent} variant="sm" weight="semibold">{label}</Txt>
+          <Txt color={theme.secondary} variant="sm">{Math.round(progress)}%</Txt>
         </View>
       )}
       <View style={{ width: "100%", height, backgroundColor: theme.base300, borderRadius: height / 2, overflow: "hidden" }}>

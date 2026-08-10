@@ -9,6 +9,7 @@ import { toast } from "@/utils/toast";
 import ScrollContainer from "@/components/ui/layout/ScrollContainer";
 import Container from "@/components/ui/layout/Container";
 import Section from "@/components/ui/layout/Section";
+import Divider from "@/components/ui/layout/Divider";
 import { HStack, VStack } from "@/components/ui/layout/Stack";
 
 import Button from "@/components/ui/buttons/Button";
@@ -79,7 +80,7 @@ const Index = () => {
         >
           <HStack justify="space-between" align="center">
             <VStack>
-              <Txt variant="h2" className="font-extrabold tracking-tight">
+              <Txt variant="3xl" className="font-extrabold tracking-tight">
                 imksh-create
               </Txt>
               <Txt
@@ -115,12 +116,12 @@ const Index = () => {
                 <Badge label="SOFT" variant="primary" soft={true} />
               </HStack>
               <Txt
-                variant="h1"
+                variant="4xl"
                 className="text-primary font-black leading-tight"
               >
                 Stop configuring. Start building.
               </Txt>
-              <Txt variant="body" className="text-primary/70 font-medium">
+              <Txt variant="base" className="text-primary/70 font-medium">
                 Skip the setup. Build your product. A complete boilerplate with auth, state management, navigation, and beautiful prebuilt components.
               </Txt>
             </VStack>
@@ -197,7 +198,7 @@ const Index = () => {
                         size={50}
                       />
                       <VStack style={{ flex: 1 }}>
-                        <Txt variant="mid" className="font-bold">
+                        <Txt variant="md" className="font-bold">
                           Swipe me left!
                         </Txt>
                         <Txt
@@ -234,7 +235,7 @@ const Index = () => {
                       color={colors.accent}
                       style={{ marginBottom: 12 }}
                     />
-                    <Txt variant="h3" className="text-accent text-center">
+                    <Txt variant="2xl" className="text-accent text-center">
                       Double Tap or Swipe Up
                     </Txt>
                     <Txt
@@ -258,11 +259,11 @@ const Index = () => {
                     placeholder="Search components..."
                   />
 
-                  <View className="h-px w-full bg-base-300/50" />
+                  <Divider />
 
                   <HStack justify="space-between" align="center">
                     <VStack>
-                      <Txt variant="mid" className="font-bold">
+                      <Txt variant="md" className="font-bold">
                         Biometric Login
                       </Txt>
                       <Txt
@@ -275,11 +276,11 @@ const Index = () => {
                     <Switch checked={isEnabled} onChange={setIsEnabled} />
                   </HStack>
 
-                  <View className="h-px w-full bg-base-300/50" />
+                  <Divider />
 
                   <VStack spacing={12}>
                     <HStack justify="space-between" align="center">
-                      <Txt variant="mid" className="font-bold">
+                      <Txt variant="md" className="font-bold">
                         Intensity
                       </Txt>
                       <Badge label={`${sliderVal}%`} variant="secondary" />
@@ -292,7 +293,7 @@ const Index = () => {
                     />
                   </VStack>
 
-                  <View className="h-px w-full bg-base-300/50 mt-2" />
+                  <Divider style={{ marginTop: 8 }} />
 
                   {/* Text Input */}
                   <Input
@@ -301,7 +302,7 @@ const Index = () => {
                     leftIcon="mail-outline"
                   />
 
-                  <View className="h-px w-full bg-base-300/50" />
+                  <Divider />
 
                   {/* Selection Controls */}
                   <VStack spacing={16}>
@@ -341,7 +342,7 @@ const Index = () => {
                   ]}
                 />
                 <View className="py-6 items-center justify-center">
-                  <Txt variant="body" className="text-base-content/60 italic">
+                  <Txt variant="base" className="text-base-content/60 italic">
                     Currently viewing {activeTab} content.
                   </Txt>
                 </View>
@@ -380,7 +381,7 @@ const Index = () => {
 
               <Card elevation={1} className="rounded-3xl p-6 mt-4">
                 <HStack justify="space-between" align="center" className="mb-4">
-                  <Txt variant="mid" className="font-bold">
+                  <Txt variant="md" className="font-bold">
                     Background Sync
                   </Txt>
                   <Spinner size={24} />
@@ -399,14 +400,14 @@ const Index = () => {
             <Section title="Information & FAQs" className="pb-20">
               <VStack spacing={12}>
                 <Accordion title="How to use this library?">
-                  <Txt variant="body">
+                  <Txt variant="base">
                     Simply import the components from the `@/components/ui`
                     directory. They are fully typed, gesture-driven, and styled
                     with NativeWind.
                   </Txt>
                 </Accordion>
                 <Accordion title="Does it support dark mode?">
-                  <Txt variant="body">
+                  <Txt variant="base">
                     Yes! All components automatically respond to the device&apos;s
                     color scheme, utilizing the custom CSS variables defined in
                     global.css.
@@ -437,11 +438,11 @@ const Index = () => {
               color={colors.primary}
             />
           </View>
-          <Txt variant="h2" className="text-center font-black">
+          <Txt variant="3xl" className="text-center font-black">
             Premium Modal
           </Txt>
           <Txt
-            variant="body"
+            variant="base"
             className="text-center text-base-content/70 leading-relaxed px-4"
           >
             This highly responsive bottom sheet is gesture-driven. You can

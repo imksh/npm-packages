@@ -1,8 +1,9 @@
 import React from "react";
-import { View, Text, ViewProps } from "react-native";
+import { View, ViewProps } from "react-native";
 import { Image } from "expo-image";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../../constants/Colors";
+import { Txt } from "../../common/Typography";
 
 export interface AvatarProps extends ViewProps {
   url?: string;
@@ -37,9 +38,9 @@ export default function Avatar({ url, initials, size = 48, style, ...props }: Av
           contentFit="cover"
         />
       ) : (
-        <Text style={{ color: theme.baseContent, fontSize: size * 0.4, fontWeight: "600" }}>
+        <Txt color={theme.baseContent} weight="semibold" style={{ fontSize: size * 0.4 }}>
           {initials?.substring(0, 2).toUpperCase()}
-        </Text>
+        </Txt>
       )}
     </View>
   );

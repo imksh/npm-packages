@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, Text } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -11,6 +11,7 @@ import Animated, {
 import { Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../../constants/Colors";
+import { Txt } from "../../common/Typography";
 
 export interface AccordionProps {
   title: string;
@@ -60,7 +61,7 @@ export default function Accordion({ title, children }: AccordionProps) {
         onPress={toggleAccordion}
         style={{ padding: 16, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}
       >
-        <Text style={{ color: theme.baseContent, fontWeight: "600", fontSize: 16 }}>{title}</Text>
+        <Txt color={theme.baseContent} weight="semibold" variant="md">{title}</Txt>
         <Animated.View style={iconStyle}>
           <Ionicons name="chevron-down" size={24} color={theme.baseContent} />
         </Animated.View>

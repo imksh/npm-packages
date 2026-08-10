@@ -25,7 +25,7 @@ export const tabNavigationConfig: TabConfig[] = [
   {
     name: "profile",
     title: "Profile",
-    baseIcon: "person",
+    baseIcon: "person-circle",
   },
 ];
 

@@ -1,8 +1,9 @@
 import React from "react";
-import { View, TouchableOpacity, Text } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../../constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
+import { Txt } from "../../common/Typography";
 
 export interface PaginationProps {
   currentPage: number;
@@ -41,9 +42,9 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
               justifyContent: "center",
             }}
           >
-            <Text style={{ color: isActive ? theme.primaryContent : theme.baseContent, fontWeight: isActive ? "700" : "500" }}>
+            <Txt color={isActive ? theme.primaryContent : theme.baseContent} weight={isActive ? "bold" : "semibold"}>
               {p}
-            </Text>
+            </Txt>
           </TouchableOpacity>
         );
       })}

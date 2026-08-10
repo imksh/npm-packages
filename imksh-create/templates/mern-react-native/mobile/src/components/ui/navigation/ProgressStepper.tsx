@@ -1,8 +1,9 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../../constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
+import { Txt } from "../../common/Typography";
 
 export interface ProgressStepperProps {
   steps: string[];
@@ -36,14 +37,14 @@ export default function ProgressStepper({ steps, currentStep }: ProgressStepperP
                 {isCompleted ? (
                   <Ionicons name="checkmark" size={16} color="#fff" />
                 ) : (
-                  <Text style={{ color: isActive ? theme.primaryContent : theme.secondary, fontWeight: "700" }}>
+                  <Txt color={isActive ? theme.primaryContent : theme.secondary} weight="bold">
                     {index + 1}
-                  </Text>
+                  </Txt>
                 )}
               </View>
-              <Text style={{ color: isActive ? theme.primary : theme.secondary, fontSize: 10, textAlign: "center" }}>
+              <Txt color={isActive ? theme.primary : theme.secondary} variant="xs" align="center">
                 {step}
-              </Text>
+              </Txt>
             </View>
             
             {index < steps.length - 1 && (

@@ -1,10 +1,10 @@
 import { View } from "react-native";
-import HomeHeader from "@/components/common/HomeHeader";
+import TabHeader from "@/components/common/TabHeader";
 
 const search = () => {
   return (
     <View>
-      <HomeHeader title="My App" />
+      <TabHeader title="Search" showMenuButton={false} />
     </View>
   );
 };

@@ -14,16 +14,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, role }) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading) {
+    if (!isCheckingAuth) {
       if (!user) {
         router.replace("/login");
       } else if (role && user.role !== role) {
         router.replace("/");
       }
     }
-  }, [user, loading, role, router]);
+  }, [user, isCheckingAuth, role, router]);
 
-  if (loading || !user || (role && user.role !== role)) return <Loading />;
+  if (isCheckingAuth || !user || (role && user.role !== role)) return <Loading />;
 
   return <>{children}</>;
 };

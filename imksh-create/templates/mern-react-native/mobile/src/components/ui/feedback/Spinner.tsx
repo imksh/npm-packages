@@ -12,7 +12,7 @@ import { Colors } from "../../../constants/Colors";
 import { EvilIcons } from "@expo/vector-icons";
 
 export interface SpinnerProps {
-  size?: number;
+  size?: number | "xs" | "sm" | "md" | "lg" | "xl";
   color?: string;
   style?: StyleProp<ViewStyle>;
 }
@@ -21,6 +21,14 @@ export default function Spinner({ size = 24, color, style }: SpinnerProps) {
   const { colorScheme } = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   const rotation = useSharedValue(0);
+
+  const numericSize = typeof size === "number" ? size : {
+    xs: 16,
+    sm: 20,
+    md: 24,
+    lg: 32,
+    xl: 40,
+  }[size] || 24;
 
   useEffect(() => {
     rotation.value = withRepeat(
@@ -35,8 +43,8 @@ export default function Spinner({ size = 24, color, style }: SpinnerProps) {
   }));
 
   return (
-    <Animated.View style={[animatedStyle, style, { width: size, height: size, alignItems: "center", justifyContent: "center" }]}>
-      <EvilIcons name="spinner" size={size} color={color || theme.primary} />
+    <Animated.View style={[animatedStyle, style, { width: numericSize, height: numericSize, alignItems: "center", justifyContent: "center" }]}>
+      <EvilIcons name="spinner" size={numericSize} color={color || theme.primary} />
     </Animated.View>
   );
 }

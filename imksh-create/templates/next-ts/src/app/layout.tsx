@@ -2,7 +2,7 @@ import React from "react";
 import { Toaster } from "react-hot-toast";
 import Scroll from "../components/common/Scroll";
 import SEO from "../components/common/SEO";
-import "../index.css"; // Assuming index.css contains Tailwind
+import "../index.css";
 import appConfig from "../config/appConfig";
 
 export const metadata = {
@@ -32,6 +32,7 @@ export default function RootLayout({
         <div className="min-h-screen bg-base-100 text-base-content font-sans">
           <Toaster position="top-right" />
           <Scroll />
+          
           {children}
         </div>
       </body>

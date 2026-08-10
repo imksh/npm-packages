@@ -10,6 +10,7 @@ export interface IconButtonProps extends TouchableOpacityProps {
   variant?: ButtonVariant;
   size?: ButtonSize;
   isLoading?: boolean;
+  color?: string;
 }
 
 export default function IconButton({
@@ -17,6 +18,7 @@ export default function IconButton({
   variant = "ghost",
   size = "md",
   isLoading = false,
+  color,
   style,
   disabled,
   ...props
@@ -73,9 +75,9 @@ export default function IconButton({
       {...props}
     >
       {isLoading ? (
-        <ActivityIndicator color={vStyles.iconColor} size="small" />
+        <ActivityIndicator color={color || vStyles.iconColor} size="small" />
       ) : (
-        <Ionicons name={icon} size={sStyles.iconSize} color={vStyles.iconColor} />
+        <Ionicons name={icon} size={sStyles.iconSize} color={color || vStyles.iconColor} />
       )}
     </TouchableOpacity>
   );

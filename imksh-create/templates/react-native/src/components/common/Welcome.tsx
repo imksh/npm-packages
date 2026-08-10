@@ -27,9 +27,9 @@ const Welcome = () => {
   return (
     <View className="flex-row flex-wrap justify-between item-center pl-4 mt-6 items-center">
       <View className="w-[55%] relative justify-end">
-        <Txt variant="h1"> Hey {user ? user.name : "There"}!</Txt>
+        <Txt variant="6xl"> Hey {user ? user.name : "There"}!</Txt>
         <View className="flex-row w-64 items-center">
-          <Txt variant="h1">Welcome Back</Txt>
+          <Txt variant="6xl">Welcome Back</Txt>
           <Text
             key={i}
             style={{ fontSize: 28 }}

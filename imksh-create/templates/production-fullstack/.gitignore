@@ -1,0 +1,148 @@
+# =========================
+# Dependencies
+# =========================
+node_modules/
+
+# Package Managers
+.pnpm-store/
+.npm/
+.yarn/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# =========================
+# Environment Variables
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# Build Output
+# =========================
+dist/
+build/
+out/
+coverage/
+.tmp/
+.temp/
+
+# =========================
+# Next.js
+# =========================
+.next/
+
+# =========================
+# React (Vite/CRA)
+# =========================
+vite.svg
+
+# =========================
+# Expo / React Native
+# =========================
+.expo/
+.expo-shared/
+android/
+ios/
+
+# Keep native folders if using prebuild/ejected workflow
+# !android/
+# !ios/
+
+*.keystore
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# React Native Debug
+*.hprof
+
+# =========================
+# Prisma
+# =========================
+prisma/dev.db
+prisma/dev.db-journal
+prisma/*.db
+prisma/*.db-journal
+
+# =========================
+# MongoDB
+# =========================
+mongodb-data/
+mongo-data/
+dump/
+
+# =========================
+# Cache
+# =========================
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+.stylelintcache
+
+# =========================
+# TypeScript
+# =========================
+*.tsbuildinfo
+
+# =========================
+# IDE
+# =========================
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+
+.idea/
+*.iml
+
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# =========================
+# Testing
+# =========================
+.nyc_output/
+playwright-report/
+test-results/
+
+# =========================
+# Firebase
+# =========================
+google-services.json
+GoogleService-Info.plist
+
+# =========================
+# Expo Credentials
+# =========================
+credentials.json
+
+# =========================
+# Misc
+# =========================
+*.pem
+*.key
+*.crt
+*.pid
+*.seed

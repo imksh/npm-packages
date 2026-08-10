@@ -1,10 +1,11 @@
 import React from "react";
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../constants/Colors";
 import { getTabConfig } from "../../config/tabNavigation";
+import { LinearGradient } from "expo-linear-gradient";
 
 const TabItem = ({
   isFocused,
@@ -14,7 +15,6 @@ const TabItem = ({
   label,
   colors,
 }: any) => {
-
   return (
     <TouchableOpacity
       accessibilityRole="button"
@@ -25,21 +25,25 @@ const TabItem = ({
       activeOpacity={0.8}
     >
       <View style={styles.tabItem}>
-        <Ionicons
-          name={iconName as any}
-          size={24}
-          color={isFocused ? colors.primary : colors.secondary}
-          style={{ marginBottom: 4 }}
-        />
-        <Text
-          style={{
-            color: isFocused ? colors.baseContent : colors.secondary,
-            fontWeight: isFocused ? "600" : "400",
-            fontSize: 11,
-          }}
+        <View
+          style={[
+            styles.iconWrapper,
+            isFocused && {
+              backgroundColor: colors.primary,
+              width: 54,
+              height: 54,
+              borderRadius: 100,
+              alignItems: "center",
+              justifyContent: "center",
+            },
+          ]}
         >
-          {label}
-        </Text>
+          <Ionicons
+            name={iconName as any}
+            size={isFocused ? 20 : 24}
+            color={isFocused ? colors.primaryContent : colors.secondary}
+          />
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -76,68 +80,97 @@ export default function CustomTabBar({
   const { colorScheme } = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
 
+  const currentRoute = state.routes[state.index];
+  const currentOptions = descriptors[currentRoute.key].options;
+  if (currentOptions.tabBarStyle?.display === "none") {
+    return null;
+  }
+
+  const bottomOffset = insets.bottom > 0 ? insets.bottom : 20;
+  const totalTabBarHeight = bottomOffset + 70; // 70 is the height of the tab bar container
+
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          bottom: insets.bottom > 0 ? insets.bottom : 20,
-          backgroundColor: colors.base100,
-          borderColor: colors.base300,
-        },
-      ]}
-    >
-      {state.routes.map((route: any, index: number) => {
-        const { options } = descriptors[route.key];
-        const tabConfig = getTabConfig(route.name);
-        const label =
-          options.tabBarLabel !== undefined
-            ? options.tabBarLabel
-            : options.title !== undefined
-              ? options.title
-              : tabConfig?.title || route.name;
+    <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
+      <LinearGradient
+        colors={[`${colors.base100}00`, colors.base100, colors.base100]}
+        locations={[0, 0.5, 1]}
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: totalTabBarHeight,
+        }}
+        pointerEvents="none"
+      />
+      <View
+        style={[
+          styles.container,
+          {
+            bottom: bottomOffset,
+            backgroundColor: colors.base100,
+            borderColor: colors.base300,
+          },
+        ]}
+      >
+        {state.routes.map((route: any, index: number) => {
+          const { options } = descriptors[route.key];
+          if (
+            options.href === null ||
+            options.tabBarItemStyle?.display === "none"
+          )
+            return null;
 
-        const isFocused = state.index === index;
+          const tabConfig = getTabConfig(route.name);
+          const label =
+            options.tabBarLabel !== undefined
+              ? options.tabBarLabel
+              : options.title !== undefined
+                ? options.title
+                : tabConfig?.title || route.name;
 
-        const onPress = () => {
-          const event = navigation.emit({
-            type: "tabPress",
-            target: route.key,
-            canPreventDefault: true,
-          });
+          const isFocused = state.index === index;
 
-          if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(route.name, route.params);
-          }
-        };
+          const onPress = () => {
+            const event = navigation.emit({
+              type: "tabPress",
+              target: route.key,
+              canPreventDefault: true,
+            });
 
-        const onLongPress = () => {
-          navigation.emit({
-            type: "tabLongPress",
-            target: route.key,
-          });
-        };
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name, route.params);
+            }
+          };
 
-        let iconName: any = tabConfig?.baseIcon || "home";
-        iconName = isFocused ? iconName : `${iconName}-outline`;
+          const onLongPress = () => {
+            navigation.emit({
+              type: "tabLongPress",
+              target: route.key,
+            });
+          };
 
-        return (
-          <React.Fragment key={route.key}>
-            {showCenterButton &&
-              index === Math.floor(state.routes.length / 2) && (
-                <CenterButton colors={colors} onPress={onCenterButtonPress} />
-              )}
-            <TabItem
-              isFocused={isFocused}
-              onPress={onPress}
-              onLongPress={onLongPress}
-              iconName={iconName}
-              label={label as string}
-              colors={colors}
-            />
-          </React.Fragment>
-        );
-      })}
+          let iconName: any = tabConfig?.baseIcon || "home";
+          iconName = isFocused ? iconName : `${iconName}-outline`;
+
+          return (
+            <React.Fragment key={route.key}>
+              {showCenterButton &&
+                index === Math.floor(state.routes.length / 2) && (
+                  <CenterButton colors={colors} onPress={onCenterButtonPress} />
+                )}
+              <TabItem
+                isFocused={isFocused}
+                onPress={onPress}
+                onLongPress={onLongPress}
+                iconName={iconName}
+                label={label as string}
+                colors={colors}
+              />
+            </React.Fragment>
+          );
+        })}
+      </View>
     </View>
   );
 }
@@ -172,6 +205,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     height: 50,
+  },
+  iconWrapper: {
+    alignItems: "center",
+    justifyContent: "center",
   },
   activeIndicator: {
     width: 20,

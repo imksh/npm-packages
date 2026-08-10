@@ -1,14 +1,16 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { OtpInput } from "react-native-otp-entry";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../../constants/Colors";
+import { Txt } from "../../common/Typography";
 
 export interface OTPProps {
   length?: number;
   onTextChange?: (text: string) => void;
   onFilled?: (text: string) => void;
   label?: string;
+  labelOnBorder?:boolean;
   error?: string;
 }
 
@@ -18,18 +20,31 @@ export default function OTPInput({
   onFilled,
   label,
   error,
+  labelOnBorder = false,
 }: OTPProps) {
   const { colorScheme } = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
 
   return (
-    <View className="mb-4">
-      {label && (
-        <Text style={{ color: theme.baseContent, marginBottom: 8, fontWeight: "500" }}>
+    <View className={`mb-4 ${labelOnBorder ? 'relative' : ''}`}>
+      {!labelOnBorder && label && (
+        <Txt
+          color={theme.baseContent}
+          weight="semibold"
+          style={{ marginBottom: 8 }}
+        >
           {label}
-        </Text>
+        </Txt>
       )}
-      
+
+      {labelOnBorder && label && (
+        <View style={{ position: 'absolute', top: -9, left: 12, backgroundColor: theme.base100, paddingHorizontal: 4, zIndex: 10, elevation: 2 }}>
+          <Txt color={error ? theme.error : theme.secondary} variant="xs" weight="semibold">
+            {label}
+          </Txt>
+        </View>
+      )}
+
       <OtpInput
         numberOfDigits={length}
         onTextChange={onTextChange}
@@ -46,14 +61,22 @@ export default function OTPInput({
             width: 56,
             height: 64,
           },
-          pinCodeTextStyle: { color: theme.baseContent, fontSize: 24, fontWeight: "700" },
+          pinCodeTextStyle: {
+            color: theme.baseContent,
+            fontSize: 24,
+            fontWeight: "700",
+          },
         }}
       />
 
       {error && (
-        <Text style={{ color: theme.error, fontSize: 12, marginTop: 8, marginLeft: 4 }}>
+        <Txt
+          color={theme.error}
+          variant="sm"
+          style={{ marginTop: 8, marginLeft: 4 }}
+        >
           {error}
-        </Text>
+        </Txt>
       )}
     </View>
   );

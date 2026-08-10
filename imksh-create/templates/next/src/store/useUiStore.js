@@ -17,12 +17,15 @@ export const useUiStore = create((set, get) => ({
     set((state) => ({ isMobileMenuOpened: !state.isMobileMenuOpened }));
   },
 
-  theme: localStorage.getItem("theme") || "light",
+  theme: typeof window !== "undefined" ? localStorage.getItem("theme") || "light" : "light",
 
   setTheme: (theme) => {
-    document.documentElement.setAttribute("data-theme", theme);
-
-    localStorage.setItem("theme", theme);
+    if (typeof document !== "undefined") {
+      document.documentElement.setAttribute("data-theme", theme);
+    }
+    if (typeof window !== "undefined") {
+      localStorage.setItem("theme", theme);
+    }
 
     set({ theme });
   },
@@ -30,9 +33,12 @@ export const useUiStore = create((set, get) => ({
   toggleTheme: () => {
     const nextTheme = get().theme === "light" ? "dark" : "light";
 
-    document.documentElement.setAttribute("data-theme", nextTheme);
-
-    localStorage.setItem("theme", nextTheme);
+    if (typeof document !== "undefined") {
+      document.documentElement.setAttribute("data-theme", nextTheme);
+    }
+    if (typeof window !== "undefined") {
+      localStorage.setItem("theme", nextTheme);
+    }
 
     set({ theme: nextTheme });
   },

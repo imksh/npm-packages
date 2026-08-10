@@ -1,7 +1,8 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../../constants/Colors";
+import { Txt } from "../../common/Typography";
 
 export interface CircularProgressProps {
   progress: number;
@@ -28,9 +29,9 @@ export default function CircularProgress({ progress, size = 60, strokeWidth = 6 
       }}
     >
       <View style={{ transform: [{ rotate: "-45deg" }] }}>
-         <Text style={{ color: theme.baseContent, fontWeight: "700", fontSize: size * 0.25 }}>
-           {progress}%
-         </Text>
+         <Txt color={theme.baseContent} weight="bold" style={{ fontSize: size * 0.25 }}>
+           {Math.round(progress)}%
+         </Txt>
       </View>
     </View>
   );

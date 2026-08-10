@@ -1,20 +1,15 @@
 import { create } from "zustand";
 import { authService } from "../services/auth.service";
-import { save, remove } from "../utils/storage";
+import { save, remove, get } from "../utils/storage";
+import { User } from "../types/auth.type";
+import { initializeSocket, disconnectSocket } from "../services/socket.service";
+import { useNotificationStore } from "./useNotificationStore";
 
-export interface User {
-  _id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  role: string;
-  avatar?: {
-    url?: string;
-    publicId?: string;
-  };
-  createdAt?: string;
-  updatedAt?: string;
-}
+// ── Module-level prefetch ──────────────────────────────────────────────────
+// Kick off the AsyncStorage read the instant this module is imported
+// (before any React component mounts). By the time loadCachedUser() is
+// called from a useEffect, the promise is already resolved or very close.
+const _prefetchedUser: Promise<User | null> = get("user");
 
 export interface AuthState {
   user: User | null;
@@ -34,6 +29,13 @@ export interface AuthState {
   getMe: () => Promise<void>;
   updateProfile: (updates: Partial<User> | FormData) => Promise<boolean>;
   logout: () => Promise<void>;
+  genOtp: (email: string) => Promise<boolean>;
+  verifyOtp: (email: string, otp: string) => Promise<boolean>;
+  resetPassword: (newPassword: string) => Promise<boolean>;
+  changePassword: (oldPassword: string, newPassword: string) => Promise<boolean>;
+  setUser: (user: User) => void;
+  clearError: () => void;
+  loadCachedUser: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -41,6 +43,27 @@ export const useAuthStore = create<AuthState>((set) => ({
   loading: false,
   isCheckingAuth: true,
   error: null,
+
+  setUser: (user: User) => set({ user }),
+
+  clearError: () => set({ error: null }),
+
+  loadCachedUser: async () => {
+    // Await the already-in-flight prefetch — typically resolves in <1ms here
+    const cached = await _prefetchedUser;
+    if (cached) {
+      set({ user: cached, isCheckingAuth: false });
+      // Re-establish socket + push on app resume with a cached session
+      initializeSocket();
+      const notifStore = useNotificationStore.getState();
+      notifStore.listenForSocketEvents();
+      notifStore.registerForPushNotificationsAsync();
+      notifStore.fetchNotifications();
+    } else {
+      // No cache — mark auth check done so routing doesn't hang
+      set({ isCheckingAuth: false });
+    }
+  },
 
   sendOtp: async (email: string) => {
     set({ loading: true, error: null });
@@ -74,13 +97,21 @@ export const useAuthStore = create<AuthState>((set) => ({
         otp,
         role,
       );
-      if (data.token) {
-        save("token", data.token);
+      if (data.data?.token) {
+        save("token", data.data.token);
       }
+      const user = data.data?.user;
+      if (user) save("user", user);
       set({
-        user: data.data,
+        user,
         loading: false,
       });
+      // Initialise socket + push after signup
+      initializeSocket();
+      const notifStore = useNotificationStore.getState();
+      notifStore.listenForSocketEvents();
+      notifStore.registerForPushNotificationsAsync();
+      notifStore.fetchNotifications();
       return true;
     } catch (err: any) {
       set({
@@ -97,13 +128,21 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ loading: true, error: null });
     try {
       const { data } = await authService.login(email, password);
-      if (data.token) {
-        save("token", data.token);
+      if (data.data?.token) {
+        save("token", data.data.token);
       }
+      const user = data.data?.user;
+      if (user) save("user", user);
       set({
-        user: data.data,
+        user,
         loading: false,
       });
+      // Initialise socket + push after login
+      initializeSocket();
+      const notifStore = useNotificationStore.getState();
+      notifStore.listenForSocketEvents();
+      notifStore.registerForPushNotificationsAsync();
+      notifStore.fetchNotifications();
       return true;
     } catch (err: any) {
       set({
@@ -123,7 +162,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     save("token", "demo-token-123");
     set({
       user: {
-        _id: "demo_user_123",
+        id: "demo_user_123",
         name: "Demo User",
         email: "demo@imksh.com",
         role: "admin",
@@ -133,12 +172,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   getMe: async () => {
-    set({ isCheckingAuth: true });
     try {
       const { data } = await authService.getMe();
-      set({ user: data.data, isCheckingAuth: false });
-    } catch {
-      set({ isCheckingAuth: false });
+      const user = data.data;
+      // Always update cache with fresh server data
+      if (user) save("user", user);
+      set({ user, isCheckingAuth: false });
+      // Network failed — cached user (already loaded) stays in place
     } finally {
       set({ isCheckingAuth: false });
     }
@@ -167,12 +207,67 @@ export const useAuthStore = create<AuthState>((set) => ({
     } catch {
       // ignore errors — cookie may already be expired
     } finally {
-      remove("token");
+      await remove("token");
+      await remove("user");   // clear cached user on logout
+      disconnectSocket();
       set({ loading: false });
     }
     set({
       user: null,
       error: null,
     });
+  },
+
+  genOtp: async (email: string) => {
+    set({ loading: true, error: null });
+    try {
+      await authService.genOtp(email);
+      return true;
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || err.message, loading: false });
+      return false;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  verifyOtp: async (email: string, otp: string) => {
+    set({ loading: true, error: null });
+    try {
+      const { data } = await authService.verifyOtp(email, otp);
+      if (data.token) save("token", data.token);
+      return true;
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || err.message, loading: false });
+      return false;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  resetPassword: async (newPassword: string) => {
+    set({ loading: true, error: null });
+    try {
+      await authService.resetPassword(newPassword);
+      return true;
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || err.message, loading: false });
+      return false;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  changePassword: async (oldPassword: string, newPassword: string) => {
+    set({ loading: true, error: null });
+    try {
+      await authService.changePassword(oldPassword, newPassword);
+      return true;
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || err.message, loading: false });
+      return false;
+    } finally {
+      set({ loading: false });
+    }
   },
 }));

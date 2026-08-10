@@ -10,12 +10,15 @@ export interface TabItem {
   label: string;
 }
 
+export type TabsSize = "xs" | "sm" | "base" | "md" | "lg";
+
 export interface TabsProps {
   tabs: TabItem[];
   activeTab: string;
   onChange: (id: string) => void;
   variant?: "button" | "underline";
   scrollable?: boolean;
+  size?: TabsSize;
 }
 
 export default function Tabs({
@@ -24,9 +27,32 @@ export default function Tabs({
   onChange,
   variant = "underline",
   scrollable = false,
+  size = "base",
 }: TabsProps) {
   const { colorScheme } = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+
+  const getSizeStyles = (): {
+    py: number;
+    fontSize: number;
+  } => {
+    switch (size) {
+      case "xs":
+        return { py: variant === "button" ? 5 : 6, fontSize: 11 };
+      case "sm":
+        return { py: variant === "button" ? 7 : 8, fontSize: 12 };
+      case "base":
+        return { py: variant === "button" ? 9 : 10, fontSize: 14 };
+      case "md":
+        return { py: variant === "button" ? 11 : 12, fontSize: 15 };
+      case "lg":
+        return { py: variant === "button" ? 13 : 14, fontSize: 17 };
+      default:
+        return { py: variant === "button" ? 9 : 10, fontSize: 14 };
+    }
+  };
+
+  const sStyles = getSizeStyles();
 
   const [tabWidths, setTabWidths] = useState<{ [key: string]: number }>({});
   const [tabXs, setTabXs] = useState<{ [key: string]: number }>({});
@@ -40,7 +66,7 @@ export default function Tabs({
       indicatorWidth.value = withTiming(tabWidths[activeTab], config);
       indicatorPosition.value = withTiming(tabXs[activeTab], config);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [activeTab, tabWidths, tabXs]);
 
   const indicatorStyle = useAnimatedStyle(() => {
@@ -101,7 +127,7 @@ export default function Tabs({
             onPress={() => onChange(tab.id)}
             onLayout={(e) => handleLayout(tab.id, e)}
             style={{
-              paddingVertical: variant === "button" ? 10 : 12, // py-2.5 for button
+              paddingVertical: sStyles.py,
               paddingHorizontal: 16,
               flex: scrollable ? undefined : 1,
               alignItems: "center",
@@ -110,9 +136,9 @@ export default function Tabs({
             }}
           >
             <Txt
-              variant="mid"
+              variant="md"
               style={{
-                fontSize: 14, // text-sm
+                fontSize: sStyles.fontSize,
                 fontWeight: isActive ? "600" : "500",
                 color:
                   variant === "button" && isActive

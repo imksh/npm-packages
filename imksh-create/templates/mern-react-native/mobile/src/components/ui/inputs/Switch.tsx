@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { TouchableOpacity, StyleProp, ViewStyle, Text } from "react-native";
+import { TouchableOpacity, StyleProp, ViewStyle } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -8,6 +8,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../../constants/Colors";
+import { Txt } from "../../common/Typography";
 
 export interface SwitchProps {
   checked: boolean;
@@ -68,7 +69,7 @@ export default function Switch({
           ]}
         />
       </Animated.View>
-      {label && <Text style={{ color: theme.baseContent, marginLeft: 10, fontSize: 15 }}>{label}</Text>}
+      {label && <Txt color={theme.baseContent} variant="base" style={{ marginLeft: 10 }}>{label}</Txt>}
     </TouchableOpacity>
   );
 }

@@ -9,27 +9,30 @@ export const FontFamily = {
 } as const;
 
 export type TxtVariant =
-  | "h1"
-  | "h2"
-  | "h3"
-  | "body"
-  | "regular"
   | "caption"
-  | "mid"
+  | "xxs"
+  | "xs"
+  | "sm"
+  | "base"
+  | "md"
+  | "lg"
   | "xl"
   | "2xl"
   | "3xl"
-  | "4xl";
+  | "4xl"
+  | "5xl"
+  | "6xl"
+  | "7xl";
 
 export interface TxtProps extends TextProps {
   variant?: TxtVariant;
   color?: string;
   align?: "auto" | "left" | "right" | "center" | "justify";
-  weight?: "normal" | "bold" | "semibold" | "black";
+  weight?: "normal" | "medium" | "bold" | "semibold" | "black";
 }
 
 export const Txt = ({
-  variant = "regular",
+  variant = "base",
   color,
   align,
   weight,
@@ -40,36 +43,51 @@ export const Txt = ({
 }: TxtProps) => {
   const getVariantStyles = () => {
     switch (variant) {
-      case "h1":
-        return { fontFamily: FontFamily.bold, fontSize: 22 };
-      case "h2":
-        return { fontFamily: FontFamily.semibold, fontSize: 18 };
-      case "h3":
-        return { fontFamily: FontFamily.semibold, fontSize: 16 };
-      case "mid":
-        return { fontFamily: FontFamily.medium, fontSize: 15 };
-      case "body":
-        return { fontFamily: FontFamily.medium, fontSize: 14 };
-      case "regular":
-        return { fontFamily: FontFamily.regular, fontSize: 13 };
       case "caption":
+        return { fontFamily: FontFamily.regular, fontSize: 10 };
+      case "xxs":
+        return { fontFamily: FontFamily.regular, fontSize: 8 };
+      case "xs":
+        return { fontFamily: FontFamily.regular, fontSize: 10 };
+      case "sm":
         return { fontFamily: FontFamily.regular, fontSize: 12 };
+      case "base":
+        return { fontFamily: FontFamily.regular, fontSize: 14 };
+      case "md":
+        return { fontFamily: FontFamily.medium, fontSize: 16 };
+      case "lg":
+        return { fontFamily: FontFamily.semibold, fontSize: 18 };
       case "xl":
-        return { fontFamily: FontFamily.extrabold, fontSize: 30 };
+        return { fontFamily: FontFamily.bold, fontSize: 20 };
       case "2xl":
-        return { fontFamily: FontFamily.extrabold, fontSize: 36 };
+        return { fontFamily: FontFamily.bold, fontSize: 24 };
       case "3xl":
-        return { fontFamily: FontFamily.extrabold, fontSize: 48 };
+        return { fontFamily: FontFamily.extrabold, fontSize: 30 };
       case "4xl":
+        return { fontFamily: FontFamily.extrabold, fontSize: 36 };
+      case "5xl":
+        return { fontFamily: FontFamily.extrabold, fontSize: 48 };
+      case "6xl":
         return { fontFamily: FontFamily.extrabold, fontSize: 60 };
+      case "7xl":
+        return { fontFamily: FontFamily.extrabold, fontSize: 72 };
       default:
-        return { fontFamily: FontFamily.regular, fontSize: 13 };
+        return { fontFamily: FontFamily.regular, fontSize: 14 };
     }
   };
 
   const baseStyle = getVariantStyles();
-  const defaultColorClass =
-    variant === "caption" ? "text-secondary" : "text-base-content";
+  const hasColorClass = className.split(" ").some((c) => {
+    if (!c.startsWith("text-")) return false;
+    const val = c.substring(5).split("/")[0]; // handle potential opacity suffix like text-white/80
+    const isSize = ["xxs", "xs", "sm", "base", "md", "lg", "xl", "2xl", "3xl", "4xl", "5xl", "6xl", "7xl", "caption"].includes(val);
+    return !isSize;
+  });
+  const defaultColorClass = hasColorClass
+    ? ""
+    : variant === "xs"
+      ? "text-secondary"
+      : "text-base-content";
 
   // Override specific properties if provided
   const customStyles: any = {};
@@ -77,9 +95,10 @@ export const Txt = ({
   if (align) customStyles.textAlign = align;
   if (weight) {
     if (weight === "bold" || weight === "black")
-      customStyles.fontFamily = "MontserratBold";
-    if (weight === "semibold") customStyles.fontFamily = "MontserratSemiBold";
-    if (weight === "normal") customStyles.fontFamily = "MontserratRegular";
+      customStyles.fontFamily = FontFamily.bold;
+    if (weight === "semibold") customStyles.fontFamily = FontFamily.semibold;
+    if (weight === "medium") customStyles.fontFamily = FontFamily.medium;
+    if (weight === "normal") customStyles.fontFamily = FontFamily.regular;
   }
 
   return (

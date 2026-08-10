@@ -3,10 +3,10 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useColorScheme } from "nativewind";
 import { Ionicons } from "@expo/vector-icons";
 import { Txt } from "../../components/common/Typography";
-import SettingsOptions from "../../components/settings/SettingsOptions";
-import SettingToggle from "../../components/settings/SettingToggle";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Avatar from "@/components/ui/data-display/Avatar";
+import Button from "@/components/ui/buttons/Button";
+import Switch from "@/components/ui/inputs/Switch";
 
 const Profile = () => {
   const { user, logout } = useAuthStore();
@@ -20,10 +20,6 @@ const Profile = () => {
 
   const handleLogout = async () => {
     await logout();
-  };
-
-  const handleEditProfile = () => {
-    console.log("Edit profile clicked");
   };
 
   return (
@@ -50,63 +46,30 @@ const Profile = () => {
           </Txt>
         </View>
       </View>
-      <ScrollView className="flex-1 bg-base-100">
-        {/* Settings Section */}
-        <View className="px-6 py-8 pb-20">
-          <Txt
-            variant="h3"
-            className="mb-6 text-base-content/80 uppercase tracking-widest text-xs"
-          >
-            Account Settings
-          </Txt>
 
-          <SettingsOptions
-            name="Edit Profile"
-            icon="person-outline"
-            message="Are you sure you want to edit your profile?"
-            fun={handleEditProfile}
-            check={false}
-          />
-
-          <SettingsOptions
-            name="Change Password"
-            icon="lock-closed-outline"
-            message="Do you want to update your password?"
-            fun={() => {}}
-            check={false}
-          />
-
-          <Txt
-            variant="h3"
-            className="mt-6 mb-6 text-base-content/80 uppercase tracking-widest text-xs"
-          >
-            Preferences
-          </Txt>
-
-          <SettingToggle
-            name="Dark Theme"
-            icon="moon-outline"
-            check={colorScheme === "dark"}
-            fun={handleToggleTheme}
-          />
-
-          <SettingToggle
-            name="Push Notifications"
-            icon="notifications-outline"
-            check={true}
-            fun={() => {}}
-          />
-
-          <View className="mt-8 mb-12">
-            <SettingsOptions
-              name="Log Out"
-              icon="log-out-outline"
-              message="Are you sure you want to log out from this device?"
-              fun={handleLogout}
-              check={false}
-            />
+      <ScrollView className="flex-1 px-6 pt-6">
+        <View className="bg-base-200 rounded-2xl p-4 mb-6">
+          <View className="flex-row items-center justify-between py-2">
+            <View className="flex-row items-center">
+              <Ionicons 
+                name={colorScheme === "dark" ? "moon" : "sunny"} 
+                size={22} 
+                color={colorScheme === "dark" ? "#fff" : "#000"} 
+              />
+              <Txt variant="base" className="ml-3 font-semibold">Dark Mode</Txt>
+            </View>
+            <Switch checked={colorScheme === "dark"} onChange={handleToggleTheme} />
           </View>
         </View>
+
+        <Button
+          label="Logout"
+          variant="error"
+          isFullWidth
+          leftIcon="log-out-outline"
+          onPress={handleLogout}
+          style={{ marginTop: 20, marginBottom: 40 }}
+        />
       </ScrollView>
     </View>
   );

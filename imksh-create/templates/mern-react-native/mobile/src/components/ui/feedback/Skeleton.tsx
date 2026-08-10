@@ -16,6 +16,7 @@ export interface SkeletonProps {
   borderRadius?: number;
   style?: StyleProp<ViewStyle>;
   variant?: "circular" | "rectangular" | "text";
+  className?: string;
 }
 
 export default function Skeleton({
@@ -24,6 +25,7 @@ export default function Skeleton({
   borderRadius,
   style,
   variant = "rectangular",
+  className=""
 }: SkeletonProps) {
   const { colorScheme } = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
@@ -76,6 +78,7 @@ export default function Skeleton({
         animatedStyle,
         style,
       ]}
+      className={className}
     />
   );
 }

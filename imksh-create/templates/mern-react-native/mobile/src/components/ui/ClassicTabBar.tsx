@@ -1,5 +1,6 @@
+import { Txt } from "../common/Typography";
 import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
@@ -23,7 +24,7 @@ const TabItem = ({ isFocused, onPress, onLongPress, iconName, label, colors }: a
           color={isFocused ? colors.primary : colors.secondary} 
           style={{ marginBottom: 4 }} 
         />
-        <Text 
+        <Txt 
           style={{ 
             color: isFocused ? colors.primary : colors.secondary, 
             fontWeight: isFocused ? '600' : '500', 
@@ -31,7 +32,7 @@ const TabItem = ({ isFocused, onPress, onLongPress, iconName, label, colors }: a
           }}
         >
           {label}
-        </Text>
+        </Txt>
       </View>
     </TouchableOpacity>
   );

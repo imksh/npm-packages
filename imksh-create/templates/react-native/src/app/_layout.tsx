@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Stack } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
 import Toast from "react-native-toast-message";
 import { useAuthStore } from "../store/useAuthStore";
 import { useColorScheme } from "nativewind";
@@ -25,9 +25,12 @@ export default function RootLayout() {
     InterExtraBold: require("../../assets/fonts/Inter_ExtraBold.ttf"),
   });
 
-  const { getMe, isCheckingAuth } = useAuthStore();
+  const { getMe, isCheckingAuth, loadCachedUser, user } = useAuthStore();
   const { colorScheme, setColorScheme } = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
+  
+  const segments = useSegments();
+  const router = useRouter();
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
@@ -36,7 +39,10 @@ export default function RootLayout() {
   }, [fontsLoaded, fontError]);
 
   useEffect(() => {
-    getMe();
+    // Load cached user quickly, then fetch fresh in background
+    loadCachedUser().then(() => {
+      getMe();
+    });
 
     // Load saved theme
     AsyncStorage.getItem("theme").then((savedTheme) => {
@@ -47,7 +53,19 @@ export default function RootLayout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (isCheckingAuth) return;
 
+    const inAuthGroup = segments[0] === "(auth)";
+
+    if (!user && !inAuthGroup) {
+      // Redirect to the auth group
+      router.replace("/(auth)/login");
+    } else if (user && inAuthGroup) {
+      // Redirect away from auth
+      router.replace("/(tabs)");
+    }
+  }, [user, isCheckingAuth, segments]);
 
   if (!fontsLoaded && !fontError) {
     return null;
@@ -69,7 +87,7 @@ export default function RootLayout() {
         >
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen
-            name="login"
+            name="(auth)"
             options={{ headerShown: false, animation: "fade" }}
           />
         </Stack>

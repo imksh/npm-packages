@@ -1,8 +1,14 @@
 import React, { useState } from "react";
-import { View, TextInput, TextInputProps, TouchableOpacity, Text } from "react-native";
+import {
+  View,
+  TextInput,
+  TextInputProps,
+  TouchableOpacity,
+} from "react-native";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../../constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
+import { Txt } from "../../common/Typography";
 
 export interface InputProps extends TextInputProps {
   label?: string;
@@ -11,7 +17,10 @@ export interface InputProps extends TextInputProps {
   rightIcon?: keyof typeof Ionicons.glyphMap;
   onRightIconPress?: () => void;
   helperText?: string;
-  containerStyle?: import("react-native").StyleProp<import("react-native").ViewStyle>;
+  containerStyle?: import("react-native").StyleProp<
+    import("react-native").ViewStyle
+  >;
+  labelOnBorder?: boolean;
 }
 
 export default function Input({
@@ -23,6 +32,7 @@ export default function Input({
   helperText,
   style,
   containerStyle,
+  labelOnBorder = false,
   ...props
 }: InputProps) {
   const { colorScheme } = useColorScheme();
@@ -32,17 +42,44 @@ export default function Input({
   const borderColor = error
     ? theme.error
     : isFocused
-    ? theme.primary
-    : theme.base300;
+      ? theme.primary
+      : theme.base300;
 
   return (
-    <View className="mb-4">
-      {label && (
-        <Text style={{ color: theme.baseContent, marginBottom: 6, fontWeight: "500" }}>
-          {label}
-        </Text>
+    <View className="mb-4 relative">
+      {!labelOnBorder && label && (
+        <Txt
+          color={theme.baseContent}
+          weight="semibold"
+          style={{ marginBottom: 6 }}
+        >
+          {label} {error ? "*" : ""}{" "}
+        </Txt>
       )}
-      
+
+      {labelOnBorder && label && (
+        <View
+          style={{
+            position: "absolute",
+            top: -6,
+            left: 12,
+            backgroundColor: theme.base100,
+            paddingHorizontal: 6,
+            zIndex: 10,
+          }}
+        >
+          <Txt
+            color={
+              error ? theme.error : isFocused ? theme.primary : theme.secondary
+            }
+            variant="xs"
+            weight="semibold"
+          >
+            {label} {error ? "*" : ""}
+          </Txt>
+        </View>
+      )}
+
       <View
         style={[
           {
@@ -66,7 +103,7 @@ export default function Input({
             style={{ marginRight: 8 }}
           />
         )}
-        
+
         <TextInput
           style={[
             {
@@ -90,7 +127,10 @@ export default function Input({
         />
 
         {rightIcon && (
-          <TouchableOpacity onPress={onRightIconPress} disabled={!onRightIconPress}>
+          <TouchableOpacity
+            onPress={onRightIconPress}
+            disabled={!onRightIconPress}
+          >
             <Ionicons
               name={rightIcon}
               size={20}
@@ -102,7 +142,7 @@ export default function Input({
       </View>
 
       {(error || helperText) && (
-        <Text
+        <Txt
           style={{
             color: error ? theme.error : theme.secondary,
             fontSize: 12,
@@ -111,7 +151,7 @@ export default function Input({
           }}
         >
           {error || helperText}
-        </Text>
+        </Txt>
       )}
     </View>
   );

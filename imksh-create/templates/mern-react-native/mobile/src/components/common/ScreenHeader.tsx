@@ -4,40 +4,64 @@ import { Ionicons } from "@expo/vector-icons";
 import { Txt } from "./Typography";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../constants/Colors";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 interface IProps {
   title: string;
-  icon?: keyof typeof Ionicons.glyphMap;
-  fun?: () => void;
+  subtitle?: string;
+  actions?: React.ReactNode;
+  onBack?: () => void;
 }
 
-export default function ScreenHeader({ title, icon, fun }: IProps) {
+export default function ScreenHeader({
+  title,
+  subtitle,
+  actions,
+  onBack,
+}: IProps) {
   const { colorScheme } = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
-  const router = useRouter();
+  const insets = useSafeAreaInsets();
+
   return (
     <View
-      className="h-28 pb-4 px-6 flex-row items-end justify-between border-b border-base-300 w-full"
+      className="px-6 flex-row items-center justify-between border-b border-base-200 w-full"
       style={{
         backgroundColor: colors.base200,
+        height: insets.top + 56,
+        paddingTop: insets.top,
       }}
     >
-      <View className="flex-row items-center">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4">
+      <View className="flex-row items-center flex-1 mr-4">
+        <TouchableOpacity
+          onPress={() => (onBack ? onBack() : router.back())}
+          activeOpacity={0.7}
+          className="w-10 h-10 rounded-full bg-base-200/80 items-center justify-center mr-3 border border-base-300/10 shadow-sm"
+        >
           <Ionicons
-            name="arrow-back-outline"
+            name="arrow-back"
             color={colors.baseContent}
-            size={28}
+            size={20}
           />
         </TouchableOpacity>
-        <Txt variant="h2" className="font-bold">
-          {title}
-        </Txt>
+        <View className="flex-1">
+          <Txt variant="md" className="text-base-content" numberOfLines={1}>
+            {title}
+          </Txt>
+          {subtitle && (
+            <Txt
+              variant="xs"
+              className="text-base-content/50 mt-0.5"
+              numberOfLines={1}
+            >
+              {subtitle}
+            </Txt>
+          )}
+        </View>
       </View>
-      {icon && (
-        <TouchableOpacity onPress={fun}>
-          <Ionicons name={icon} color={colors.baseContent} size={28} />
-        </TouchableOpacity>
+      {actions && (
+        <View className="flex-row items-center gap-2">{actions}</View>
       )}
     </View>
   );

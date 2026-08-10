@@ -1,7 +1,8 @@
 import React from "react";
-import { View, Text, ViewProps } from "react-native";
+import { View, ViewProps } from "react-native";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../../constants/Colors";
+import { Txt } from "../../common/Typography";
 
 export interface SectionProps extends ViewProps {
   title?: string;
@@ -32,16 +33,14 @@ export default function Section({
           }}
         >
           {title && (
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: "700",
-                color: theme.baseContent,
-              }}
+            <Txt
+              color={theme.baseContent}
+              weight="bold"
+              variant="lg"
               className={titleClass}
             >
               {title}
-            </Text>
+            </Txt>
           )}
           {action}
         </View>

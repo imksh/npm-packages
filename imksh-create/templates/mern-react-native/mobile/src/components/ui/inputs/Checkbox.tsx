@@ -1,8 +1,9 @@
 import React from "react";
-import { TouchableOpacity, View, Text } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../../constants/Colors";
+import { Txt } from "../../common/Typography";
 
 export interface CheckboxProps {
   checked: boolean;
@@ -47,7 +48,7 @@ export default function Checkbox({
       >
         {checked && <Ionicons name="checkmark" size={16} color={theme.primaryContent} />}
       </View>
-      {label && <Text style={{ color: theme.baseContent, fontSize: 15 }}>{label}</Text>}
+      {label && <Txt color={theme.baseContent} variant="base">{label}</Txt>}
     </TouchableOpacity>
   );
 }

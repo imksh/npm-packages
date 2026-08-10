@@ -4,6 +4,8 @@ import {
   TouchableWithoutFeedback,
   Dimensions,
   StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -12,7 +14,7 @@ import Animated, {
   Easing,
   runOnJS,
 } from "react-native-reanimated";
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { Portal } from "react-native-paper";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../constants/Colors";
@@ -64,7 +66,7 @@ export default function BottomModal({
         }
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [isOpen]);
 
   const panGesture = Gesture.Pan()
@@ -98,20 +100,24 @@ export default function BottomModal({
 
   return (
     <Portal>
-      <View style={[StyleSheet.absoluteFill, { zIndex: 999 }]}>
-        {/* Backdrop Overlay */}
-        <TouchableWithoutFeedback onPress={onClose}>
-          <Animated.View
-            style={[
-              StyleSheet.absoluteFill,
-              { backgroundColor: "#000" },
-              backdropAnimatedStyle,
-            ]}
-          />
-        </TouchableWithoutFeedback>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={StyleSheet.absoluteFill}
+        pointerEvents="box-none"
+      >
+        <View style={[StyleSheet.absoluteFill, { zIndex: 999 }]}>
+          {/* Backdrop Overlay */}
+          <TouchableWithoutFeedback onPress={onClose}>
+            <Animated.View
+              style={[
+                StyleSheet.absoluteFill,
+                { backgroundColor: "#000" },
+                backdropAnimatedStyle,
+              ]}
+            />
+          </TouchableWithoutFeedback>
 
-        {/* Sliding Bottom Modal Panel */}
-        <GestureDetector gesture={panGesture}>
+          {/* Sliding Bottom Modal Panel */}
           <Animated.View
             style={[
               {
@@ -134,15 +140,20 @@ export default function BottomModal({
             ]}
           >
             {/* Drag Handle Indicator */}
-            <View className="items-center py-4">
-              <View className="w-12 h-1.5 rounded-full bg-base-300" />
-            </View>
+            <GestureDetector gesture={panGesture}>
+              <View
+                className="items-center pt-4 pb-6 bg-base-100 rounded-t-[30px]"
+                style={{ zIndex: 10 }}
+              >
+                <View className="w-16 h-1.5 rounded-full bg-base-300" />
+              </View>
+            </GestureDetector>
 
             {/* Modal Content */}
             <View className="flex-1 px-6">{children}</View>
           </Animated.View>
-        </GestureDetector>
-      </View>
+        </View>
+      </KeyboardAvoidingView>
     </Portal>
   );
 }

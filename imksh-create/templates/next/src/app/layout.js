@@ -28,6 +28,7 @@ export default function RootLayout({ children }) {
         <div className="min-h-screen bg-base-100 text-base-content font-sans">
           <Toaster position="top-right" />
           <Scroll />
+          
           {children}
         </div>
       </body>

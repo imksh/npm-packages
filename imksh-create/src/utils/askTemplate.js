@@ -13,6 +13,7 @@ export async function askTemplate() {
         { name: 'React Native', value: 'react-native' },
         { name: 'MERN + React Native', value: 'mern-react-native' },
         { name: 'Next.js', value: 'next' },
+        { name: 'Production Fullstack', value: 'production-fullstack' },
       ],
     },
   ]);
