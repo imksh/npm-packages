@@ -5,7 +5,6 @@ import type {
   RichTextEditorFeatures,
   BlockType,
 } from "../types";
-import { CODE_LANGUAGES } from "../types";
 import ToolbarButton from "./ToolbarButton";
 import FontSizeSelector from "./FontSizeSelector";
 import AlignmentSelector from "./AlignmentSelector";
@@ -13,6 +12,7 @@ import BlockTypeSelector from "./BlockTypeSelector";
 import ListSelector from "./ListSelector";
 import StyleSelector from "./StyleSelector";
 import InsertSelector from "./InsertSelector";
+import MoreSelector from "./MoreSelector";
 import ActionsSelector from "./ActionsSelector";
 import ColorPicker from "./ColorPicker";
 import LinkDialog from "./LinkDialog";
@@ -203,36 +203,16 @@ const Toolbar: React.FC<ToolbarProps> = ({
 
       {/* Code block button */}
       {features.codeBlock !== false && (
-        <>
-          <div className="rte-block-expanded">
-            <ToolbarButton
-              onClick={() => handleBlockTypeChange("code")}
-              isActive={state.blockType === "code"}
-              disabled={disabled}
-              ariaLabel="Code block"
-            >
-              <CodeXml size={iconSize} />
-            </ToolbarButton>
-          </div>
-
-          <select
-            className="rte-code-language-select"
-            disabled={state.blockType !== "code"}
-            value={state.codeLanguage}
-            onChange={(e) => actions.setCodeLanguage(e.target.value)}
-            aria-label="Select code language"
-            style={{
-              opacity: state.blockType === "code" ? 1 : 0.45,
-              transition: "opacity 0.2s ease",
-            }}
+        <div className="rte-block-expanded">
+          <ToolbarButton
+            onClick={() => handleBlockTypeChange("code")}
+            isActive={state.blockType === "code"}
+            disabled={disabled}
+            ariaLabel="Code block"
           >
-            {Object.entries(CODE_LANGUAGES).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </>
+            <CodeXml size={iconSize} />
+          </ToolbarButton>
+        </div>
       )}
 
       {(features.headings !== false ||
@@ -410,6 +390,19 @@ const Toolbar: React.FC<ToolbarProps> = ({
               isLink={state.isLink}
               features={features}
               disabled={disabled}
+            />
+          </div>
+          <div className="rte-more-collapsed">
+            <MoreSelector
+              state={state}
+              actions={actions}
+              features={features}
+              disabled={disabled}
+              onLinkClick={handleLinkClick}
+              onImageClick={handleImageClick}
+              onTableClick={() => setShowTableDialog(true)}
+              onHorizontalRuleClick={actions.insertHorizontalRule}
+              onBlockTypeChange={handleBlockTypeChange}
             />
           </div>
           <Divider />

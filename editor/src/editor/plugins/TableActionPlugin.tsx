@@ -39,10 +39,24 @@ export default function TableActionPlugin(): React.ReactElement | null {
     const domElement = editor.getElementByKey(activeTableKey);
     if (!domElement) return;
 
+    const rootElement = editor.getRootElement();
+    const scrollContainer = rootElement?.parentElement;
+    const wrapperElement = rootElement?.closest('.rte-wrapper');
+    if (!scrollContainer || !wrapperElement) return;
+
     const rect = domElement.getBoundingClientRect();
+    const containerRect = scrollContainer.getBoundingClientRect();
+    const wrapperRect = wrapperElement.getBoundingClientRect();
+
+    // Hide if the table has scrolled out of view vertically
+    if (rect.bottom < containerRect.top || rect.top > containerRect.bottom) {
+      setPosition({ top: -10000, left: -10000 });
+      return;
+    }
+
     setPosition({
-      top: rect.top - 40, // Above the table
-      left: rect.right,
+      top: Math.max(rect.top - 40, containerRect.top + 4) - wrapperRect.top,
+      left: rect.right - wrapperRect.left,
     });
   }, [editor, activeTableKey]);
 

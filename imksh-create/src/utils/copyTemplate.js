@@ -1,42 +1,20 @@
-import fs from 'fs-extra';
-import path from 'path';
-import { fileURLToPath } from 'url';
+/**
+ * copyTemplate.js
+ *
+ * Public API entry point for template copying.
+ * Delegates to the composable template engine (composeTemplate.js).
+ *
+ * Signature is preserved for backward compatibility.
+ */
+import { composeTemplate } from './composeTemplate.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
+/**
+ * Copy/compose a template into the target directory.
+ *
+ * @param {string} templateName - Preset name (e.g. 'react', 'mern-ts')
+ * @param {string} targetDir    - Absolute path to the destination directory
+ * @param {string} projectName  - Name to inject into package.json(s)
+ */
 export async function copyTemplate(templateName, targetDir, projectName) {
-  const templateDir = path.resolve(__dirname, '../../templates', templateName);
-
-  if (!fs.existsSync(templateDir)) {
-    throw new Error(`Template directory not found: ${templateDir}`);
-  }
-
-  // Copy template files
-  await fs.copy(templateDir, targetDir, {
-    filter: (src) => {
-      const relativePath = path.relative(templateDir, src);
-      return !relativePath.split(path.sep).includes('node_modules');
-    }
-  });
-
-  // Rename package.json project name
-  const packageJsonPath = path.join(targetDir, 'package.json');
-  if (fs.existsSync(packageJsonPath)) {
-    const pkg = await fs.readJson(packageJsonPath);
-    pkg.name = projectName;
-    await fs.writeJson(packageJsonPath, pkg, { spaces: 2 });
-  }
-
-  // Rename _gitignore to .gitignore
-  const gitignorePath = path.join(targetDir, '_gitignore');
-  if (fs.existsSync(gitignorePath)) {
-    await fs.rename(gitignorePath, path.join(targetDir, '.gitignore'));
-  }
-
-  // Copy .env.example to .env if it exists
-  const envExamplePath = path.join(targetDir, '.env.example');
-  if (fs.existsSync(envExamplePath)) {
-    await fs.copy(envExamplePath, path.join(targetDir, '.env'));
-  }
+  await composeTemplate(templateName, targetDir, projectName);
 }

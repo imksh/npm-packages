@@ -1,0 +1,13 @@
+enum StorageProvider {
+  LOCAL
+  S3
+  CLOUDINARY
+}
+
+enum AttachmentType {
+  IMAGE
+  DOCUMENT
+  VIDEO
+  AUDIO
+  OTHER
+}

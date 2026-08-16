@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $generateHtmlFromNodes } from '@lexical/html';
 import { $getRoot } from 'lexical';
 import { useDebounce } from '../hooks/useDebounce';
+import { exportHTML } from '../utils/htmlSerializer';
+
 
 interface OnChangePluginProps {
   onChange: (html: string) => void;
@@ -48,7 +49,9 @@ export default function OnChangePlugin({
           return;
         }
 
-        const html = $generateHtmlFromNodes(editor);
+        // Use exportHTML so copy-button wrappers and any other
+        // post-processing are included in what consumers receive.
+        const html = exportHTML(editor);
         debouncedOnChange(html);
       });
     });

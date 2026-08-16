@@ -1,0 +1,6 @@
+{
+  "description": "Expo React Native (TypeScript)",
+  "layers": [
+    "react-native/base"
+  ]
+}

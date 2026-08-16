@@ -25,10 +25,24 @@ export default function CodeActionMenuPlugin(): React.ReactElement | null {
     const domElement = editor.getElementByKey(activeCodeKey);
     if (!domElement) return;
 
+    const rootElement = editor.getRootElement();
+    const scrollContainer = rootElement?.parentElement;
+    const wrapperElement = rootElement?.closest('.rte-wrapper');
+    if (!scrollContainer || !wrapperElement) return;
+
     const rect = domElement.getBoundingClientRect();
+    const containerRect = scrollContainer.getBoundingClientRect();
+    const wrapperRect = wrapperElement.getBoundingClientRect();
+
+    // Hide if the code block has scrolled out of view vertically
+    if (rect.bottom < containerRect.top || rect.top > containerRect.bottom) {
+      setPosition({ top: -10000, left: -10000 });
+      return;
+    }
+
     setPosition({
-      top: rect.top + 8, // Inside top-right
-      left: rect.right - 8,
+      top: Math.max(rect.top, containerRect.top) - wrapperRect.top + 8,
+      left: rect.right - wrapperRect.left - 8,
     });
   }, [editor, activeCodeKey]);
 
@@ -97,6 +111,20 @@ export default function CodeActionMenuPlugin(): React.ReactElement | null {
     });
   }, [editor, activeCodeKey]);
 
+  const handleLanguageChange = useCallback(
+    (newLanguage: string) => {
+      if (!activeCodeKey) return;
+      editor.update(() => {
+        const node = $getNodeByKey(activeCodeKey);
+        if ($isCodeNode(node)) {
+          node.setLanguage(newLanguage);
+          setLanguage(newLanguage);
+        }
+      });
+    },
+    [editor, activeCodeKey],
+  );
+
   if (!activeCodeKey) return null;
 
   return (
@@ -109,17 +137,30 @@ export default function CodeActionMenuPlugin(): React.ReactElement | null {
         transform: 'translateX(-100%)', // Shift left to align right edge
       }}
     >
-      <span className="rte-code-language-badge">
-        {CODE_LANGUAGES[language] || 'Plain Text'}
-      </span>
-      <div className="rte-toolbar-divider" style={{ height: '14px', margin: '0 4px' }} />
+      <select
+        className="rte-code-language-select rte-code-language-select--inline"
+        value={language}
+        onChange={(e) => handleLanguageChange(e.target.value)}
+        aria-label="Select code language"
+      >
+        <option value="">Plain Text</option>
+        {Object.entries(CODE_LANGUAGES).map(([value, label]) => (
+          <option key={value} value={value}>
+            {label as string}
+          </option>
+        ))}
+      </select>
+
+      <div className="rte-toolbar-divider" style={{ height: '16px' }} />
+
       <button
         type="button"
         className="rte-floating-toolbar-btn"
         onClick={handleCopy}
-        title="Copy Code"
+        title="Copy code"
+        aria-label="Copy code"
       >
-        {isCopied ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
+        {isCopied ? <Check size={14} className="rte-text-success" /> : <Copy size={14} />}
       </button>
     </div>
   );

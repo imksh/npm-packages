@@ -1,0 +1,6 @@
+{
+  "description": "Node.js Express + Prisma ORM (TypeScript)",
+  "layers": [
+    "node-prisma/typescript"
+  ]
+}

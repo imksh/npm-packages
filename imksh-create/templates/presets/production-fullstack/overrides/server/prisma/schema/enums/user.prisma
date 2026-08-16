@@ -1,0 +1,11 @@
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum PushSubscriptionType {
+  WEB
+  EXPO
+}

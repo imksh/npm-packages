@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useEffect, useState } from "react";
+import { GitPullRequestArrow } from "lucide-react";
 
 interface Heading {
   id: string;
@@ -21,10 +22,7 @@ export function TableOfContents() {
   const [activeId, setActiveId] = useState<string>("");
 
   useEffect(() => {
-    // 1. Find all h2 and h3 elements inside the main content area
     const elements = Array.from(document.querySelectorAll("main h2, main h3"));
-    
-    // 2. Map elements to Heading objects and assign IDs if missing
     const newHeadings: Heading[] = elements.map((elem) => {
       let id = elem.id;
       const text = elem.textContent || "";
@@ -32,62 +30,75 @@ export function TableOfContents() {
         id = slugify(text);
         elem.id = id;
       }
-      return {
-        id,
-        text,
-        level: Number(elem.tagName.charAt(1)), // 2 or 3
-      };
+      return { id, text, level: Number(elem.tagName.charAt(1)) };
     });
-    
     setHeadings(newHeadings);
 
-    // 3. Set up IntersectionObserver to highlight active link
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
-          }
+          if (entry.isIntersecting) setActiveId(entry.target.id);
         });
       },
       { rootMargin: "0% 0% -80% 0%" }
     );
-
     elements.forEach((elem) => observer.observe(elem));
-
     return () => observer.disconnect();
   }, []);
 
-  if (headings.length === 0) {
-    return null; // Don't render TOC if no headings found
-  }
+  if (headings.length === 0) return null;
 
   return (
-    <div className="sticky top-0 pt-4 space-y-12">
-      <div className="space-y-4">
-        <h4 className="font-medium text-xs text-muted-foreground uppercase tracking-widest">
+    <div className="sticky top-6 space-y-8">
+      {/* On This Page */}
+      <div className="space-y-3">
+        <h4
+          className="text-[11px] font-semibold uppercase tracking-widest px-1"
+          style={{ color: "var(--muted-foreground)" }}
+        >
           On This Page
         </h4>
-        <div className="flex flex-col space-y-3">
+        <div className="relative flex flex-col space-y-1">
+          {/* Left track */}
+          <div
+            className="absolute left-0 top-0 bottom-0 w-px rounded-full"
+            style={{ background: "var(--border)" }}
+          />
           {headings.map((heading) => {
             const isActive = activeId === heading.id;
             return (
               <a
                 key={heading.id}
                 href={`#${heading.id}`}
-                className={`transition-colors pl-4 border-l-[2px] -ml-[2px] font-medium text-sm ${
-                  isActive
-                    ? "text-blue-500 border-blue-500"
-                    : "text-muted-foreground border-transparent hover:text-foreground hover:border-muted"
-                } ${heading.level === 3 ? "pl-8 text-xs font-normal" : ""}`}
                 onClick={(e) => {
                   e.preventDefault();
-                  document.querySelector(`#${heading.id}`)?.scrollIntoView({
-                    behavior: "smooth",
-                  });
+                  document
+                    .querySelector(`#${heading.id}`)
+                    ?.scrollIntoView({ behavior: "smooth" });
                   setActiveId(heading.id);
                 }}
+                className={`relative transition-all duration-200 text-sm leading-snug ${
+                  heading.level === 3 ? "pl-8 text-xs" : "pl-5"
+                } ${
+                  isActive
+                    ? "font-semibold"
+                    : "font-normal hover:text-foreground"
+                }`}
+                style={{
+                  color: isActive ? "#818cf8" : "var(--muted-foreground)",
+                  paddingTop: "4px",
+                  paddingBottom: "4px",
+                }}
               >
+                {/* Active highlight bar */}
+                {isActive && (
+                  <span
+                    className="absolute left-0 inset-y-0 w-px rounded-full"
+                    style={{
+                      background: "linear-gradient(180deg, #6366f1, #8b5cf6)",
+                    }}
+                  />
+                )}
                 {heading.text}
               </a>
             );
@@ -95,27 +106,37 @@ export function TableOfContents() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-muted/30 p-5 shadow-sm space-y-3">
-        <h4 className="font-semibold text-foreground text-sm">Contributing</h4>
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          Found an issue? Help improve these docs.
-        </p>
-        <a href="#" className="text-xs text-blue-500 hover:underline flex items-center font-medium">
-          Open a PR{" "}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="ml-1"
+      {/* Contributing card */}
+      <div
+        className="rounded-xl p-4 space-y-2.5"
+        style={{
+          background:
+            "linear-gradient(135deg, rgba(99,102,241,0.06), rgba(139,92,246,0.04))",
+          border: "1px solid rgba(99,102,241,0.15)",
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <div
+            className="flex h-6 w-6 items-center justify-center rounded-md"
+            style={{
+              background: "rgba(99,102,241,0.15)",
+            }}
           >
-            <path d="M5 12h14" />
-            <path d="m12 5 7 7-7 7" />
+            <GitPullRequestArrow className="h-3.5 w-3.5" style={{ color: "#818cf8" }} />
+          </div>
+          <h4 className="font-semibold text-sm text-foreground">Contributing</h4>
+        </div>
+        <p className="text-xs leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+          Found an issue? Help improve these docs by opening a PR.
+        </p>
+        <a
+          href="#"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold transition-colors hover:opacity-80"
+          style={{ color: "#818cf8" }}
+        >
+          Open a Pull Request
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
           </svg>
         </a>
       </div>

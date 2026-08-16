@@ -72,11 +72,11 @@ const BlockTypeSelector: React.FC<BlockTypeSelectorProps> = ({
         aria-label="Text Type"
         aria-expanded={isOpen}
         title="Text Type"
-        style={{ minWidth: '120px', padding: '0 8px', justifyContent: 'space-between' }}
+        style={{ padding: '0 8px', justifyContent: 'space-between' }}
       >
         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <CurrentIcon size={16} />
-          <span style={{ fontSize: '13px', fontWeight: 500 }}>{currentConfig.label}</span>
+          {/* <span style={{ fontSize: '13px', fontWeight: 500 }}>{currentConfig.label}</span> */}
         </span>
         <svg
           width="12"

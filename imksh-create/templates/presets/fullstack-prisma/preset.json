@@ -1,0 +1,22 @@
+{
+  "description": "Fullstack Prisma: React client + Node.js + Prisma server + React Native mobile",
+  "layers": [
+    {
+      "layer": "react/base",
+      "dest": "client"
+    },
+    {
+      "layer": "react/typescript",
+      "dest": "client"
+    },
+    {
+      "layer": "node-prisma/typescript",
+      "dest": "server"
+    },
+    {
+      "layer": "react-native/base",
+      "dest": "mobile"
+    }
+  ],
+  "overrides": "overrides/"
+}

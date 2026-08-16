@@ -1,0 +1,18 @@
+{
+  "description": "MERN Stack - React + Node.js (JavaScript)",
+  "layers": [
+    {
+      "layer": "react/base",
+      "dest": "client"
+    },
+    {
+      "layer": "react/javascript",
+      "dest": "client"
+    },
+    {
+      "layer": "node/javascript",
+      "dest": "server"
+    }
+  ],
+  "overrides": "overrides/"
+}

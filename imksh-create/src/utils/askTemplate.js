@@ -14,6 +14,7 @@ export async function askTemplate() {
         { name: 'MERN + React Native', value: 'mern-react-native' },
         { name: 'Next.js', value: 'next' },
         { name: 'Production Fullstack', value: 'production-fullstack' },
+        { name: 'Fullstack Prisma', value: 'fullstack-prisma' },
       ],
     },
   ]);

@@ -44,11 +44,21 @@ export default function FloatingLinkPlugin(): React.ReactElement | null {
     const range = nativeSelection.getRangeAt(0);
     const rect = range.getBoundingClientRect();
     const editorRoot = editor.getRootElement();
-    if (!editorRoot) return;
+    const scrollContainer = editorRoot?.parentElement;
+    const wrapperElement = editorRoot?.closest('.rte-wrapper');
+    if (!scrollContainer || !wrapperElement) return;
 
-    const editorRect = editorRoot.getBoundingClientRect();
-    const top = rect.bottom - editorRect.top + 8;
-    const left = Math.max(0, rect.left - editorRect.left);
+    const containerRect = scrollContainer.getBoundingClientRect();
+    const wrapperRect = wrapperElement.getBoundingClientRect();
+
+    // Hide if the link has scrolled out of view vertically
+    if (rect.bottom < containerRect.top || rect.top > containerRect.bottom) {
+      setPosition({ top: -10000, left: -10000 });
+      return;
+    }
+
+    const top = Math.max(rect.bottom + 8, containerRect.top + 8) - wrapperRect.top;
+    const left = rect.left - wrapperRect.left;
 
     setPosition({ top, left });
   }, [editor]);

@@ -28,10 +28,23 @@ export default function TableCellResizerPlugin(): React.ReactElement | null {
     const handleMouseMove = (e: MouseEvent) => {
       if (isResizing) return;
 
+      // Only activate when the editor is editable (not in readOnly mode)
+      if (!editor.isEditable()) {
+        setActiveCell(null);
+        return;
+      }
+
       const target = e.target as HTMLElement;
       if (!target) return;
 
       if (target.classList.contains("rte-table-cell-resizer")) return;
+
+      // Only consider cells that live inside the editor's own root element
+      const editorRoot = editor.getRootElement();
+      if (!editorRoot || !editorRoot.contains(target)) {
+        setActiveCell(null);
+        return;
+      }
 
       const cell = target.closest("td, th") as HTMLElement;
       if (cell) {
@@ -55,7 +68,8 @@ export default function TableCellResizerPlugin(): React.ReactElement | null {
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
     };
-  }, [isResizing]);
+  }, [isResizing, editor]);
+
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {

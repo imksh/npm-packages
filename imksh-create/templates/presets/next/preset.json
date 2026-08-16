@@ -1,0 +1,7 @@
+{
+  "description": "Next.js (JavaScript)",
+  "layers": [
+    "next/base",
+    "next/javascript"
+  ]
+}

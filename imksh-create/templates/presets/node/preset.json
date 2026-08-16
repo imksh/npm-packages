@@ -1,0 +1,6 @@
+{
+  "description": "Node.js Express + MongoDB (JavaScript)",
+  "layers": [
+    "node/javascript"
+  ]
+}

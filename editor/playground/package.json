@@ -1,0 +1,36 @@
+{
+  "name": "editor-playground",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@lexical/code": "^0.46.0",
+    "@lexical/html": "^0.46.0",
+    "@lexical/link": "^0.46.0",
+    "@lexical/list": "^0.46.0",
+    "@lexical/markdown": "^0.46.0",
+    "@lexical/react": "^0.46.0",
+    "@lexical/rich-text": "^0.46.0",
+    "@lexical/selection": "^0.46.0",
+    "@lexical/table": "^0.46.0",
+    "@lexical/utils": "^0.46.0",
+    "lexical": "^0.46.0",
+    "lucide-react": "^0.509.0",
+    "prismjs": "^1.30.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/prismjs": "^1.26.6",
+    "@types/react": "^18.3.20",
+    "@types/react-dom": "^18.3.6",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
+  }
+}

@@ -31,13 +31,24 @@ export default function ImageActionMenuPlugin({
     const domElement = editor.getElementByKey(activeImageKey);
     if (!domElement) return;
 
-    const img = domElement.querySelector('img');
-    if (!img) return;
-    
-    const rect = img.getBoundingClientRect();
+    const rootElement = editor.getRootElement();
+    const scrollContainer = rootElement?.parentElement;
+    const wrapperElement = rootElement?.closest('.rte-wrapper');
+    if (!scrollContainer || !wrapperElement) return;
+
+    const rect = domElement.getBoundingClientRect();
+    const containerRect = scrollContainer.getBoundingClientRect();
+    const wrapperRect = wrapperElement.getBoundingClientRect();
+
+    // Hide if the image has scrolled out of view vertically
+    if (rect.bottom < containerRect.top || rect.top > containerRect.bottom) {
+      setPosition({ top: -10000, left: -10000 });
+      return;
+    }
+
     setPosition({
-      top: rect.top - 40,
-      left: rect.right,
+      top: Math.max(rect.top - 40, containerRect.top + 4) - wrapperRect.top,
+      left: rect.right - wrapperRect.left,
     });
   }, [editor, activeImageKey]);
 
@@ -136,49 +147,48 @@ export default function ImageActionMenuPlugin({
         className="rte-floating-toolbar rte-image-floating-toolbar"
         style={{ top: position.top, left: position.left, transform: 'translateX(-100%)' }}
       >
-      <button
-        type="button"
-        className={`rte-floating-toolbar-btn ${alignment === 'left' ? 'active' : ''}`}
-        onClick={() => handleAlignment('left')}
-        title="Float Left"
-      >
-        <AlignLeft size={16} />
-      </button>
-      <button
-        type="button"
-        className={`rte-floating-toolbar-btn ${alignment === 'center' ? 'active' : ''}`}
-        onClick={() => handleAlignment('center')}
-        title="Align Center"
-      >
-        <AlignCenter size={16} />
-      </button>
-      <button
-        type="button"
-        className={`rte-floating-toolbar-btn ${alignment === 'right' ? 'active' : ''}`}
-        onClick={() => handleAlignment('right')}
-        title="Float Right"
-      >
-        <AlignRight size={16} />
-      </button>
-      <div className="rte-toolbar-divider" style={{ height: '16px' }} />
-      <button
-        type="button"
-        className="rte-floating-toolbar-btn"
-        onClick={handleReplace}
-        title="Replace Image"
-      >
-        <ImageIcon size={16} />
-      </button>
-      <button
-        type="button"
-        className="rte-floating-toolbar-btn rte-floating-toolbar-btn--danger"
-        onClick={handleDelete}
-        title="Delete Image"
-      >
-        <Trash2 size={16} />
-      </button>
-    </div>
-
+        <button
+          type="button"
+          className={`rte-floating-toolbar-btn ${alignment === 'left' ? 'active' : ''}`}
+          onClick={() => handleAlignment('left')}
+          title="Float Left"
+        >
+          <AlignLeft size={16} />
+        </button>
+        <button
+          type="button"
+          className={`rte-floating-toolbar-btn ${alignment === 'center' ? 'active' : ''}`}
+          onClick={() => handleAlignment('center')}
+          title="Align Center"
+        >
+          <AlignCenter size={16} />
+        </button>
+        <button
+          type="button"
+          className={`rte-floating-toolbar-btn ${alignment === 'right' ? 'active' : ''}`}
+          onClick={() => handleAlignment('right')}
+          title="Float Right"
+        >
+          <AlignRight size={16} />
+        </button>
+        <div className="rte-toolbar-divider" style={{ height: '16px' }} />
+        <button
+          type="button"
+          className="rte-floating-toolbar-btn"
+          onClick={handleReplace}
+          title="Replace Image"
+        >
+          <ImageIcon size={16} />
+        </button>
+        <button
+          type="button"
+          className="rte-floating-toolbar-btn rte-floating-toolbar-btn--danger"
+          onClick={handleDelete}
+          title="Delete Image"
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
       <ImageDialog
         isOpen={showReplaceDialog}
         onClose={() => setShowReplaceDialog(false)}

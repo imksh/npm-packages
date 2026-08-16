@@ -1,0 +1,22 @@
+{
+  "description": "MERN Stack with React Native mobile app",
+  "layers": [
+    {
+      "layer": "react/base",
+      "dest": "client"
+    },
+    {
+      "layer": "react/typescript",
+      "dest": "client"
+    },
+    {
+      "layer": "node/typescript",
+      "dest": "server"
+    },
+    {
+      "layer": "react-native/base",
+      "dest": "mobile"
+    }
+  ],
+  "overrides": "overrides/"
+}

@@ -1,18 +1,21 @@
 {
   "name": "@imksh/create",
-  "version": "1.0.27",
+  "version": "1.0.28",
   "description": "A production-ready create for scaffolding modern applications.",
   "type": "module",
   "bin": {
     "imksh": "./bin/index.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node scripts/test-presets.js",
+    "test:snapshot": "node scripts/snapshot-presets.js",
+    "test:regression": "node scripts/test-presets.js"
   },
   "files": [
     "bin",
     "src",
-    "templates"
+    "templates/layers",
+    "templates/presets"
   ],
   "keywords": [
     "create",

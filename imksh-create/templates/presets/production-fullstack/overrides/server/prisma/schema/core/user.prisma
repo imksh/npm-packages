@@ -1,0 +1,56 @@
+model User {
+  id            String     @id @default(uuid())
+  email         String     @unique
+  password      String
+  phone         String?
+  firstName     String
+  lastName      String
+  avatar        String?
+  status        UserStatus @default(ACTIVE)
+  emailVerified Boolean    @default(false)
+  lastLogin     DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  deletedAt     DateTime?
+
+  // Relations
+  roles             UserRole[]
+  pushSubscriptions PushSubscription[]
+  notifications     Notification[]
+
+  @@index([email])
+  @@index([status])
+}
+
+model Otp {
+  id         String   @id @default(uuid())
+  identifier String // Can be email or phone
+  otp        String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@index([identifier])
+}
+
+model PushSubscription {
+  id       String               @id @default(uuid())
+  type     PushSubscriptionType @default(WEB)
+
+  // For Web Push
+  endpoint String?
+  keys     Json?
+
+  // For Expo
+  token    String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([userId])
+  @@index([token])
+  @@index([endpoint])
+}

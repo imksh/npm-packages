@@ -18,6 +18,7 @@
 /* ─── Wrapper ───────────────────────────────────────────────────── */
 .rte-wrapper {
   position: relative;
+  container-type: inline-size;
   border: 1px solid var(--color-base-300, #e5e7eb);
   border-radius: 12px;
   background: var(--color-base-100, #ffffff);
@@ -64,7 +65,7 @@
   gap: 2px;
 }
 
-.rte-align-collapsed, .rte-list-collapsed, .rte-block-collapsed, .rte-insert-collapsed, .rte-style-collapsed,.rte-actions-collapsed {
+.rte-align-collapsed, .rte-list-collapsed, .rte-block-collapsed, .rte-insert-collapsed, .rte-style-collapsed,.rte-actions-collapsed, .rte-more-collapsed {
   display: none;
 }
 
@@ -86,48 +87,34 @@
   .rte-block-collapsed { display: flex; }
 }
 
-/* Priority 4: Insert */
-@container (max-width: 950px) {
-  .rte-insert-expanded { display: none; }
-  .rte-insert-collapsed { display: flex; }
-}
-
-/* Priority 5: Styles */
+/* Priority 4: Styles */
 @container (max-width: 860px) {
   .rte-style-expanded { display: none; }
   .rte-style-collapsed { display: flex; }
 }
 
-/* Priority 6: Actions */
+/* Priority 5: Actions */
 @container (max-width: 725px) {
   .rte-actions-expanded { display: none; }
   .rte-actions-collapsed { display: flex; }
 }
 
-@container (max-width: 600px) {
-  .rte-block-expanded { display: flex; }
-  .rte-block-collapsed { display: none; }
+/* Priority 6: Insert */
+@container (max-width: 625px) {
+  .rte-insert-expanded { display: none; }
+  .rte-insert-collapsed { display: flex; }
 }
 
-/* Priority 4: Insert */
-@container (max-width: 600px) {
-  .rte-insert-expanded { display: flex; }
-  .rte-insert-collapsed { display: none; }
+/* Mega Priority: Combine into More Options */
+@container (max-width: 500px) {
+  .rte-style-collapsed,
+  .rte-insert-collapsed,
+  .rte-align-collapsed,
+  .rte-list-collapsed { display: none !important; }
+  .rte-more-collapsed { display: flex; }
 }
 
-/* Priority 5: Styles */
-@container (max-width: 600px) {
-  .rte-style-expanded { display: flex; }
-  .rte-style-collapsed { display: none; }
-}
-
-/* Priority 5: Styles */
-@container (max-width: 510px) {
-  .rte-style-expanded { display: none; }
-  .rte-style-collapsed { display: flex; }
-}
-
-/* Priority 3: Block Types & Headings */
+/* Priority 8: Block Types & Headings collapse fully if needed */
 @container (max-width: 400px) {
   .rte-block-expanded { display: none; }
   .rte-block-collapsed { display: flex; }
@@ -187,6 +174,7 @@
 /* ─── Content Area ──────────────────────────────────────────────── */
 .rte-content-wrapper {
   position: relative;
+  overflow-x: auto; /* Scrolls when a wide table (or other wide content) overflows */
 }
 
 .rte-root {
@@ -337,6 +325,47 @@
   white-space: pre;
 }
 
+/* ─── Code Block Copy Button ────────────────────────────────────── */
+/* Wraps the <pre> element injected by exportHTML */
+.rte-code-wrapper {
+  position: relative;
+  margin: 12px 0;
+}
+
+.rte-code-wrapper .rte-code-block {
+  margin: 0; /* wrapper handles the margin */
+}
+
+.rte-code-copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--color-base-300, #e5e7eb);
+  border-radius: 6px;
+  background: var(--color-base-100, #ffffff);
+  color: var(--color-base-content, #333333);
+  opacity: 0.55;        /* always visible, subtle */
+  cursor: pointer;
+  transition: opacity 0.15s, background 0.15s;
+  z-index: 1;
+  line-height: 0;
+}
+
+.rte-code-wrapper:hover .rte-code-copy-btn {
+  opacity: 1;
+}
+
+.rte-code-copy-btn:hover {
+  background: var(--color-base-200, #f8f6f1);
+}
+
+
 /* ─── Code Syntax Tokens ────────────────────────────────────────── */
 .rte-token-comment { color: #6b7280; font-style: italic; }
 .rte-token-keyword { color: #7c3aed; }
@@ -451,16 +480,16 @@
 
 /* ─── Table ─────────────────────────────────────────────────────── */
 .rte-table {
-  width: 100%;
+  width: 100%;       /* fills container — table layout algo distributes columns */
   max-width: 100%;
-  flex: 1;
-  display: block;
-  overflow-x: auto;
   border-collapse: collapse;
   margin: 16px 0;
   border-radius: 8px;
-  /* overflow: hidden; Removed to allow internal scroll and rounded corners usually conflict, but display:block overflow-x:auto makes it scrollable */
   border: 1px solid var(--color-base-300, #e5e7eb);
+  /* display: table (browser default) — do NOT override with block.
+     display:block disconnects the outer block from the inner table
+     layout, causing the border to extend past the last column.
+     Overflow for wide tables is handled by .rte-content-wrapper. */
 }
 
 .rte-table[style*="text-align: center"] {
@@ -1199,11 +1228,20 @@
   height: 100vh !important;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Anchor sticky inside this container */
+}
+
+.rte-fullscreen .rte-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20; /* Above content inside the fullscreen context */
+  flex-shrink: 0;
 }
 
 .rte-fullscreen .rte-content-wrapper {
   flex: 1;
   overflow-y: auto;
+  min-height: 0; /* Prevent flex overflow that breaks scroll */
 }
 
 .rte-fullscreen .rte-root {
@@ -1212,7 +1250,7 @@
 
 /* ─── Floating Toolbars ─────────────────────────────────────────── */
 .rte-floating-toolbar {
-  position: fixed;
+  position: absolute;
   z-index: 50;
   display: flex;
   gap: 2px;
@@ -1258,13 +1296,31 @@
   padding: 4px 6px;
 }
 
-.rte-code-language-badge {
+/* Inline language select — lives inside the floating code action menu */
+.rte-code-language-select--inline {
+  height: 24px;
+  padding: 0 4px;
+  border: none;
+  background: transparent;
+  color: var(--color-base-content, #111827);
   font-size: 11px;
   font-weight: 600;
-  color: var(--color-base-content, #111827);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  cursor: pointer;
+  outline: none;
+  border-radius: 4px;
+  max-width: 110px;
 }
+
+.rte-code-language-select--inline:hover {
+  background: var(--color-base-300, #e5e7eb);
+}
+
+.rte-code-language-select--inline:focus {
+  background: var(--color-base-200, #f8fafc);
+}
+
 
 /* ─── Table Enhancements ────────────────────────────────────────── */
 .rte-table-scroll-container {
@@ -1318,6 +1374,23 @@
 }
 
 /* ─── Responsive ────────────────────────────────────────────────── */
+
+@container (max-width: 600px) {
+  .rte-toolbar {
+    gap: 1px;
+    padding: 4px 6px;
+  }
+  .rte-toolbar-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+  }
+  .rte-toolbar-divider {
+    height: 20px;
+    margin: 0 2px;
+  }
+}
+
 @media (max-width: 640px) {
   .rte-toolbar {
     gap: 1px;
