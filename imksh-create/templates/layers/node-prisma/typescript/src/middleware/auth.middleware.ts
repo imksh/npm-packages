@@ -1,9 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../utils/jwt.js";
 import logger from "../utils/logger.js";
-import { prisma } from "../config/db.js";
+import { prisma } from "../config/prisma.js";
 
-export const protect = async (req: Request, res: Response, next: NextFunction) => {
+export const protect = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   let token: string | undefined;
 
   if (req.cookies?.token) {
@@ -16,7 +20,9 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
   }
 
   if (!token) {
-    return res.status(401).json({ message: "Not authorized, no token provided" });
+    return res
+      .status(401)
+      .json({ message: "Not authorized, no token provided" });
   }
 
   try {
@@ -30,7 +36,9 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
     });
 
     if (!user) {
-      return res.status(401).json({ message: "Not authorized, user not found" });
+      return res
+        .status(401)
+        .json({ message: "Not authorized, user not found" });
     }
 
     const safeUser: any = { ...user };
@@ -40,6 +48,8 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
     return next();
   } catch (error: any) {
     logger.error("Auth middleware error", error);
-    return res.status(401).json({ message: "Not authorized, token verification failed" });
+    return res
+      .status(401)
+      .json({ message: "Not authorized, token verification failed" });
   }
 };

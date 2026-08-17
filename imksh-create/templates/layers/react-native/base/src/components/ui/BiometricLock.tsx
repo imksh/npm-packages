@@ -7,6 +7,7 @@ import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "nativewind";
 import { Txt } from "./common/Typography";
 import Button from "./ui/buttons/Button";
+import appConfig from "@/config/appConfig";
 
 export default function BiometricLock({ children }: { children: React.ReactNode }) {
   const { isBiometricEnabled, isAppLocked, setIsAppLocked, lockDuration } = useAuthStore();
@@ -80,7 +81,7 @@ export default function BiometricLock({ children }: { children: React.ReactNode 
             </View>
             <Txt variant="3xl" className="font-extrabold tracking-tight mb-2">App Locked</Txt>
             <Txt variant="base" className="opacity-70 text-center px-8">
-              Please authenticate to continue using HireMe
+              Please authenticate to continue using {appConfig.app.name}
             </Txt>
           </View>
 

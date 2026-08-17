@@ -1,35 +1,74 @@
 import { Request, Response, NextFunction } from "express";
-import { prisma } from "../config/db.js";
+import { prisma } from "../config/prisma.js";
 import logger from "../utils/logger.js";
 
-export const subscribe = async (req: Request, res: Response, next: NextFunction) => {
+export const subscribe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const subscription = req.body;
-    const userId = req.user?._id || req.user?.id; // supports both mongoose and prisma IDs
-    
-    if (!subscription || !subscription.endpoint) {
+    const userId = req.user?._id || req.user?.id;
+
+    if (!subscription) {
       return next({ status: 400, message: "Invalid subscription payload" });
     }
 
-    const existingSub = await prisma.pushSubscription.findUnique({ where: { endpoint: subscription.endpoint } });
+    // Determine type: EXPO if token is present, else WEB
+    const isExpo = !!subscription.token;
+    const isWeb = !!(subscription.endpoint && subscription.keys);
 
-    if (existingSub) {
-      if (userId) {
-        await prisma.pushSubscription.update({ where: { endpoint: subscription.endpoint }, data: { userId } })
-      }
-      return res.status(200).json({ success: true, message: "Already subscribed." });
+    if (!isExpo && !isWeb) {
+      return next({ status: 400, message: "Missing token (EXPO) or endpoint/keys (WEB)" });
     }
 
-    
-    await prisma.pushSubscription.create({
-      data: {
-        endpoint: subscription.endpoint,
-        p256dh: subscription.keys.p256dh,
-        auth: subscription.keys.auth,
-        userId: userId || null
+    if (isExpo) {
+      const existingSub = await prisma.pushSubscription.findUnique({
+        where: { token: subscription.token },
+      });
+
+      if (existingSub) {
+        if (userId && existingSub.userId !== userId) {
+          await prisma.pushSubscription.update({
+            where: { token: subscription.token },
+            data: { userId },
+          });
+        }
+        return res.status(200).json({ success: true, message: "Already subscribed." });
       }
-    });
-    
+
+      await prisma.pushSubscription.create({
+        data: {
+          type: "EXPO",
+          token: subscription.token,
+          userId: userId || null,
+        },
+      });
+    } else {
+      const existingSub = await prisma.pushSubscription.findUnique({
+        where: { endpoint: subscription.endpoint },
+      });
+
+      if (existingSub) {
+        if (userId && existingSub.userId !== userId) {
+          await prisma.pushSubscription.update({
+            where: { endpoint: subscription.endpoint },
+            data: { userId },
+          });
+        }
+        return res.status(200).json({ success: true, message: "Already subscribed." });
+      }
+
+      await prisma.pushSubscription.create({
+        data: {
+          type: "WEB",
+          endpoint: subscription.endpoint,
+          keys: subscription.keys,
+          userId: userId || null,
+        },
+      });
+    }
 
     res.status(201).json({ success: true, message: "Subscription created." });
   } catch (error) {
@@ -38,14 +77,20 @@ export const subscribe = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
-export const unsubscribe = async (req: Request, res: Response, next: NextFunction) => {
+export const unsubscribe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { endpoint } = req.body;
     if (!endpoint) {
       return next({ status: 400, message: "Endpoint required" });
     }
 
-    await prisma.pushSubscription.delete({ where: { endpoint } }).catch(() => {})
+    await prisma.pushSubscription
+      .delete({ where: { endpoint } })
+      .catch(() => {});
 
     res.status(200).json({ success: true, message: "Unsubscribed." });
   } catch (error) {

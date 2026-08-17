@@ -2,6 +2,7 @@ import mongoose, { Document } from "mongoose";
 
 // Handles both Web Push (endpoint + keys) and Expo Push (expoPushToken)
 export interface IPushSubscription extends Document {
+  type: "WEB" | "EXPO";
   endpoint?: string;
   keys?: {
     p256dh: string;
@@ -17,6 +18,11 @@ export interface IPushSubscription extends Document {
 
 const pushSubscriptionSchema = new mongoose.Schema<IPushSubscription>(
   {
+    type: {
+      type: String,
+      enum: ["WEB", "EXPO"],
+      default: "WEB",
+    },
     // Web Push fields
     endpoint: {
       type: String,
