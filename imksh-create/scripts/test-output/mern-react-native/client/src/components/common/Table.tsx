@@ -33,7 +33,7 @@ const Table = <T extends Record<string, any>>({
   }
 
   return (
-    <div className="flex flex-col w-full border border-base-300 rounded-xl overflow-hidden bg-base-100 shadow-sm">
+    <div className="flex flex-col w-full border border-base-300 rounded-xl overflow-hidden bg-base-100 shadow">
       <div className="overflow-x-auto w-full">
         <table className="table table-hover w-full min-w-full">
           <thead className="bg-base-200/60 border-b border-base-300">
@@ -59,7 +59,9 @@ const Table = <T extends Record<string, any>>({
                   }`}
                 >
                   {columns.map((col, colIndex) => {
-                    const value = col.accessor ? row[col.accessor as string] : undefined;
+                    const value = col.accessor
+                      ? row[col.accessor as string]
+                      : undefined;
                     return (
                       <td
                         key={(col.accessor as string) || colIndex}

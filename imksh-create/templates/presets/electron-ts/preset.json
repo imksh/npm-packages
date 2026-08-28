@@ -1,0 +1,9 @@
+{
+  "description": "Electron + React (TypeScript) with Vite",
+  "layers": [
+    "react/base",
+    "react/typescript",
+    "electron/base",
+    "electron/typescript"
+  ]
+}

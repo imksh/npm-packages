@@ -8,6 +8,7 @@ export async function askTemplate() {
       message: 'Which framework would you like to use?',
       choices: [
         { name: 'React', value: 'react' },
+        { name: 'Electron', value: 'electron' },
         { name: 'Node.js', value: 'node' },
         { name: 'MERN Stack', value: 'mern' },
         { name: 'React Native', value: 'react-native' },
@@ -19,7 +20,7 @@ export async function askTemplate() {
     },
   ]);
 
-  if (framework === 'react' || framework === 'next' || framework === 'mern') {
+  if (framework === 'react' || framework === 'next' || framework === 'mern' || framework === 'electron') {
     const { language } = await inquirer.prompt([
       {
         type: 'list',

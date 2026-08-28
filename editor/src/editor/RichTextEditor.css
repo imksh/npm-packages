@@ -480,7 +480,7 @@
 
 /* ─── Table ─────────────────────────────────────────────────────── */
 .rte-table {
-  width: 100%;       /* fills container — table layout algo distributes columns */
+  width: 100%;       /* Responsive default; overridden by inline style after column resize */
   max-width: 100%;
   border-collapse: collapse;
   margin: 16px 0;
@@ -524,8 +524,9 @@
 }
 
 .rte-table-cell-header {
-  background: color-mix(in srgb, var(--color-base-content, #111827) 5%, transparent);
-  font-weight: 600;
+  /* No special header styling — all cells are uniform.
+     Lexical still applies this class to the first row/column;
+     we simply don't differentiate them visually. */
 }
 
 /* ─── Table Action Toolbar ──────────────────────────────────────── */
@@ -1371,6 +1372,108 @@
 .rte-image-caption-input:focus {
   background: var(--color-base-100, #ffffff);
   border-color: var(--color-base-300, #e5e7eb);
+}
+
+/* ─── Video ─────────────────────────────────────────────────────── */
+.rte-video-wrapper {
+  display: block;
+  margin: 12px 0;
+}
+
+.rte-video-container {
+  display: inline-block;
+  max-width: 100%;
+}
+
+.rte-video-align-left {
+  float: left;
+  margin: 0 16px 16px 0;
+}
+
+.rte-video-align-center {
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.rte-video-align-right {
+  float: right;
+  margin: 0 0 16px 16px;
+}
+
+.rte-video-inner {
+  position: relative;
+  display: inline-block;
+  border-radius: 8px;
+  overflow: visible;
+}
+
+.rte-video-selected {
+  outline: 3px solid var(--color-primary, #2563eb);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.rte-video-element {
+  display: block;
+  border-radius: 8px;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Resize handles */
+.rte-video-resize-handle {
+  position: absolute;
+  background: var(--color-primary, #2563eb);
+  border: 2px solid var(--color-primary-content, #ffffff);
+  border-radius: 3px;
+  cursor: ew-resize;
+  z-index: 5;
+}
+
+.rte-video-resize-e {
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 32px;
+  border-radius: 4px;
+}
+
+.rte-video-resize-se {
+  right: -6px;
+  bottom: -6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  cursor: nwse-resize;
+}
+
+/* Video toolbar */
+.rte-video-floating-toolbar {
+  position: absolute;
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  background: var(--color-base-100, #ffffff);
+  border: 1px solid var(--color-base-300, #e5e7eb);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
+  z-index: 10;
+}
+
+/* ─── Utils ─────────────────────────────────────────────────────── */
+@keyframes rte-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.rte-spin {
+  animation: rte-spin 1s linear infinite;
 }
 
 /* ─── Responsive ────────────────────────────────────────────────── */

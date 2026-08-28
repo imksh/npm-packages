@@ -8,16 +8,18 @@ import {
   $getNodeByKey,
 } from 'lexical';
 import { mergeRegister } from '@lexical/utils';
-import { $isImageNode, type ImageAlignment } from '../nodes/ImageNode';
+import { $isImageNode, type ImageAlignment, ON_IMAGE_DELETE_COMMAND } from '../nodes/ImageNode';
 import { AlignLeft, AlignCenter, AlignRight, Trash2, Image as ImageIcon } from 'lucide-react';
 import ImageDialog from '../components/ImageDialog';
 
 interface ImageActionMenuPluginProps {
   onOpenImageDrawer?: (callback: (url: string) => void) => void;
+  onImageUpload?: (file: File) => Promise<string>;
 }
 
 export default function ImageActionMenuPlugin({
   onOpenImageDrawer,
+  onImageUpload,
 }: ImageActionMenuPluginProps): React.ReactElement | null {
   const [editor] = useLexicalComposerContext();
   const [activeImageKey, setActiveImageKey] = useState<string | null>(null);
@@ -118,6 +120,7 @@ export default function ImageActionMenuPlugin({
       if (!activeImageKey) return;
       const node = $getNodeByKey(activeImageKey);
       if ($isImageNode(node)) {
+        editor.dispatchCommand(ON_IMAGE_DELETE_COMMAND, node.getSrc());
         node.remove();
       }
     });
@@ -194,6 +197,7 @@ export default function ImageActionMenuPlugin({
         onClose={() => setShowReplaceDialog(false)}
         onSubmit={handleReplaceSubmit}
         onOpenImageDrawer={onOpenImageDrawer}
+        onImageUpload={onImageUpload}
       />
     </>
   );

@@ -15,7 +15,13 @@ export interface AuthState {
   user: User | null;
   loading: boolean;
   isCheckingAuth: boolean;
+  isBiometricEnabled: boolean;
+  lockDuration: number;
+  isAppLocked: boolean;
   error: string | null;
+  setIsAppLocked: (locked: boolean) => void;
+  setBiometricEnabled: (enabled: boolean) => Promise<void>;
+  setLockDuration: (duration: number) => Promise<void>;
   sendOtp: (email: string) => Promise<boolean>;
   signup: (
     name: string,
@@ -43,24 +49,59 @@ export const useAuthStore = create<AuthState>((set) => ({
   loading: false,
   isCheckingAuth: true,
   error: null,
+  isBiometricEnabled: false,
+  lockDuration: 5,
+  isAppLocked: false,
+
+  setIsAppLocked: (locked: boolean) => set({ isAppLocked: locked }),
+
+  setBiometricEnabled: async (enabled: boolean) => {
+    set({ isBiometricEnabled: enabled });
+    if (enabled) {
+      await save("biometric_enabled", "true");
+    } else {
+      await remove("biometric_enabled");
+      set({ isAppLocked: false });
+    }
+  },
+
+  setLockDuration: async (duration: number) => {
+    set({ lockDuration: duration });
+    await save("lock_duration", duration.toString());
+  },
 
   setUser: (user: User) => set({ user }),
 
   clearError: () => set({ error: null }),
 
   loadCachedUser: async () => {
-    // Await the already-in-flight prefetch — typically resolves in <1ms here
-    const cached = await _prefetchedUser;
-    if (cached) {
-      set({ user: cached, isCheckingAuth: false });
-      // Re-establish socket + push on app resume with a cached session
-      initializeSocket();
-      const notifStore = useNotificationStore.getState();
-      notifStore.listenForSocketEvents();
-      notifStore.registerForPushNotificationsAsync();
-      notifStore.fetchNotifications();
-    } else {
-      // No cache — mark auth check done so routing doesn't hang
+    try {
+      const biometricSetting = await get("biometric_enabled");
+      const isBiometricEnabled = biometricSetting === "true";
+      const lockDurationRaw = await get("lock_duration");
+      const lockDuration = lockDurationRaw ? parseInt(lockDurationRaw, 10) : 0;
+
+      set({
+        isBiometricEnabled,
+        lockDuration,
+        isAppLocked: isBiometricEnabled, // Lock on startup if enabled
+      });
+
+      // Await the already-in-flight prefetch — typically resolves in <1ms here
+      const cached = await _prefetchedUser;
+      if (cached) {
+        set({ user: cached, isCheckingAuth: false });
+        // Re-establish socket + push on app resume with a cached session
+        initializeSocket();
+        const notifStore = useNotificationStore.getState();
+        notifStore.listenForSocketEvents();
+        notifStore.registerForPushNotificationsAsync();
+        notifStore.fetchNotifications();
+      } else {
+        // No cache — mark auth check done so routing doesn't hang
+        set({ isCheckingAuth: false });
+      }
+    } catch {
       set({ isCheckingAuth: false });
     }
   },

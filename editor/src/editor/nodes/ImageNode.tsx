@@ -55,6 +55,9 @@ type SerializedImageNode = Spread<
 export const INSERT_IMAGE_COMMAND: LexicalCommand<ImagePayload> =
   createCommand('INSERT_IMAGE_COMMAND');
 
+export const ON_IMAGE_DELETE_COMMAND: LexicalCommand<string> =
+  createCommand('ON_IMAGE_DELETE_COMMAND');
+
 // ─── DOM Conversion ──────────────────────────────────────────────
 function $convertImageElement(domNode: HTMLElement): DOMConversionOutput | null {
   const img = domNode as HTMLImageElement;
@@ -335,7 +338,8 @@ function ImageComponent({
         event.preventDefault();
         editor.update(() => {
           const node = $getNodeByKey(nodeKey);
-          if (node) {
+          if ($isImageNode(node)) {
+            editor.dispatchCommand(ON_IMAGE_DELETE_COMMAND, node.getSrc());
             node.remove();
           }
         });

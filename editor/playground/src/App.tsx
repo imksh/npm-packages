@@ -126,9 +126,19 @@ export default function App() {
         <div className="pg-header-right">
           <button
             className="pg-toggle-btn"
-            style={{ marginRight: "12px", display: "flex", alignItems: "center", justifyContent: "center", width: "32px", height: "32px", padding: 0 }}
-            onClick={() => setTheme(t => t === "dark" ? "light" : "dark")}
-            title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            style={{
+              marginRight: "12px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "32px",
+              height: "32px",
+              padding: 0,
+            }}
+            onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+            title={
+              theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"
+            }
           >
             {theme === "dark" ? "☀️" : "🌙"}
           </button>
@@ -237,6 +247,17 @@ export default function App() {
               value={INITIAL_HTML}
               onChange={setHtml}
               readOnly={readOnly}
+              onImageUpload={async (file) => {
+                // upload file to cloud, return url
+                return new Promise((resolve) => {
+                  setTimeout(() => {
+                    resolve(
+                      "https://plus.unsplash.com/premium_photo-1786552941093-cfa31e3fe2d0?q=80&w=1475&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                    );
+                  }, 5000);
+                });
+              }}
+              onImageDelete={(link: string) => console.log("deleted")}
               showToolbar={showToolbar}
               height={minHeight}
               {...features}

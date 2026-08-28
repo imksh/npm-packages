@@ -49,7 +49,7 @@ const Profile = () => {
 
       <ScrollView className="flex-1 px-6 pt-6">
         <View className="bg-base-200 rounded-2xl p-4 mb-6">
-          <View className="flex-row items-center justify-between py-2">
+          <View className="flex-row items-center justify-between py-2 border-b border-base-300">
             <View className="flex-row items-center">
               <Ionicons 
                 name={colorScheme === "dark" ? "moon" : "sunny"} 
@@ -60,7 +60,26 @@ const Profile = () => {
             </View>
             <Switch checked={colorScheme === "dark"} onChange={handleToggleTheme} />
           </View>
+          
+          <View className="flex-row items-center justify-between py-3">
+            <View className="flex-row items-center">
+              <Ionicons 
+                name="finger-print-outline" 
+                size={22} 
+                color={colorScheme === "dark" ? "#fff" : "#000"} 
+              />
+              <Txt variant="base" className="ml-3 font-semibold">App Lock (Biometrics)</Txt>
+            </View>
+            <Switch 
+              checked={useAuthStore(state => state.isBiometricEnabled)} 
+              onChange={async () => {
+                const store = useAuthStore.getState();
+                await store.setBiometricEnabled(!store.isBiometricEnabled);
+              }} 
+            />
+          </View>
         </View>
+
 
         <Button
           label="Logout"

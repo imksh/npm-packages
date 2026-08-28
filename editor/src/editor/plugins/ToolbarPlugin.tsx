@@ -7,6 +7,9 @@ import type { RichTextEditorFeatures } from '../types';
 interface ToolbarPluginProps {
   features: RichTextEditorFeatures;
   onOpenImageDrawer?: (callback: (url: string) => void) => void;
+  onOpenVideoDrawer?: (callback: (url: string) => void) => void;
+  onImageUpload?: (file: File) => Promise<string>;
+  onVideoUpload?: (file: File) => Promise<string>;
   disabled?: boolean;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
@@ -19,6 +22,9 @@ interface ToolbarPluginProps {
 export default function ToolbarPlugin({
   features,
   onOpenImageDrawer,
+  onOpenVideoDrawer,
+  onImageUpload,
+  onVideoUpload,
   disabled = false,
   isFullscreen,
   onToggleFullscreen,
@@ -32,6 +38,9 @@ export default function ToolbarPlugin({
       actions={actions}
       features={features}
       onOpenImageDrawer={onOpenImageDrawer}
+      onOpenVideoDrawer={onOpenVideoDrawer}
+      onImageUpload={onImageUpload}
+      onVideoUpload={onVideoUpload}
       disabled={disabled}
       isFullscreen={isFullscreen}
       onToggleFullscreen={onToggleFullscreen}

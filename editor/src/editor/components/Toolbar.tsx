@@ -17,6 +17,7 @@ import ActionsSelector from "./ActionsSelector";
 import ColorPicker from "./ColorPicker";
 import LinkDialog from "./LinkDialog";
 import ImageDialog from "./ImageDialog";
+import VideoDialog from "./VideoDialog";
 import TableDialog from "./TableDialog";
 import Divider from "./Divider";
 import {
@@ -37,9 +38,10 @@ import {
   ListOrdered,
   ListChecks,
   TextQuote,
-  Link2,
+  Link,
   Unlink,
   Image,
+  Video,
   Table,
   Minus,
   Undo2,
@@ -54,6 +56,9 @@ interface ToolbarProps {
   actions: ToolbarActions;
   features: RichTextEditorFeatures;
   onOpenImageDrawer?: (callback: (url: string) => void) => void;
+  onOpenVideoDrawer?: (callback: (url: string) => void) => void;
+  onImageUpload?: (file: File) => Promise<string>;
+  onVideoUpload?: (file: File) => Promise<string>;
   disabled?: boolean;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
@@ -67,12 +72,16 @@ const Toolbar: React.FC<ToolbarProps> = ({
   actions,
   features,
   onOpenImageDrawer,
+  onOpenVideoDrawer,
+  onImageUpload,
+  onVideoUpload,
   disabled = false,
   isFullscreen = false,
   onToggleFullscreen,
 }) => {
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [showImageDialog, setShowImageDialog] = useState(false);
+  const [showVideoDialog, setShowVideoDialog] = useState(false);
   const [showTableDialog, setShowTableDialog] = useState(false);
 
   // ── Heading & Block Type ──────────────────────────────────────
@@ -120,6 +129,26 @@ const Toolbar: React.FC<ToolbarProps> = ({
   const handleImageSubmit = useCallback(
     (src: string, alt?: string) => {
       actions.insertImage({ src, altText: alt });
+    },
+    [actions],
+  );
+
+  // ── Video ─────────────────────────────────────────────────────
+  const handleVideoClick = useCallback(() => {
+    if (onOpenVideoDrawer) {
+      onOpenVideoDrawer((url: string) => {
+        if (url) {
+          actions.insertVideo({ src: url, controls: true });
+        }
+      });
+    } else {
+      setShowVideoDialog(true);
+    }
+  }, [onOpenVideoDrawer, actions]);
+
+  const handleVideoSubmit = useCallback(
+    (src: string, options: { autoplay: boolean; loop: boolean; muted: boolean; controls: boolean }) => {
+      actions.insertVideo({ src, ...options });
     },
     [actions],
   );
@@ -335,6 +364,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
       {/* ── Insert Elements ─────────────────────────────────────── */}
       {(features.link !== false ||
         features.image !== false ||
+        features.video !== false ||
         features.table !== false ||
         features.horizontalRule !== false) && (
         <>
@@ -349,7 +379,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
                 {state.isLink ? (
                   <Unlink size={iconSize} />
                 ) : (
-                  <Link2 size={iconSize} />
+                  <Link size={iconSize} />
                 )}
               </ToolbarButton>
             )}
@@ -360,6 +390,15 @@ const Toolbar: React.FC<ToolbarProps> = ({
                 ariaLabel="Insert image"
               >
                 <Image size={iconSize} />
+              </ToolbarButton>
+            )}
+            {features.video !== false && (
+              <ToolbarButton
+                onClick={handleVideoClick}
+                disabled={disabled}
+                ariaLabel="Insert video"
+              >
+                <Video size={iconSize} />
               </ToolbarButton>
             )}
             {features.table !== false && (
@@ -525,6 +564,14 @@ const Toolbar: React.FC<ToolbarProps> = ({
         onClose={() => setShowImageDialog(false)}
         onSubmit={handleImageSubmit}
         onOpenImageDrawer={onOpenImageDrawer}
+        onImageUpload={onImageUpload}
+      />
+      <VideoDialog
+        isOpen={showVideoDialog}
+        onClose={() => setShowVideoDialog(false)}
+        onSubmit={handleVideoSubmit}
+        onOpenVideoDrawer={onOpenVideoDrawer}
+        onVideoUpload={onVideoUpload}
       />
       <TableDialog
         isOpen={showTableDialog}

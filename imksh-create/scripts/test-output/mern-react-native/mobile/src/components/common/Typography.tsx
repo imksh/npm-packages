@@ -83,27 +83,54 @@ export const Txt = ({
     const isSize = ["xxs", "xs", "sm", "base", "md", "lg", "xl", "2xl", "3xl", "4xl", "5xl", "6xl", "7xl", "caption"].includes(val);
     return !isSize;
   });
-  const defaultColorClass = hasColorClass
+  const defaultColorClass = hasColorClass || color
     ? ""
     : variant === "xs"
       ? "text-secondary"
       : "text-base-content";
-
-  // Override specific properties if provided
+    
   const customStyles: any = {};
   if (color) customStyles.color = color;
   if (align) customStyles.textAlign = align;
-  if (weight) {
-    if (weight === "bold" || weight === "black")
-      customStyles.fontFamily = FontFamily.bold;
-    if (weight === "semibold") customStyles.fontFamily = FontFamily.semibold;
-    if (weight === "medium") customStyles.fontFamily = FontFamily.medium;
-    if (weight === "normal") customStyles.fontFamily = FontFamily.regular;
+
+  // Intercept font weight classes from Nativewind or weight prop
+  let finalClassName = className;
+  
+  const resolvedWeight = weight || (
+    finalClassName.includes("font-black") || finalClassName.includes("font-extrabold") ? "black" :
+    finalClassName.includes("font-bold") ? "bold" :
+    finalClassName.includes("font-semibold") ? "semibold" :
+    finalClassName.includes("font-medium") ? "medium" : null
+  );
+
+  if (resolvedWeight === "black" || resolvedWeight === "extrabold") {
+    customStyles.fontFamily = FontFamily.extrabold;
+    customStyles.fontWeight = "normal"; // Prevent Android fallback
+  } else if (resolvedWeight === "bold") {
+    customStyles.fontFamily = FontFamily.bold;
+    customStyles.fontWeight = "normal";
+  } else if (resolvedWeight === "semibold") {
+    customStyles.fontFamily = FontFamily.semibold;
+    customStyles.fontWeight = "normal";
+  } else if (resolvedWeight === "medium") {
+    customStyles.fontFamily = FontFamily.medium;
+    customStyles.fontWeight = "normal";
+  } else if (resolvedWeight === "normal") {
+    customStyles.fontFamily = FontFamily.regular;
+    customStyles.fontWeight = "normal";
   }
+
+  // Strip weight classes since we handle them manually
+  finalClassName = finalClassName
+    .replace(/font-black/g, "")
+    .replace(/font-extrabold/g, "")
+    .replace(/font-bold/g, "")
+    .replace(/font-semibold/g, "")
+    .replace(/font-medium/g, "");
 
   return (
     <Text
-      className={`${defaultColorClass} ${className}`}
+      className={`${defaultColorClass} ${finalClassName}`}
       style={[baseStyle, customStyles, style]}
       {...props}
     >

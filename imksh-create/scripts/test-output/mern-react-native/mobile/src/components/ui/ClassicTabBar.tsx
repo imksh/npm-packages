@@ -1,4 +1,3 @@
-import { Txt } from "../common/Typography";
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,7 +6,7 @@ import { useColorScheme } from 'nativewind';
 import { Colors } from '../../constants/Colors';
 import { getTabConfig } from '../../config/tabNavigation';
 
-const TabItem = ({ isFocused, onPress, onLongPress, iconName, label, colors }: any) => {
+const TabItem = ({ isFocused, onPress, onLongPress, iconName, colors }: any) => {
   return (
     <TouchableOpacity
       accessibilityRole="button"
@@ -20,19 +19,9 @@ const TabItem = ({ isFocused, onPress, onLongPress, iconName, label, colors }: a
       <View style={styles.tabItem}>
         <Ionicons 
           name={iconName as any} 
-          size={24} 
-          color={isFocused ? colors.primary : colors.secondary} 
-          style={{ marginBottom: 4 }} 
+          size={28} 
+          color={isFocused ? colors.primary : colors.baseContent + '60'} 
         />
-        <Txt 
-          style={{ 
-            color: isFocused ? colors.primary : colors.secondary, 
-            fontWeight: isFocused ? '600' : '500', 
-            fontSize: 11 
-          }}
-        >
-          {label}
-        </Txt>
       </View>
     </TouchableOpacity>
   );
@@ -47,10 +36,11 @@ export default function ClassicTabBar({ state, descriptors, navigation }: any) {
     <View style={[
       styles.container, 
       { 
-        backgroundColor: colors.base100, 
-        borderTopColor: colors.base300,
-        height: 60 + insets.bottom,
-        paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
+        backgroundColor: colors.base100,
+        borderTopColor: colors.base300 + '80',
+        height: 72 + insets.bottom,
+        paddingBottom: insets.bottom > 0 ? insets.bottom : 20,
+        elevation:1
       }
     ]}>
       {state.routes.map((route: any, index: number) => {
@@ -93,7 +83,6 @@ export default function ClassicTabBar({ state, descriptors, navigation }: any) {
             onPress={onPress}
             onLongPress={onLongPress}
             iconName={iconName}
-            label={label as string}
             colors={colors}
           />
         );
@@ -107,13 +96,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
+    paddingVertical: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
   },
   tabButton: {
     flex: 1,
@@ -124,6 +108,5 @@ const styles = StyleSheet.create({
   tabItem: {
     alignItems: 'center',
     justifyContent: 'center',
-    height: 50,
   },
 });

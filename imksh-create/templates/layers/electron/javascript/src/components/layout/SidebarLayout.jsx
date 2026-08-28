@@ -1,0 +1,43 @@
+import { useEffect } from "react";
+import { Outlet, useLocation } from "react-router-dom";
+import SidebarHeader from "../ui/SidebarHeader";
+import Sidebar from "../ui/sidebar";
+import TitleBar from "../ui/TitleBar";
+import { useUiStore } from "../../store/useUiStore";
+import appConfig from "../../config/appConfig";
+
+const SidebarLayout = () => {
+  const { headerTitle, headerActions, setHeaderTitle, setHeaderActions } =
+    useUiStore();
+  const { pathname } = useLocation();
+
+  // Reset header title and actions whenever the route shifts
+  useEffect(() => {
+    setHeaderTitle(appConfig.app.name);
+    setHeaderActions(null);
+  }, [pathname, setHeaderTitle, setHeaderActions]);
+
+  return (
+    <div className="flex flex-col h-screen overflow-hidden">
+      {/* Electron custom title bar — only renders inside Electron */}
+      <TitleBar />
+
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar />
+
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <SidebarHeader title={headerTitle} actions={headerActions} />
+
+          <main
+            className="flex-1 h-full overflow-y-auto px-2 py-6 md:p-6 max-w-7xl"
+            data-lenis-prevent
+          >
+            <Outlet />
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SidebarLayout;

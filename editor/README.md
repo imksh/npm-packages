@@ -21,7 +21,7 @@ A modern, reusable Lexical-based rich text editor component for React. Productio
 - ✨ **Rich Text Formatting**: Bold, italic, underline, strikethrough, inline code
 - 📝 **Block Elements**: Headings, paragraphs, blockquotes, code blocks
 - 📋 **Lists**: Bullet, numbered, and check lists
-- 🔗 **Links & Media**: Link insertion, image insertion, and image editing with built-in dialogs or external drawers
+- 🔗 **Links & Media**: Link insertion, image/video insertion, and editing with built-in dialogs or external drawers. Supports device uploads and callbacks.
 - 📊 **Tables**: Full table support with add/remove rows and columns
 - 🎨 **Styling**: Font size, text color, background highlight, alignment
 - ⌨️ **Keyboard Shortcuts**: Full keyboard support including undo/redo
@@ -85,9 +85,23 @@ export default function MyComponent() {
 />
 ```
 
-### With Custom Image Upload Handler
+### Markdown Output
 
-If you want the editor to handle file uploads when the user selects a local file, provide the `onImageUpload` prop.
+If you need Markdown output instead of (or alongside) HTML, pass `onMarkdownChange`. Both callbacks can coexist and are independently debounced.
+
+```tsx
+<RichTextEditor
+  value={html}
+  onChange={setHtml}              // HTML output
+  onMarkdownChange={setMarkdown}  // Markdown output (independent)
+/>
+```
+
+> Markdown serialization uses Lexical's built-in transformers and supports all standard elements: bold, italic, headings, lists, inline code, fenced code blocks, and links.
+
+### With Custom Image/Video Upload Handler
+
+If you want the editor to handle file uploads when the user selects a local file, provide the `onImageUpload` and/or `onVideoUpload` prop.
 
 ```tsx
 <RichTextEditor
@@ -104,12 +118,32 @@ If you want the editor to handle file uploads when the user selects a local file
     const data = await response.json();
     return data.url; // Return the hosted image URL
   }}
+  onVideoUpload={async (file) => {
+    // Similarly for videos
+    return "https://my-domain.com/video.mp4";
+  }}
 />
 ```
 
-### With External Image Drawer / Media Gallery
+### Deletion Callbacks
 
-If your app already has an external media gallery or image drawer, you can completely bypass the editor's default image dialog by providing `onOpenImageDrawer`. When the user clicks the Image icon in the toolbar, your custom callback is triggered.
+If you need to know when an image or video is deleted (e.g. to clean up your cloud storage bucket), use the `onImageDelete` and `onVideoDelete` callbacks.
+
+```tsx
+<RichTextEditor
+  onImageDelete={(src) => {
+    console.log("Image deleted from editor:", src);
+    // call api to delete from s3
+  }}
+  onVideoDelete={(src) => {
+    console.log("Video deleted from editor:", src);
+  }}
+/>
+```
+
+### With External Image/Video Drawer / Media Gallery
+
+If your app already has an external media gallery or image drawer, you can completely bypass the editor's default dialog by providing `onOpenImageDrawer` or `onOpenVideoDrawer`. When the user clicks the icon in the toolbar, your custom callback is triggered.
 
 ```tsx
 <RichTextEditor
@@ -126,15 +160,15 @@ If your app already has an external media gallery or image drawer, you can compl
 />
 ```
 
-## Image Editing
+## Media Editing
 
-After an image is inserted, selecting it opens a floating image toolbar with quick actions:
+After an image or video is inserted, selecting it opens a floating toolbar with quick actions:
 
 - Align left, center, or right
-- Replace the image source
-- Delete the image node
+- Replace the media source
+- Delete the media node
 
-If `onOpenImageDrawer` is provided, both the insert flow and the replace flow can hand off to your own media picker. If not, the editor falls back to a URL prompt for replacement.
+If `onOpenImageDrawer` / `onOpenVideoDrawer` is provided, both the insert flow and the replace flow can hand off to your own media picker. If not, the editor falls back to a URL prompt/device upload for replacement.
 
 The editor also ships with screenshot assets in `docs/images` that you can use in your own docs or demos:
 
@@ -155,8 +189,13 @@ The editor also ships with screenshot assets in `docs/images` that you can use i
 | `disabled`          | `boolean`                                   | `false`              | Disable editing (grayed-out appearance)             |
 | `showToolbar`       | `boolean`                                   | `true`               | Show/hide the toolbar                               |
 | `className`         | `string`                                    | `''`                 | Additional CSS class on wrapper                     |
+| `onMarkdownChange` | `(markdown: string) => void`                | —                    | Fires with Markdown string on content change        |
 | `onImageUpload`     | `(file: File) => Promise<string>`           | —                    | Image upload handler (returns image URL)            |
+| `onVideoUpload`     | `(file: File) => Promise<string>`           | —                    | Video upload handler (returns video URL)            |
+| `onImageDelete`     | `(src: string) => void`                     | —                    | Callback when an image is deleted                   |
+| `onVideoDelete`     | `(src: string) => void`                     | —                    | Callback when a video is deleted                    |
 | `onOpenImageDrawer` | `(callback: (url: string) => void) => void` | —                    | Custom external image picker integration            |
+| `onOpenVideoDrawer` | `(callback: (url: string) => void) => void` | —                    | Custom external video picker integration            |
 
 ### Feature Flags
 
@@ -181,6 +220,7 @@ All features are **enabled by default**. Set any to `false` to disable it from t
 | `blockquote`     | `boolean` | `true`  |
 | `link`           | `boolean` | `true`  |
 | `image`          | `boolean` | `true`  |
+| `video`          | `boolean` | `true`  |
 | `table`          | `boolean` | `true`  |
 | `horizontalRule` | `boolean` | `true`  |
 | `undoRedo`       | `boolean` | `true`  |
@@ -197,6 +237,7 @@ All features are **enabled by default**. Set any to `false` to disable it from t
   highlight={false}
   table={false}
   image={false}
+  video={false}
   link={false}
 />
 ```
@@ -227,9 +268,22 @@ All features are **enabled by default**. Set any to `false` to disable it from t
   blockquote={true}
   link={true}
   image={true}
+  video={true}
   table={true}
   horizontalRule={true}
   undoRedo={true}
+  onImageUpload={async (file) => {
+    return "https://my-domain.com/uploaded-image.png";
+  }}
+  onVideoUpload={async (file) => {
+    return "https://my-domain.com/uploaded-video.mp4";
+  }}
+  onImageDelete={(src) => {
+    console.log("Deleted image:", src);
+  }}
+  onVideoDelete={(src) => {
+    console.log("Deleted video:", src);
+  }}
 />
 ```
 
@@ -279,7 +333,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Support
 
-For issues, questions, or suggestions, please open an issue on [GitHub](https://github.com/imksh/editor).
+For issues, questions, or suggestions, please open an issue on [GitHub](https://github.com/imksh/npm-packages/issues).
 
 ---
 

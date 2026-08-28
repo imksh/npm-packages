@@ -50,9 +50,9 @@ const Sidebar = () => {
             {/* Header */}
             <div className="h-16 border-b border-base-300 flex items-center justify-between px-5">
               <div className="flex items-center gap-3">
-                {appConfig.app.img ? (
+                {appConfig.app.logo ? (
                   <img
-                    src={appConfig.app.img}
+                    src={appConfig.app.logo}
                     alt=""
                     className="w-8 h-8 rounded-lg"
                   />
@@ -89,7 +89,7 @@ const Sidebar = () => {
                     to={item.path}
                     onClick={isMobile ? close : undefined}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 rounded-box px-4 py-3 transition-all h-12 
+                      `flex items-center gap-3 rounded-box px-4 py-3 duration-0  h-12 
                       ${
                         isActive
                           ? "bg-primary text-primary-content"
@@ -104,7 +104,7 @@ const Sidebar = () => {
                     />
 
                     {!collapsed && (
-                      <span className="font-medium transition-all duration-300">
+                      <span className="font-medium transition-all duration-0 whitespace-nowrap">
                         {item.title}
                       </span>
                     )}

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import SidebarHeader from "../ui/SidebarHeader";
-import Sidebar from "../ui/sidebar";
+import Sidebar from "../ui/Sidebar";
 import { useUiStore } from "../../store/useUiStore";
 import appConfig from "../../config/appConfig";
 

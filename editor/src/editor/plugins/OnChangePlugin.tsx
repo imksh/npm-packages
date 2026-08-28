@@ -1,29 +1,36 @@
 import { useEffect, useRef } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { $getRoot } from 'lexical';
+import { $convertToMarkdownString, TRANSFORMERS } from '@lexical/markdown';
 import { useDebounce } from '../hooks/useDebounce';
 import { exportHTML } from '../utils/htmlSerializer';
 
 
 interface OnChangePluginProps {
-  onChange: (html: string) => void;
+  onChange?: (html: string) => void;
+  onMarkdownChange?: (markdown: string) => void;
   debounceMs?: number;
 }
 
 /**
- * Serializes editor content to HTML on every change.
+ * Serializes editor content to HTML and/or Markdown on every change.
  * Debounced to avoid excessive serialization.
  * Returns "" for empty content instead of <p><br></p>.
  */
 export default function OnChangePlugin({
   onChange,
+  onMarkdownChange,
   debounceMs = 300,
 }: OnChangePluginProps): null {
   const [editor] = useLexicalComposerContext();
   const isFirstRender = useRef(true);
 
   const debouncedOnChange = useDebounce((html: string) => {
-    onChange(html);
+    onChange?.(html);
+  }, debounceMs);
+
+  const debouncedOnMarkdownChange = useDebounce((md: string) => {
+    onMarkdownChange?.(md);
   }, debounceMs);
 
   useEffect(() => {
@@ -46,16 +53,25 @@ export default function OnChangePlugin({
         // Empty state check
         if (textContent === '') {
           debouncedOnChange('');
+          debouncedOnMarkdownChange('');
           return;
         }
 
-        // Use exportHTML so copy-button wrappers and any other
-        // post-processing are included in what consumers receive.
-        const html = exportHTML(editor);
-        debouncedOnChange(html);
+        if (onChange) {
+          // Use exportHTML so copy-button wrappers and any other
+          // post-processing are included in what consumers receive.
+          const html = exportHTML(editor);
+          debouncedOnChange(html);
+        }
+
+        if (onMarkdownChange) {
+          const markdown = $convertToMarkdownString(TRANSFORMERS);
+          debouncedOnMarkdownChange(markdown);
+        }
       });
     });
-  }, [editor, debouncedOnChange]);
+  }, [editor, debouncedOnChange, debouncedOnMarkdownChange, onChange, onMarkdownChange]);
 
   return null;
 }
+

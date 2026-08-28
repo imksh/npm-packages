@@ -24,6 +24,7 @@ export interface RichTextEditorFeatures {
   table?: boolean;
   horizontalRule?: boolean;
   undoRedo?: boolean;
+  video?: boolean;
 }
 
 // ─── Editor Props ────────────────────────────────────────────────
@@ -52,8 +53,18 @@ export interface RichTextEditorProps extends RichTextEditorFeatures {
   className?: string;
   /** Callback for image file upload — receives File, returns URL */
   onImageUpload?: (file: File) => Promise<string>;
+  /** Callback for video file upload — receives File, returns URL */
+  onVideoUpload?: (file: File) => Promise<string>;
+  /** Callback when an image is deleted */
+  onImageDelete?: (src: string) => void;
+  /** Callback when a video is deleted */
+  onVideoDelete?: (src: string) => void;
   /** Callback to open external image drawer. Editor passes a callback to receive the URL. */
   onOpenImageDrawer?: (callback: (url: string) => void) => void;
+  /** Callback to open external video drawer. Editor passes a callback to receive the URL. */
+  onOpenVideoDrawer?: (callback: (url: string) => void) => void;
+  /** Callback fired with Markdown string when editor content changes (debounced 300ms) */
+  onMarkdownChange?: (markdown: string) => void;
 }
 
 // ─── Ref Handle ──────────────────────────────────────────────────
@@ -133,6 +144,7 @@ export interface ToolbarActions {
   insertLink: (url: string, text?: string) => void;
   removeLink: () => void;
   insertImage: (payload: ImagePayload) => void;
+  insertVideo: (payload: VideoPayload) => void;
   insertTable: (payload: InsertTablePayload) => void;
   insertHorizontalRule: () => void;
   undo: () => void;
@@ -147,6 +159,17 @@ export interface ImagePayload {
   width?: number | 'inherit';
   height?: number | 'inherit';
   alignment?: 'left' | 'center' | 'right';
+}
+
+export interface VideoPayload {
+  src: string;
+  width?: number | 'inherit';
+  height?: number | 'inherit';
+  alignment?: 'left' | 'center' | 'right';
+  autoplay?: boolean;
+  loop?: boolean;
+  muted?: boolean;
+  controls?: boolean;
 }
 
 export interface InsertTablePayload {

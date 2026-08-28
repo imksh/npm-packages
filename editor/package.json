@@ -1,6 +1,6 @@
 {
   "name": "@imksh/editor",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A modern, reusable Lexical-based rich text editor for React.",
   "license": "MIT",
   "author": "Karan Kumar",
@@ -68,10 +68,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/imksh/editor.git"
+    "url": "https://github.com/imksh/npm-packages/tree/main/editor"
   },
   "bugs": {
     "url": "https://github.com/imksh/editor/issues"
   },
-  "homepage": "https://github.com/imksh/editor#readme"
+  "homepage": "https://github.com/imksh/npm-packages/tree/main/editor#readme"
 }

@@ -70,7 +70,6 @@ export default function TableCellResizerPlugin(): React.ReactElement | null {
     };
   }, [isResizing, editor]);
 
-
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       if (!activeCell) return;

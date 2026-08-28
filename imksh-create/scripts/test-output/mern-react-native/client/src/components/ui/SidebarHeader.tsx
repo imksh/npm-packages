@@ -1,11 +1,18 @@
 import { FiMenu } from "react-icons/fi";
 import { useUiStore } from "../../store/useUiStore";
 
-const SidebarHeader = ({ title = "Dashboard", actions = null }) => {
-  const { toggleSidebar } = useUiStore();
+import { Breadcrumbs } from "../common/Breadcrumbs";
+
+interface SidebarHeaderProps {
+  title?: string;
+  actions?: React.ReactNode;
+}
+
+const SidebarHeader = ({ title = "Dashboard", actions = null }: SidebarHeaderProps) => {
+  const { toggleSidebar, breadcrumbs } = useUiStore();
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-base-200 backdrop-blur border-b border-base-300 flex items-center justify-between px-4 lg:px-6">
+    <header className="sticky top-0 z-30 h-16 bg-base-200 backdrop-blur border-b border-base-200 flex items-center justify-between px-4 lg:px-6">
       <div className="flex items-center gap-3">
         <button
           onClick={toggleSidebar}
@@ -14,7 +21,11 @@ const SidebarHeader = ({ title = "Dashboard", actions = null }) => {
           <FiMenu size={22} />
         </button>
 
-        <h1 className="text-xl font-bold">{title}</h1>
+        {breadcrumbs && breadcrumbs.length > 0 ? (
+          <Breadcrumbs items={breadcrumbs} />
+        ) : (
+          <h1 className="text-xl font-bold">{title}</h1>
+        )}
       </div>
 
       <div className="flex items-center gap-2">

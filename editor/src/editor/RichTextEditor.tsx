@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useMemo } from 'react';
 
 // ── Lexical Core ────────────────────────────────────────────────
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
 import { LexicalErrorBoundary } from '@lexical/react/LexicalErrorBoundary';
@@ -28,6 +29,7 @@ import { TRANSFORMERS } from '@lexical/markdown';
 
 // ── Custom Nodes ────────────────────────────────────────────────
 import { ImageNode } from './nodes/ImageNode';
+import { VideoNode } from './nodes/VideoNode';
 
 // ── Custom Plugins ──────────────────────────────────────────────
 import ToolbarPlugin from './plugins/ToolbarPlugin';
@@ -39,6 +41,8 @@ import FloatingLinkPlugin from './plugins/FloatingLinkPlugin';
 import TableActionPlugin from './plugins/TableActionPlugin';
 import TableCellResizerPlugin from './plugins/TableCellResizerPlugin';
 import ImageActionMenuPlugin from './plugins/ImageActionMenuPlugin';
+import VideoPlugin from './plugins/VideoPlugin';
+import VideoActionMenuPlugin from './plugins/VideoActionMenuPlugin';
 import CodeActionMenuPlugin from './plugins/CodeActionMenuPlugin';
 import TabEscapePlugin from './plugins/TabEscapePlugin';
 import RootClickPlugin from './plugins/RootClickPlugin';
@@ -62,6 +66,48 @@ import './RichTextEditor.css';
 function InitialContentPlugin({ value }: { value?: string }): null {
   const [editor] = React.useState(() => null);
   // We handle this via the LexicalComposer's editorState instead
+  return null;
+}
+
+// ─── Command Listener Plugin ────────────────────────────────────
+import { ON_IMAGE_DELETE_COMMAND } from './nodes/ImageNode';
+import { ON_VIDEO_DELETE_COMMAND } from './nodes/VideoNode';
+import { COMMAND_PRIORITY_EDITOR } from 'lexical';
+
+function CommandListenerPlugin({
+  onImageDelete,
+  onVideoDelete,
+}: {
+  onImageDelete?: (src: string) => void;
+  onVideoDelete?: (src: string) => void;
+}): null {
+  const [editor] = useLexicalComposerContext();
+
+  useEffect(() => {
+    const unregisterImage = editor.registerCommand(
+      ON_IMAGE_DELETE_COMMAND,
+      (src: string) => {
+        if (onImageDelete) onImageDelete(src);
+        return false;
+      },
+      COMMAND_PRIORITY_EDITOR
+    );
+
+    const unregisterVideo = editor.registerCommand(
+      ON_VIDEO_DELETE_COMMAND,
+      (src: string) => {
+        if (onVideoDelete) onVideoDelete(src);
+        return false;
+      },
+      COMMAND_PRIORITY_EDITOR
+    );
+
+    return () => {
+      unregisterImage();
+      unregisterVideo();
+    };
+  }, [editor, onImageDelete, onVideoDelete]);
+
   return null;
 }
 
@@ -96,7 +142,12 @@ function RichTextEditorInner(
     showToolbar = true,
     className = '',
     onImageUpload,
+    onVideoUpload,
+    onImageDelete,
+    onVideoDelete,
     onOpenImageDrawer,
+    onOpenVideoDrawer,
+    onMarkdownChange,
     // Feature flags (all default to true)
     bold = true,
     italic = true,
@@ -115,6 +166,7 @@ function RichTextEditorInner(
     blockquote = true,
     link = true,
     image = true,
+    video = true,
     table = true,
     horizontalRule = true,
     undoRedo = true,
@@ -160,6 +212,7 @@ function RichTextEditorInner(
       blockquote,
       link,
       image,
+      video,
       table,
       horizontalRule,
       undoRedo,
@@ -168,13 +221,13 @@ function RichTextEditorInner(
       bold, italic, underline, strikethrough, inlineCode, codeBlock,
       headings, fontSize, textColor, highlight, alignment,
       bulletList, numberedList, checkList, blockquote, link,
-      image, table, horizontalRule, undoRedo,
+      image, video, table, horizontalRule, undoRedo,
     ],
   );
 
   // Build nodes list based on features
   const nodes = useMemo(() => {
-    const nodeList: Array<typeof HeadingNode | typeof QuoteNode | typeof ListNode | typeof ListItemNode | typeof LinkNode | typeof AutoLinkNode | typeof CodeNode | typeof CodeHighlightNode | typeof TableNode | typeof TableCellNode | typeof TableRowNode | typeof HorizontalRuleNode | typeof ImageNode> = [
+    const nodeList: Array<typeof HeadingNode | typeof QuoteNode | typeof ListNode | typeof ListItemNode | typeof LinkNode | typeof AutoLinkNode | typeof CodeNode | typeof CodeHighlightNode | typeof TableNode | typeof TableCellNode | typeof TableRowNode | typeof HorizontalRuleNode | typeof ImageNode | typeof VideoNode> = [
       HeadingNode,
       QuoteNode,
       ListNode,
@@ -196,9 +249,12 @@ function RichTextEditorInner(
     if (image !== false) {
       nodeList.push(ImageNode);
     }
+    if (video !== false) {
+      nodeList.push(VideoNode);
+    }
 
     return nodeList;
-  }, [link, codeBlock, inlineCode, table, horizontalRule, image]);
+  }, [link, codeBlock, inlineCode, table, horizontalRule, image, video]);
 
   // Editor initial config
   const initialConfig = useMemo(
@@ -243,6 +299,9 @@ function RichTextEditorInner(
           <ToolbarPlugin
             features={features}
             onOpenImageDrawer={onOpenImageDrawer}
+            onOpenVideoDrawer={onOpenVideoDrawer}
+            onImageUpload={onImageUpload}
+            onVideoUpload={onVideoUpload}
             disabled={disabled}
             isFullscreen={isFullscreen}
             onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
@@ -303,7 +362,15 @@ function RichTextEditorInner(
         {image !== false && (
           <>
             <ImagePlugin />
-            <ImageActionMenuPlugin onOpenImageDrawer={onOpenImageDrawer} />
+            <ImageActionMenuPlugin onOpenImageDrawer={onOpenImageDrawer} onImageUpload={onImageUpload} />
+          </>
+        )}
+
+        {/* Videos */}
+        {video !== false && (
+          <>
+            <VideoPlugin />
+            <VideoActionMenuPlugin onOpenVideoDrawer={onOpenVideoDrawer} onVideoUpload={onVideoUpload} />
           </>
         )}
 
@@ -330,8 +397,13 @@ function RichTextEditorInner(
         {/* Auto focus */}
         {autoFocus && <AutoFocusPlugin />}
 
+        {/* Command Listeners */}
+        <CommandListenerPlugin onImageDelete={onImageDelete} onVideoDelete={onVideoDelete} />
+
         {/* onChange serialization */}
-        {onChange && <OnChangePlugin onChange={onChange} />}
+        {(onChange || onMarkdownChange) && (
+          <OnChangePlugin onChange={onChange} onMarkdownChange={onMarkdownChange} />
+        )}
 
         {/* Imperative handle */}
         <ImperativeHandlePlugin editorRef={editorRef} />

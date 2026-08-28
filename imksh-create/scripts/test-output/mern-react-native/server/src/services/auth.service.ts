@@ -46,9 +46,9 @@ export const signup = async ({ name, email, phone, password, otp }: any) => {
 };
 export const login = async ({ email, password }: any) => {
   const user = await User.findOne({ email });
-  if (!user) {
-    const err: any = new Error("User not found");
-    err.status = 404;
+  if (!user || !user.password) {
+    const err: any = new Error("Invalid Credentials");
+    err.status = 401;
     throw err;
   }
   const isValid = await bcrypt.compare(password, user.password);

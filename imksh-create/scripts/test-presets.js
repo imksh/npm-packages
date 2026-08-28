@@ -24,6 +24,7 @@ const PRESETS = [
   'react', 'react-ts', 'node', 'node-ts', 'node-prisma', 'node-prisma-ts',
   'mern', 'mern-ts', 'mern-react-native', 'next', 'next-ts',
   'react-native', 'production-fullstack', 'fullstack-prisma',
+  'electron', 'electron-ts',
 ];
 
 function hashFile(p) {

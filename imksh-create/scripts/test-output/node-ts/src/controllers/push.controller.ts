@@ -7,26 +7,47 @@ export const subscribe = async (req: Request, res: Response, next: NextFunction)
     const subscription = req.body;
     const userId = req.user?._id || req.user?.id; // supports both mongoose and prisma IDs
     
-    if (!subscription || !subscription.endpoint) {
+    if (!subscription) {
       return next({ status: 400, message: "Invalid subscription payload" });
     }
 
-    const existingSub = await PushSubscription.findOne({ endpoint: subscription.endpoint });
+    const isExpo = !!subscription.token;
+    const isWeb = !!(subscription.endpoint && subscription.keys);
 
-    if (existingSub) {
-      if (userId) {
-        existingSub.user = userId; await existingSub.save();
-      }
-      return res.status(200).json({ success: true, message: "Already subscribed." });
+    if (!isExpo && !isWeb) {
+      return next({ status: 400, message: "Missing token (EXPO) or endpoint/keys (WEB)" });
     }
 
-    
-    await PushSubscription.create({
-      endpoint: subscription.endpoint,
-      keys: subscription.keys,
-      user: userId || undefined
-    });
-    
+    if (isExpo) {
+      const existingSub = await PushSubscription.findOne({ expoPushToken: subscription.token });
+      if (existingSub) {
+        if (userId && String(existingSub.user) !== String(userId)) {
+          existingSub.user = userId; await existingSub.save();
+        }
+        return res.status(200).json({ success: true, message: "Already subscribed." });
+      }
+
+      await PushSubscription.create({
+        type: "EXPO",
+        expoPushToken: subscription.token,
+        user: userId || undefined
+      });
+    } else {
+      const existingSub = await PushSubscription.findOne({ endpoint: subscription.endpoint });
+      if (existingSub) {
+        if (userId && String(existingSub.user) !== String(userId)) {
+          existingSub.user = userId; await existingSub.save();
+        }
+        return res.status(200).json({ success: true, message: "Already subscribed." });
+      }
+
+      await PushSubscription.create({
+        type: "WEB",
+        endpoint: subscription.endpoint,
+        keys: subscription.keys,
+        user: userId || undefined
+      });
+    }
 
     res.status(201).json({ success: true, message: "Subscription created." });
   } catch (error) {

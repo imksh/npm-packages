@@ -1,14 +1,14 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { AlignLeft, AlignCenter, AlignRight, AlignJustify } from 'lucide-react';
-import type { ElementFormatType } from 'lexical';
+import type { ElementAlignment } from '../types';
 
 interface AlignmentSelectorProps {
-  currentAlignment: ElementFormatType;
-  onChange: (alignment: ElementFormatType) => void;
+  currentAlignment: ElementAlignment;
+  onChange: (alignment: ElementAlignment) => void;
   disabled?: boolean;
 }
 
-const ALIGNMENTS: { value: ElementFormatType; label: string; icon: React.FC<any> }[] = [
+const ALIGNMENTS: { value: ElementAlignment; label: string; icon: React.FC<any> }[] = [
   { value: 'left', label: 'Left Align', icon: AlignLeft },
   { value: 'center', label: 'Center Align', icon: AlignCenter },
   { value: 'right', label: 'Right Align', icon: AlignRight },
@@ -35,7 +35,7 @@ const AlignmentSelector: React.FC<AlignmentSelectorProps> = ({
   }, []);
 
   const handleSelect = useCallback(
-    (alignment: ElementFormatType) => {
+    (alignment: ElementAlignment) => {
       onChange(alignment);
       setIsOpen(false);
     },

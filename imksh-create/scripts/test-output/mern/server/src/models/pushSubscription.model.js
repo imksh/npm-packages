@@ -3,6 +3,11 @@ import mongoose from "mongoose";
 // Handles both Web Push (endpoint + keys) and Expo Push (expoPushToken)
 const pushSubscriptionSchema = new mongoose.Schema(
   {
+    type: {
+      type: String,
+      enum: ["WEB", "EXPO"],
+      default: "WEB",
+    },
     // Web Push fields
     endpoint: {
       type: String,

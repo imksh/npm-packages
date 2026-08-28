@@ -42,6 +42,7 @@ import {
 } from "@lexical/list";
 import { INSERT_HORIZONTAL_RULE_COMMAND } from "@lexical/react/LexicalHorizontalRuleNode";
 import { INSERT_IMAGE_COMMAND } from "../nodes/ImageNode";
+import { INSERT_VIDEO_COMMAND } from "../nodes/VideoNode";
 import type {
   ToolbarState,
   ToolbarActions,
@@ -49,6 +50,7 @@ import type {
   ElementAlignment,
   TextFormatType,
   ImagePayload,
+  VideoPayload,
   InsertTablePayload,
 } from "../types";
 import { INITIAL_TOOLBAR_STATE } from "../types";
@@ -313,6 +315,13 @@ export function useEditorToolbar(editor: LexicalEditor): {
     [editor],
   );
 
+  const insertVideo = useCallback(
+    (payload: VideoPayload) => {
+      editor.dispatchCommand(INSERT_VIDEO_COMMAND, payload);
+    },
+    [editor],
+  );
+
   const insertTable = useCallback(
     (payload: InsertTablePayload) => {
       editor.dispatchCommand(INSERT_TABLE_COMMAND, {
@@ -365,6 +374,7 @@ export function useEditorToolbar(editor: LexicalEditor): {
     insertLink,
     removeLink,
     insertImage,
+    insertVideo,
     insertTable,
     insertHorizontalRule,
     undo,

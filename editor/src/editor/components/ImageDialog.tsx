@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Loader2 } from 'lucide-react';
 
 interface ImageDialogProps {
   isOpen: boolean;
@@ -6,6 +7,8 @@ interface ImageDialogProps {
   onSubmit: (src: string, alt?: string) => void;
   /** External image drawer callback */
   onOpenImageDrawer?: (callback: (url: string) => void) => void;
+  /** Image upload callback */
+  onImageUpload?: (file: File) => Promise<string>;
 }
 
 /**
@@ -17,12 +20,16 @@ const ImageDialog: React.FC<ImageDialogProps> = ({
   onClose,
   onSubmit,
   onOpenImageDrawer,
+  onImageUpload,
 }) => {
   const [url, setUrl] = useState('');
   const [alt, setAlt] = useState('');
   const [error, setError] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const hasDrawer = typeof onOpenImageDrawer === 'function';
+  const hasUpload = typeof onImageUpload === 'function';
 
   useEffect(() => {
     if (isOpen) {
@@ -54,6 +61,27 @@ const ImageDialog: React.FC<ImageDialogProps> = ({
     },
     [url, alt, onSubmit, onClose],
   );
+
+  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !onImageUpload) return;
+    
+    setIsUploading(true);
+    setError('');
+    try {
+      const uploadedUrl = await onImageUpload(file);
+      onSubmit(uploadedUrl, alt.trim() || undefined);
+      onClose();
+    } catch (err) {
+      setError('Failed to upload image');
+    } finally {
+      setIsUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  }, [onImageUpload, onSubmit, alt, onClose]);
 
   // Don't render the dialog if not open
   if (!isOpen) return null;
@@ -92,6 +120,7 @@ const ImageDialog: React.FC<ImageDialogProps> = ({
               }}
               placeholder="https://example.com/image.png"
               className={`rte-dialog-input ${error ? 'rte-dialog-input--error' : ''}`}
+              disabled={isUploading}
             />
             {error && <span className="rte-dialog-error">{error}</span>}
           </div>
@@ -107,11 +136,39 @@ const ImageDialog: React.FC<ImageDialogProps> = ({
               onChange={(e) => setAlt(e.target.value)}
               placeholder="Image description"
               className="rte-dialog-input"
+              disabled={isUploading}
             />
           </div>
 
           <div className="rte-dialog-actions">
-            {hasDrawer && (
+            {hasUpload && (
+              <>
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={fileInputRef}
+                  style={{ display: 'none' }}
+                  onChange={handleFileUpload}
+                />
+                <button
+                  type="button"
+                  className="rte-dialog-btn rte-dialog-btn--secondary"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 size={16} className="rte-spin" style={{ marginRight: '6px' }} />
+                      Uploading...
+                    </>
+                  ) : (
+                    'Upload from Device'
+                  )}
+                </button>
+              </>
+            )}
+            {hasDrawer && !hasUpload && (
               <button
                 type="button"
                 className="rte-dialog-btn rte-dialog-btn--secondary"
@@ -124,14 +181,14 @@ const ImageDialog: React.FC<ImageDialogProps> = ({
                   });
                 }}
               >
-                Upload File
+                Open Drawer
               </button>
             )}
             <div className="rte-dialog-actions-right">
-              <button type="button" className="rte-dialog-btn rte-dialog-btn--secondary" onClick={onClose}>
+              <button type="button" className="rte-dialog-btn rte-dialog-btn--secondary" onClick={onClose} disabled={isUploading}>
                 Cancel
               </button>
-              <button type="submit" className="rte-dialog-btn rte-dialog-btn--primary">
+              <button type="submit" className="rte-dialog-btn rte-dialog-btn--primary" disabled={isUploading}>
                 Insert
               </button>
             </div>

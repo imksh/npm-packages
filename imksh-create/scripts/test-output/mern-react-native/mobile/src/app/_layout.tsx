@@ -6,8 +6,10 @@ import { useColorScheme } from "nativewind";
 import { Colors } from "../constants/Colors";
 import "./global.css";
 import Loading from "@/components/common/Loading";
+import BiometricLock from "@/components/ui/BiometricLock";
 
 import { PaperProvider } from "react-native-paper";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFonts } from "expo-font";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -79,18 +81,24 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <PaperProvider>
         <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.base100 },
-          }}
-        >
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="(auth)"
-            options={{ headerShown: false, animation: "fade" }}
-          />
-        </Stack>
+        <BiometricLock>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.base100 },
+            }}
+          >
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="(auth)"
+              options={{ headerShown: false, animation: "fade" }}
+            />
+            <Stack.Screen
+              name="doc-viewer"
+              options={{ presentation: "fullScreenModal" }}
+            />
+          </Stack>
+        </BiometricLock>
         <Toast />
       </PaperProvider>
     </GestureHandlerRootView>
