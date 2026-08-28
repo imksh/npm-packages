@@ -148,6 +148,7 @@ function RichTextEditorInner(
     onOpenImageDrawer,
     onOpenVideoDrawer,
     onMarkdownChange,
+    onJsonChange,
     // Feature flags (all default to true)
     bold = true,
     italic = true,
@@ -401,8 +402,8 @@ function RichTextEditorInner(
         <CommandListenerPlugin onImageDelete={onImageDelete} onVideoDelete={onVideoDelete} />
 
         {/* onChange serialization */}
-        {(onChange || onMarkdownChange) && (
-          <OnChangePlugin onChange={onChange} onMarkdownChange={onMarkdownChange} />
+        {(onChange || onMarkdownChange || onJsonChange) && (
+          <OnChangePlugin onChange={onChange} onMarkdownChange={onMarkdownChange} onJsonChange={onJsonChange} />
         )}
 
         {/* Imperative handle */}

@@ -28,6 +28,7 @@ const FEATURE_CONFIG: FeatureConfig[] = [
   { key: "alignment", label: "Alignment", group: "Layout" },
   { key: "link", label: "Links", group: "Insert" },
   { key: "image", label: "Images", group: "Insert" },
+  { key: "video", label: "Video", group: "Insert" },
   { key: "table", label: "Tables", group: "Insert" },
   { key: "horizontalRule", label: "Horizontal Rule", group: "Insert" },
   { key: "undoRedo", label: "Undo / Redo", group: "Actions" },
@@ -41,7 +42,7 @@ const INITIAL_HTML = `<h2>Welcome to the Editor Playground 👋</h2>
 <ul>
   <li>Rich text formatting — <strong>bold</strong>, <em>italic</em>, <u>underline</u>, ~~strikethrough~~</li>
   <li>Code blocks with syntax highlighting</li>
-  <li>Tables, images, links, and more</li>
+  <li>Tables, images, video, links, and more</li>
 </ul>
 <pre><code class="language-javascript">// Code block example
 function greet(name) {
@@ -50,10 +51,14 @@ function greet(name) {
 console.log(greet('World'));</code></pre>
 <blockquote><p>Use the <strong>Feature Toggles</strong> panel on the left to enable/disable toolbar features on the fly.</p></blockquote>`;
 
+type OutputTab = "html" | "markdown" | "json" | "preview";
+
 // ─── Component ──────────────────────────────────────────────────
 export default function App() {
   const editorRef = useRef<RichTextEditorRef>(null);
   const [html, setHtml] = useState<string>(INITIAL_HTML);
+  const [markdown, setMarkdown] = useState<string>("");
+  const [json, setJson] = useState<string>("");
   const [features, setFeatures] = useState<Required<RichTextEditorFeatures>>({
     bold: true,
     italic: true,
@@ -72,11 +77,12 @@ export default function App() {
     alignment: true,
     link: true,
     image: true,
+    video: true,
     table: true,
     horizontalRule: true,
     undoRedo: true,
   });
-  const [activeTab, setActiveTab] = useState<"html" | "preview">("html");
+  const [activeTab, setActiveTab] = useState<OutputTab>("html");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [readOnly, setReadOnly] = useState(false);
   const [minHeight, setMinHeight] = useState(300);
@@ -93,12 +99,19 @@ export default function App() {
     setFeatures((prev) => ({ ...prev, [key]: !prev[key] }));
   }, []);
 
-  const handleCopyHtml = useCallback(() => {
-    navigator.clipboard.writeText(html).then(() => {
+  const getActiveOutput = () => {
+    if (activeTab === "html") return html || "<!-- empty -->";
+    if (activeTab === "markdown") return markdown || "<!-- empty -->";
+    if (activeTab === "json") return json || "{}";
+    return "";
+  };
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(getActiveOutput()).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
-  }, [html]);
+  }, [html, markdown, json, activeTab]);
 
   const handleClear = useCallback(() => {
     editorRef.current?.clear();
@@ -111,6 +124,13 @@ export default function App() {
   }, []);
 
   const isEmpty = isHTMLEmpty(html);
+
+  const TAB_LABELS: Record<OutputTab, string> = {
+    html: "HTML",
+    markdown: "Markdown",
+    json: "JSON",
+    preview: "Preview",
+  };
 
   return (
     <div className="pg-root">
@@ -246,6 +266,8 @@ export default function App() {
               ref={editorRef}
               value={INITIAL_HTML}
               onChange={setHtml}
+              onMarkdownChange={setMarkdown}
+              onJsonChange={setJson}
               readOnly={readOnly}
               onImageUpload={async (file) => {
                 // upload file to cloud, return url
@@ -268,31 +290,26 @@ export default function App() {
           <div className="pg-output-card">
             <div className="pg-output-header">
               <div className="pg-output-tabs">
-                <button
-                  className={`pg-tab ${activeTab === "html" ? "pg-tab--active" : ""}`}
-                  onClick={() => setActiveTab("html")}
-                >
-                  HTML Output
-                </button>
-                <button
-                  className={`pg-tab ${activeTab === "preview" ? "pg-tab--active" : ""}`}
-                  onClick={() => setActiveTab("preview")}
-                >
-                  Preview
-                </button>
+                {(["html", "markdown", "json", "preview"] as OutputTab[]).map(
+                  (tab) => (
+                    <button
+                      key={tab}
+                      className={`pg-tab ${activeTab === tab ? "pg-tab--active" : ""}`}
+                      onClick={() => setActiveTab(tab)}
+                    >
+                      {TAB_LABELS[tab]}
+                    </button>
+                  )
+                )}
               </div>
-              {activeTab === "html" && (
-                <button className="pg-copy-btn" onClick={handleCopyHtml}>
-                  {copied ? "✓ Copied!" : "Copy HTML"}
+              {activeTab !== "preview" && (
+                <button className="pg-copy-btn" onClick={handleCopy}>
+                  {copied ? "✓ Copied!" : `Copy ${TAB_LABELS[activeTab]}`}
                 </button>
               )}
             </div>
 
-            {activeTab === "html" ? (
-              <pre className="pg-html-output">
-                <code>{html || "<!-- empty -->"}</code>
-              </pre>
-            ) : (
+            {activeTab === "preview" ? (
               <div
                 className="pg-preview-output"
                 dangerouslySetInnerHTML={{
@@ -301,6 +318,12 @@ export default function App() {
                     '<p style="color: #6b7280; font-style: italic;">Nothing to preview yet.</p>',
                 }}
               />
+            ) : (
+              <pre
+                className={`pg-html-output${activeTab === "json" ? " pg-json-output" : activeTab === "markdown" ? " pg-markdown-output" : ""}`}
+              >
+                <code>{getActiveOutput()}</code>
+              </pre>
             )}
           </div>
         </main>

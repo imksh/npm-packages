@@ -65,6 +65,8 @@ export interface RichTextEditorProps extends RichTextEditorFeatures {
   onOpenVideoDrawer?: (callback: (url: string) => void) => void;
   /** Callback fired with Markdown string when editor content changes (debounced 300ms) */
   onMarkdownChange?: (markdown: string) => void;
+  /** Callback fired with raw Lexical JSON string when editor content changes (debounced 300ms) */
+  onJsonChange?: (json: string) => void;
 }
 
 // ─── Ref Handle ──────────────────────────────────────────────────

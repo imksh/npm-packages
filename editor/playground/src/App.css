@@ -497,6 +497,29 @@ html, body, #root {
   color: inherit;
 }
 
+/* JSON output — emerald tint */
+.pg-json-output {
+  color: #6ee7b7 !important;
+}
+
+/* Markdown output — amber tint */
+.pg-markdown-output {
+  color: #fcd34d !important;
+}
+
+[data-theme="light"] .pg-html-output {
+  background: #f8fafc;
+  color: #4338ca;
+}
+
+[data-theme="light"] .pg-json-output {
+  color: #047857 !important;
+}
+
+[data-theme="light"] .pg-markdown-output {
+  color: #92400e !important;
+}
+
 .pg-preview-output {
   padding: 20px 24px;
   max-height: 340px;
@@ -516,4 +539,5 @@ html, body, #root {
   --color-primary-content: #ffffff;
   --color-error: var(--pg-danger);
 }
+
 

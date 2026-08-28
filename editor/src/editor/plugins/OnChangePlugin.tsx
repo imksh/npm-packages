@@ -9,6 +9,7 @@ import { exportHTML } from '../utils/htmlSerializer';
 interface OnChangePluginProps {
   onChange?: (html: string) => void;
   onMarkdownChange?: (markdown: string) => void;
+  onJsonChange?: (json: string) => void;
   debounceMs?: number;
 }
 
@@ -20,6 +21,7 @@ interface OnChangePluginProps {
 export default function OnChangePlugin({
   onChange,
   onMarkdownChange,
+  onJsonChange,
   debounceMs = 300,
 }: OnChangePluginProps): null {
   const [editor] = useLexicalComposerContext();
@@ -31,6 +33,10 @@ export default function OnChangePlugin({
 
   const debouncedOnMarkdownChange = useDebounce((md: string) => {
     onMarkdownChange?.(md);
+  }, debounceMs);
+
+  const debouncedOnJsonChange = useDebounce((json: string) => {
+    onJsonChange?.(json);
   }, debounceMs);
 
   useEffect(() => {
@@ -68,9 +74,14 @@ export default function OnChangePlugin({
           const markdown = $convertToMarkdownString(TRANSFORMERS);
           debouncedOnMarkdownChange(markdown);
         }
+
+        if (onJsonChange) {
+          const json = JSON.stringify(editorState.toJSON(), null, 2);
+          debouncedOnJsonChange(json);
+        }
       });
     });
-  }, [editor, debouncedOnChange, debouncedOnMarkdownChange, onChange, onMarkdownChange]);
+  }, [editor, debouncedOnChange, debouncedOnMarkdownChange, debouncedOnJsonChange, onChange, onMarkdownChange, onJsonChange]);
 
   return null;
 }
