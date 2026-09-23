@@ -7,7 +7,7 @@ import type { RichTextEditorFeatures, CustomToolbarButton } from '../types';
 interface ToolbarPluginProps {
   features: RichTextEditorFeatures;
   onOpenImageDrawer?: (callback: (url: string) => void) => void;
-  onOpenVideoDrawer?: (callback: (url: string) => void) => void;
+  onOpenVideoDrawer?: (callback: (payload: string | { src: string; autoplay?: boolean; loop?: boolean; muted?: boolean; controls?: boolean }) => void) => void;
   onImageUpload?: (file: File) => Promise<string>;
   onVideoUpload?: (file: File) => Promise<string>;
   disabled?: boolean;

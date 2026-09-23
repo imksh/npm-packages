@@ -82,8 +82,8 @@ export interface RichTextEditorProps extends RichTextEditorFeatures {
   onVideoDelete?: (src: string) => void;
   /** Callback to open external image drawer. Editor passes a callback to receive the URL. */
   onOpenImageDrawer?: (callback: (url: string) => void) => void;
-  /** Callback to open external video drawer. Editor passes a callback to receive the URL. */
-  onOpenVideoDrawer?: (callback: (url: string) => void) => void;
+  /** Callback to open external video drawer. Editor passes a callback to receive the URL or a video payload object. */
+  onOpenVideoDrawer?: (callback: (payload: string | { src: string; autoplay?: boolean; loop?: boolean; muted?: boolean; controls?: boolean }) => void) => void;
   /** Callback fired with Markdown string when editor content changes (debounced 300ms) */
   onMarkdownChange?: (markdown: string) => void;
   /** Callback fired with raw Lexical JSON string when editor content changes (debounced 300ms) */

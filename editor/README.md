@@ -21,7 +21,8 @@ A modern, reusable Lexical-based rich text editor component for React. Productio
 - ✨ **Rich Text Formatting**: Bold, italic, underline, strikethrough, inline code
 - 📝 **Block Elements**: Headings, paragraphs, blockquotes, code blocks with syntax highlighting
 - 📋 **Lists**: Bullet, numbered, and check lists
-- 🔗 **Links & Media**: Link insertion, image/video insertion with resize + alignment. Supports device uploads and external drawers.
+- 🔗 **Links**: Link insertion with automatic `target="_blank"` handling for opening in new tabs
+- 📸 **Media & YouTube**: Image and video insertion with resize + alignment. Paste a YouTube URL to automatically embed a responsive YouTube iframe! Supports video playback options (autoplay, loop, muted, controls). Supports device uploads and external drawers.
 - 📊 **Tables**: Full table support — add/remove rows & columns, toggle borders, resize columns
 - 🎨 **Styling**: Font size, text colour, background highlight, alignment
 - ⌨️ **Keyboard Shortcuts**: Full keyboard support including undo/redo and Markdown shortcuts
@@ -146,7 +147,19 @@ export default function MyComponent() {
     saveCallback(insertImage);
   }}
   onOpenVideoDrawer={(insertVideo) => {
-    openVideoPicker((url) => insertVideo(url));
+    // You can pass a string URL:
+    // openVideoPicker((url) => insertVideo(url));
+    
+    // OR pass a payload with options:
+    openVideoPicker((url) => {
+      insertVideo({
+        src: url,
+        autoplay: true,
+        loop: true,
+        muted: true,
+        controls: false,
+      });
+    });
   }}
 />
 ```
@@ -188,6 +201,13 @@ After inserting an image or video, selecting it reveals a **floating toolbar**:
 - Replace the media source (uses your drawer/upload callbacks if provided)
 - Delete the node
 
+### Video Embeds & YouTube
+
+When inserting a video:
+- You can toggle video playback options: **Autoplay**, **Loop**, **Muted**, and **Controls**.
+- Simply pasting a **YouTube URL** will automatically detect it and generate a responsive YouTube `iframe` instead of a standard `<video>` tag.
+- YouTube embeds fully support the same resizing, alignment, and playback options.
+
 ---
 
 ## API Reference
@@ -214,7 +234,7 @@ After inserting an image or video, selecting it reveals a **floating toolbar**:
 | `onImageDelete` | `(src: string) => void` | — | Called when an image node is deleted |
 | `onVideoDelete` | `(src: string) => void` | — | Called when a video node is deleted |
 | `onOpenImageDrawer` | `(cb: (url: string) => void) => void` | — | Override image insert with external picker |
-| `onOpenVideoDrawer` | `(cb: (url: string) => void) => void` | — | Override video insert with external picker |
+| `onOpenVideoDrawer` | `(cb: (payload: string \| { src: string; autoplay?: boolean; loop?: boolean; muted?: boolean; controls?: boolean }) => void) => void` | — | Override video insert with external picker |
 | `customToolbarButtons` | `CustomToolbarButton[]` | — | Custom buttons rendered in the toolbar |
 
 ### `CustomToolbarButton`

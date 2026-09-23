@@ -57,7 +57,7 @@ interface ToolbarProps {
   actions: ToolbarActions;
   features: RichTextEditorFeatures;
   onOpenImageDrawer?: (callback: (url: string) => void) => void;
-  onOpenVideoDrawer?: (callback: (url: string) => void) => void;
+  onOpenVideoDrawer?: (callback: (payload: string | { src: string; autoplay?: boolean; loop?: boolean; muted?: boolean; controls?: boolean }) => void) => void;
   onImageUpload?: (file: File) => Promise<string>;
   onVideoUpload?: (file: File) => Promise<string>;
   disabled?: boolean;
@@ -140,9 +140,11 @@ const Toolbar: React.FC<ToolbarProps> = ({
   // ── Video ─────────────────────────────────────────────────────
   const handleVideoClick = useCallback(() => {
     if (onOpenVideoDrawer) {
-      onOpenVideoDrawer((url: string) => {
-        if (url) {
-          actions.insertVideo({ src: url, controls: true });
+      onOpenVideoDrawer((payload) => {
+        if (typeof payload === 'string') {
+          if (payload) actions.insertVideo({ src: payload, controls: true });
+        } else if (payload && payload.src) {
+          actions.insertVideo({ controls: true, ...payload });
         }
       });
     } else {

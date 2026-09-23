@@ -13,7 +13,7 @@ import { AlignLeft, AlignCenter, AlignRight, Trash2, Video as VideoIcon } from '
 import VideoDialog from '../components/VideoDialog';
 
 interface VideoActionMenuPluginProps {
-  onOpenVideoDrawer?: (callback: (url: string) => void) => void;
+  onOpenVideoDrawer?: (callback: (payload: string | { src: string; autoplay?: boolean; loop?: boolean; muted?: boolean; controls?: boolean }) => void) => void;
   onVideoUpload?: (file: File) => Promise<string>;
 }
 

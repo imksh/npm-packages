@@ -6,7 +6,7 @@ interface VideoDialogProps {
   onClose: () => void;
   onSubmit: (src: string, options: { autoplay: boolean; loop: boolean; muted: boolean; controls: boolean }) => void;
   /** External video drawer callback */
-  onOpenVideoDrawer?: (callback: (url: string) => void) => void;
+  onOpenVideoDrawer?: (callback: (payload: string | { src: string; autoplay?: boolean; loop?: boolean; muted?: boolean; controls?: boolean }) => void) => void;
   /** Video upload callback */
   onVideoUpload?: (file: File) => Promise<string>;
 }
@@ -183,9 +183,19 @@ const VideoDialog: React.FC<VideoDialogProps> = ({
                 type="button"
                 className="rte-dialog-btn rte-dialog-btn--secondary"
                 onClick={() => {
-                  onOpenVideoDrawer!((videoUrl: string) => {
-                    if (videoUrl) {
-                      onSubmit(videoUrl, { autoplay, loop, muted, controls });
+                  onOpenVideoDrawer!((payload) => {
+                    if (typeof payload === 'string') {
+                      if (payload) {
+                        onSubmit(payload, { autoplay, loop, muted, controls });
+                        onClose();
+                      }
+                    } else if (payload && payload.src) {
+                      onSubmit(payload.src, {
+                        autoplay: payload.autoplay ?? autoplay,
+                        loop: payload.loop ?? loop,
+                        muted: payload.muted ?? muted,
+                        controls: payload.controls ?? controls,
+                      });
                       onClose();
                     }
                   });
