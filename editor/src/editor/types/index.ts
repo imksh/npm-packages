@@ -27,6 +27,27 @@ export interface RichTextEditorFeatures {
   video?: boolean;
 }
 
+// ─── Custom Toolbar Buttons ──────────────────────────────────────
+/**
+ * A single custom action button rendered in the toolbar next to the
+ * fullscreen toggle. Pass an array of these via the `customToolbarButtons`
+ * prop on `RichTextEditor`.
+ */
+export interface CustomToolbarButton {
+  /** Unique key for React reconciliation */
+  key: string;
+  /** Icon element to render inside the button (e.g. a Lucide icon) */
+  icon: React.ReactNode;
+  /** Tooltip / accessible label shown on hover */
+  label: string;
+  /** Called when the button is clicked */
+  onClick: () => void;
+  /** Whether the button should appear in its active / pressed state */
+  active?: boolean;
+  /** Disable the button independently of the editor disabled state */
+  disabled?: boolean;
+}
+
 // ─── Editor Props ────────────────────────────────────────────────
 export interface RichTextEditorProps extends RichTextEditorFeatures {
   /** HTML string to initialize or control the editor content */
@@ -67,6 +88,12 @@ export interface RichTextEditorProps extends RichTextEditorFeatures {
   onMarkdownChange?: (markdown: string) => void;
   /** Callback fired with raw Lexical JSON string when editor content changes (debounced 300ms) */
   onJsonChange?: (json: string) => void;
+  /**
+   * Optional custom buttons rendered in the toolbar to the left of the
+   * fullscreen toggle. Each button must have a unique `key`, an `icon`,
+   * a `label` (used as tooltip + aria-label) and an `onClick` handler.
+   */
+  customToolbarButtons?: CustomToolbarButton[];
 }
 
 // ─── Ref Handle ──────────────────────────────────────────────────
@@ -160,14 +187,14 @@ export interface ImagePayload {
   altText?: string;
   width?: number | 'inherit';
   height?: number | 'inherit';
-  alignment?: 'left' | 'center' | 'right';
+  alignment?: 'left' | 'center' | 'right' | 'inline';
 }
 
 export interface VideoPayload {
   src: string;
   width?: number | 'inherit';
   height?: number | 'inherit';
-  alignment?: 'left' | 'center' | 'right';
+  alignment?: 'left' | 'center' | 'right' | 'inline';
   autoplay?: boolean;
   loop?: boolean;
   muted?: boolean;

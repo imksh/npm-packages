@@ -4,6 +4,7 @@ import type {
   ToolbarActions,
   RichTextEditorFeatures,
   BlockType,
+  CustomToolbarButton,
 } from "../types";
 import ToolbarButton from "./ToolbarButton";
 import FontSizeSelector from "./FontSizeSelector";
@@ -62,6 +63,8 @@ interface ToolbarProps {
   disabled?: boolean;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
+  /** Custom action buttons rendered to the left of the fullscreen toggle */
+  customToolbarButtons?: CustomToolbarButton[];
 }
 
 /**
@@ -78,6 +81,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
   disabled = false,
   isFullscreen = false,
   onToggleFullscreen,
+  customToolbarButtons,
 }) => {
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [showImageDialog, setShowImageDialog] = useState(false);
@@ -580,7 +584,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
       />
 
       {/* ── Actions (Undo/Redo & Fullscreen) ──────────────────── */}
-      {(features.undoRedo !== false || onToggleFullscreen) && (
+      {(features.undoRedo !== false || onToggleFullscreen || (customToolbarButtons && customToolbarButtons.length > 0)) && (
         <>
           <div className="rte-actions-expanded" style={{ marginLeft: "auto" }}>
             {features.undoRedo !== false && (
@@ -599,6 +603,23 @@ const Toolbar: React.FC<ToolbarProps> = ({
                 >
                   <Redo2 size={iconSize} />
                 </ToolbarButton>
+              </>
+            )}
+            {/* Custom toolbar buttons — rendered left of the fullscreen toggle */}
+            {customToolbarButtons && customToolbarButtons.length > 0 && (
+              <>
+                <div className="rte-toolbar-divider" />
+                {customToolbarButtons.map((btn) => (
+                  <ToolbarButton
+                    key={btn.key}
+                    onClick={btn.onClick}
+                    disabled={disabled || btn.disabled}
+                    ariaLabel={btn.label}
+                    isActive={btn.active}
+                  >
+                    {btn.icon}
+                  </ToolbarButton>
+                ))}
               </>
             )}
             {onToggleFullscreen && (

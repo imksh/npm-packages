@@ -93,6 +93,7 @@ export default function VideoActionMenuPlugin({
 
   useEffect(() => {
     if (activeVideoKey) {
+      updatePosition(); // Initial position calculation when it becomes active
       window.addEventListener('scroll', updatePosition, true);
       window.addEventListener('resize', updatePosition);
       return () => {
@@ -129,7 +130,10 @@ export default function VideoActionMenuPlugin({
         const node = $getNodeByKey(activeVideoKey);
         if ($isVideoNode(node)) {
           node.setSrc(url);
-          // could set other options if we add setters
+          node.setAutoplay(options.autoplay);
+          node.setLoop(options.loop);
+          node.setMuted(options.muted);
+          node.setControls(options.controls);
         }
       });
     }

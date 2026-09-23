@@ -171,6 +171,7 @@ function RichTextEditorInner(
     table = true,
     horizontalRule = true,
     undoRedo = true,
+    customToolbarButtons,
   } = props;
 
   const [isFullscreen, setIsFullscreen] = React.useState(false);
@@ -306,6 +307,7 @@ function RichTextEditorInner(
             disabled={disabled}
             isFullscreen={isFullscreen}
             onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+            customToolbarButtons={customToolbarButtons}
           />
         )}
 

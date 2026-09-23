@@ -1,6 +1,6 @@
 {
   "name": "@imksh/editor",
-  "version": "1.0.8",
+  "version": "1.0.16",
   "description": "A modern, reusable Lexical-based rich text editor for React.",
   "license": "MIT",
   "author": "Karan Kumar",

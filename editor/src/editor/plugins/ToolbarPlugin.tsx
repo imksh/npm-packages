@@ -2,7 +2,7 @@ import React from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
 import { useEditorToolbar } from '../hooks/useEditorToolbar';
 import Toolbar from '../components/Toolbar';
-import type { RichTextEditorFeatures } from '../types';
+import type { RichTextEditorFeatures, CustomToolbarButton } from '../types';
 
 interface ToolbarPluginProps {
   features: RichTextEditorFeatures;
@@ -13,6 +13,7 @@ interface ToolbarPluginProps {
   disabled?: boolean;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
+  customToolbarButtons?: CustomToolbarButton[];
 }
 
 /**
@@ -28,6 +29,7 @@ export default function ToolbarPlugin({
   disabled = false,
   isFullscreen,
   onToggleFullscreen,
+  customToolbarButtons,
 }: ToolbarPluginProps): React.ReactElement {
   const [editor] = useLexicalComposerContext();
   const { state, actions } = useEditorToolbar(editor);
@@ -44,6 +46,7 @@ export default function ToolbarPlugin({
       disabled={disabled}
       isFullscreen={isFullscreen}
       onToggleFullscreen={onToggleFullscreen}
+      customToolbarButtons={customToolbarButtons}
     />
   );
 }

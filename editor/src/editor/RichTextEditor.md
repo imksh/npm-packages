@@ -2,8 +2,6 @@
 
 A production-ready, reusable Rich Text Editor component built on **Lexical** for React.
 
-Designed to be self-contained — copy the entire `RichTextEditor/` folder into any React project.
-
 ---
 
 ## Quick Start
@@ -17,13 +15,13 @@ npm install lexical @lexical/react @lexical/rich-text @lexical/list @lexical/lin
 npm install -D @types/prismjs
 ```
 
-### Usage
+### Basic Usage
 
 ```tsx
 'use client';
 
 import { useState } from 'react';
-import { RichTextEditor } from '@/components/RichTextEditor';
+import { RichTextEditor } from '@imksh/editor';
 
 export default function MyPage() {
   const [html, setHtml] = useState('<p>Hello world</p>');
@@ -49,42 +47,54 @@ export default function MyPage() {
 |------|------|---------|-------------|
 | `value` | `string` | `''` | Initial HTML content |
 | `onChange` | `(html: string) => void` | — | Fires when content changes (debounced 300ms) |
+| `onMarkdownChange` | `(md: string) => void` | — | Fires with Markdown output on change |
+| `onJsonChange` | `(json: string) => void` | — | Fires with raw Lexical JSON on change |
 | `placeholder` | `string` | `'Start writing...'` | Placeholder text |
 | `readOnly` | `boolean` | `false` | Disables editing, hides toolbar |
 | `autoFocus` | `boolean` | `false` | Focus on mount |
-| `minHeight` | `number` | `200` | Minimum height in px |
-| `disabled` | `boolean` | `false` | Grayed-out state |
+| `minHeight` | `number \| string` | `200` | Min height of content area |
+| `maxHeight` | `number \| string` | — | Max height (enables scroll) |
+| `height` | `number \| string` | — | Fixed height |
+| `disabled` | `boolean` | `false` | Grayed-out non-interactive state |
 | `showToolbar` | `boolean` | `true` | Show/hide toolbar |
 | `className` | `string` | `''` | Extra CSS class on wrapper |
-| `onImageUpload` | `(file: File) => Promise<string>` | — | Image upload handler |
-| `onOpenImageDrawer` | `(cb: (url: string) => void) => void` | — | External image picker |
+| `onImageUpload` | `(file: File) => Promise<string>` | — | Image upload handler, returns URL |
+| `onVideoUpload` | `(file: File) => Promise<string>` | — | Video upload handler, returns URL |
+| `onImageDelete` | `(src: string) => void` | — | Fires when an image is removed |
+| `onVideoDelete` | `(src: string) => void` | — | Fires when a video is removed |
+| `onOpenImageDrawer` | `(cb: (url: string) => void) => void` | — | Open external image picker |
+| `onOpenVideoDrawer` | `(cb: (url: string) => void) => void` | — | Open external video picker |
+| `customToolbarButtons` | `CustomToolbarButton[]` | — | Extra buttons in the toolbar (see below) |
+
+---
 
 ### Feature Flags
 
-All features are **enabled by default**. Set any to `false` to remove from the editor.
+All features are **enabled by default**. Set any to `false` to remove it from the editor.
 
-| Flag | Type | Default | Toolbar Feature |
-|------|------|---------|-----------------|
-| `bold` | `boolean` | `true` | Bold button |
-| `italic` | `boolean` | `true` | Italic button |
-| `underline` | `boolean` | `true` | Underline button |
-| `strikethrough` | `boolean` | `true` | Strikethrough button |
-| `inlineCode` | `boolean` | `true` | Inline code button |
-| `codeBlock` | `boolean` | `true` | Code block button + language selector |
-| `headings` | `boolean` | `true` | H1, H2, H3, Paragraph buttons |
-| `fontSize` | `boolean` | `true` | Font size selector |
-| `textColor` | `boolean` | `true` | Text color picker |
-| `highlight` | `boolean` | `true` | Background highlight picker |
-| `alignment` | `boolean` | `true` | Left, Center, Right, Justify |
-| `bulletList` | `boolean` | `true` | Bullet list |
-| `numberedList` | `boolean` | `true` | Numbered list |
-| `checkList` | `boolean` | `true` | Check list |
-| `blockquote` | `boolean` | `true` | Blockquote |
-| `link` | `boolean` | `true` | Link insert/edit/remove |
-| `image` | `boolean` | `true` | Image insert |
-| `table` | `boolean` | `true` | Table insert + R+/R-/C+/C- controls |
-| `horizontalRule` | `boolean` | `true` | Horizontal divider |
-| `undoRedo` | `boolean` | `true` | Undo / Redo |
+| Flag | Default | Toolbar Feature |
+|------|---------|-----------------|
+| `bold` | `true` | Bold button |
+| `italic` | `true` | Italic button |
+| `underline` | `true` | Underline button |
+| `strikethrough` | `true` | Strikethrough button |
+| `inlineCode` | `true` | Inline code button |
+| `codeBlock` | `true` | Code block + language selector |
+| `headings` | `true` | H1, H2, H3, Paragraph block types |
+| `fontSize` | `true` | Font size selector |
+| `textColor` | `true` | Text colour picker |
+| `highlight` | `true` | Background highlight picker |
+| `alignment` | `true` | Left, Center, Right, Justify |
+| `bulletList` | `true` | Bullet list |
+| `numberedList` | `true` | Numbered list |
+| `checkList` | `true` | Checklist |
+| `blockquote` | `true` | Blockquote |
+| `link` | `true` | Link insert / edit / remove |
+| `image` | `true` | Image insert |
+| `video` | `true` | Video insert |
+| `table` | `true` | Table insert + row/column controls |
+| `horizontalRule` | `true` | Horizontal divider |
+| `undoRedo` | `true` | Undo / Redo |
 
 **Example — Minimal Editor:**
 
@@ -98,17 +108,60 @@ All features are **enabled by default**. Set any to `false` to remove from the e
   highlight={false}
   table={false}
   image={false}
+  video={false}
   codeBlock={false}
   horizontalRule={false}
 />
 ```
 
+---
+
+### `CustomToolbarButton`
+
+Pass an array of custom action buttons that appear in the toolbar **to the left of the fullscreen toggle**. On narrow screens they collapse into the Actions (⚙) dropdown.
+
+```ts
+interface CustomToolbarButton {
+  key: string;           // Unique React key
+  icon: React.ReactNode; // Icon element — Lucide icon, SVG, emoji, etc.
+  label: string;         // Tooltip text + aria-label
+  onClick: () => void;   // Click handler
+  active?: boolean;      // Highlights button with primary colour when true
+  disabled?: boolean;    // Disables this button independently
+}
+```
+
+**Example:**
+
+```tsx
+import { Sparkles } from 'lucide-react';
+import type { CustomToolbarButton } from '@imksh/editor';
+
+const myButtons: CustomToolbarButton[] = [
+  {
+    key: 'ai-improve',
+    icon: <Sparkles size={16} />,
+    label: 'Improve with AI',
+    onClick: () => handleAIImprove(),
+    active: isAIActive,
+  },
+];
+
+<RichTextEditor
+  value={html}
+  onChange={setHtml}
+  customToolbarButtons={myButtons}
+/>
+```
+
+---
+
 ### Ref API
 
 ```tsx
 import { useRef } from 'react';
-import { RichTextEditor } from '@/components/RichTextEditor';
-import type { RichTextEditorRef } from '@/components/RichTextEditor';
+import { RichTextEditor } from '@imksh/editor';
+import type { RichTextEditorRef } from '@imksh/editor';
 
 function MyEditor() {
   const editorRef = useRef<RichTextEditorRef>(null);
@@ -128,6 +181,14 @@ function MyEditor() {
   );
 }
 ```
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `setContent` | `(html: string) => void` | Replace editor content |
+| `getContent` | `() => string` | Get current HTML |
+| `focus` | `() => void` | Focus the editor |
+| `clear` | `() => void` | Clear all content |
+| `getEditor` | `() => LexicalEditor \| null` | Access the underlying Lexical instance |
 
 ---
 
@@ -156,41 +217,93 @@ The editor does **not** upload images. It exposes callbacks:
 ```tsx
 <RichTextEditor
   onOpenImageDrawer={(insertCallback) => {
-    // Open your custom drawer/modal
     openImagePicker((selectedUrl) => {
-      insertCallback(selectedUrl); // Inserts the image
+      insertCallback(selectedUrl);
     });
   }}
 />
 ```
 
-### URL Fallback
+### File Upload
 
-If `onOpenImageDrawer` is not provided, clicking the image button opens a simple URL input dialog.
+```tsx
+<RichTextEditor
+  onImageUpload={async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch('/api/upload', { method: 'POST', body: formData });
+    const { url } = await res.json();
+    return url;
+  }}
+/>
+```
+
+If neither is provided, clicking the image button opens a simple URL input dialog.
 
 ### Image Features
 
-- **Resizable**: Drag corner/edge handles to resize
-- **Alignable**: Click image → alignment toolbar (left/center/right)
-- **Deletable**: Select + Backspace/Delete
+- **Resizable**: Drag the east / south-east handle — width is persisted in saved HTML
+- **Alignable**: Click image → floating toolbar (left / center / right / inline)
+- **Deletable**: Select + `Backspace` or `Delete`
+- **Round-trip safe**: Resize and alignment survive save → reload into editor
+
+---
+
+## Video Handling
+
+Mirrors image handling exactly.
+
+```tsx
+<RichTextEditor
+  onOpenVideoDrawer={(insertCallback) => {
+    openVideoPicker((url) => insertCallback(url));
+  }}
+  onVideoUpload={async (file) => {
+    return await uploadVideoAndGetUrl(file);
+  }}
+  onVideoDelete={(src) => console.log('Video removed:', src)}
+/>
+```
+
+### Video Features
+
+- **Resizable**: Same drag handles as images — width persisted
+- **Alignable**: left / center / right / inline
+- **Controls**: Play/pause, mute, loop toggleable via floating toolbar
+- **Round-trip safe**: Width and alignment persist through save/reload
 
 ---
 
 ## Table Features
 
-- **Insert**: Click table button → grid picker or manual row/col input
-- **Add Row**: `R+` button in floating toolbar
-- **Remove Row**: `R−` button
-- **Add Column**: `C+` button
-- **Remove Column**: `C−` button
+- **Insert**: Toolbar → table icon → grid picker or manual row/col input
+- **Floating toolbar** appears when a table cell is focused:
 
-The floating toolbar appears when a table cell is selected.
+| Button | Action |
+|--------|--------|
+| Align Left / Center / Right | Table-level alignment |
+| ↑ Row | Add row above |
+| ↓ Row | Add row below |
+| 🗑 Row | Delete current row |
+| ← Col | Add column left |
+| → Col | Add column right |
+| 🗑 Col | Delete current column |
+| ⊞ | **Toggle borders** — removes/restores all borders; persisted in HTML |
+| 🗑 Table | Delete entire table |
+
+### No-border Tables
+
+Clicking ⊞ toggles borders off. The borderless state is:
+
+- **Saved** via `data-no-borders` attribute + `border: none` inline styles on all cells
+- **Restored** when HTML is reloaded into the editor (`onUpdate` callback re-applies styles)
+- **Rendered** correctly in any HTML viewer without needing the editor's CSS
 
 ---
 
 ## Theming
 
-The editor uses **CSS custom properties with fallbacks**:
+The editor uses **CSS custom properties with sensible fallbacks**:
 
 ```css
 background: var(--color-base-100, #ffffff);
@@ -198,126 +311,111 @@ color: var(--color-base-content, #111827);
 border-color: var(--color-base-300, #e5e7eb);
 ```
 
-### Required Variables
+### CSS Variables
 
 | Variable | Purpose | Fallback |
 |----------|---------|----------|
 | `--color-base-100` | Editor background | `#ffffff` |
 | `--color-base-200` | Toolbar background | `#f8fafc` |
 | `--color-base-300` | Borders, dividers | `#e5e7eb` |
-| `--color-base-content` | Text color | `#111827` |
+| `--color-base-content` | Text colour | `#111827` |
 | `--color-primary` | Accent, active states | `#2563eb` |
 | `--color-primary-content` | Active button text | `#ffffff` |
 | `--color-error` | Danger actions | `#ef4444` |
 
-If using **FlyonUI/DaisyUI**, these variables are automatically available.  
-For other projects, define them in your root CSS or the variables fallback to sane defaults.
+If using **FlyonUI / DaisyUI**, these variables are automatically available.
 
 ### Dark Mode
 
-Works automatically with `[data-theme="dark"]` if the CSS variables change.
+Works automatically with `[data-theme="dark"]` when the CSS variables change.
 
 ---
 
-## Portability
+## Exported Utilities
 
-To use in another React project:
-
-1. Copy the entire `RichTextEditor/` folder
-2. Install peer dependencies (see Installation)
-3. Import and use:
-
-```tsx
-import { RichTextEditor } from './components/RichTextEditor';
+```ts
+import { exportHTML, importHTML, isHTMLEmpty, isEditorEmpty } from '@imksh/editor';
 ```
 
-4. If not using FlyonUI, define the CSS variables or rely on fallbacks
-
-### Peer Dependencies
-
-| Package | Purpose |
-|---------|---------|
-| `react` ≥ 18 | React |
-| `lexical` | Editor core |
-| `@lexical/*` | Editor features |
-| `lucide-react` | Toolbar icons |
-| `prismjs` | Syntax highlighting (optional) |
+| Utility | Description |
+|---------|-------------|
+| `exportHTML(editor)` | Serialize editor state → HTML. Code blocks get a copy button. Image/video sizes, alignments, and table no-border state are all preserved. |
+| `importHTML(editor, html)` | Load HTML into the editor, replacing existing content. No-border tables and media dimensions are correctly restored. |
+| `isHTMLEmpty(html)` | `true` if HTML represents empty content (`<p><br></p>`, whitespace, etc.) |
+| `isEditorEmpty(editor)` | `true` if the live editor contains no meaningful text |
 
 ---
 
-## Extensibility
+## HTML Round-Trip Guarantees
 
-The architecture supports future plugins without refactoring:
-
-1. **Create a plugin** in `plugins/`
-2. **Register nodes** in `nodes/`
-3. **Add to `RichTextEditor.tsx`** conditionally
-
-Potential extensions:
-- AI writing suggestions
-- Comments & annotations
-- @mentions
-- Emoji picker
-- Math equations (KaTeX)
-- Mermaid diagrams
-- Video/audio embeds
-- Collaborative editing (Yjs)
-- Version history
+| Feature | Saved as |
+|---------|----------|
+| Image resize width | `width` HTML attribute + `style="width:Npx"` on `<img>` |
+| Image alignment | `data-alignment` attribute on wrapper `<span>` |
+| Video resize width | `width` HTML attribute + `style="width:Npx"` on `<video>` |
+| Video alignment | `data-alignment` attribute on wrapper `<span>` |
+| Table no-borders | `data-no-borders` attribute + `border: none` inline on `<table>`, `<tr>`, `<td>`, `<th>` |
+| Table column widths | `<colgroup>` / `<col width="...">` in exported HTML |
+| Table header background | Lexical's default `#f2f3f5` header background is stripped from exported `<th>` so preview matches editor |
 
 ---
 
 ## File Structure
 
 ```
-RichTextEditor/
-├── index.ts              # Public API barrel
-├── RichTextEditor.tsx     # Main component
-├── RichTextEditor.css     # All styles
-├── RichTextEditor.md      # This documentation
+editor/src/editor/
+├── index.ts                    # Public API barrel
+├── RichTextEditor.tsx           # Main component
+├── RichTextEditor.css           # All styles
+├── RichTextEditor.md            # This documentation
 ├── types/
-│   └── index.ts           # TypeScript interfaces & constants
+│   └── index.ts                # TypeScript interfaces & constants
 ├── components/
-│   ├── Toolbar.tsx         # Toolbar UI
-│   ├── ToolbarButton.tsx   # Memoized button
+│   ├── Toolbar.tsx              # Toolbar UI (responsive, supports custom buttons)
+│   ├── ToolbarButton.tsx        # Memoized button
+│   ├── ActionsSelector.tsx      # Collapsed actions dropdown
 │   ├── FontSizeSelector.tsx
 │   ├── ColorPicker.tsx
 │   ├── LinkDialog.tsx
 │   ├── ImageDialog.tsx
+│   ├── VideoDialog.tsx
 │   ├── TableDialog.tsx
 │   └── Divider.tsx
 ├── plugins/
-│   ├── ToolbarPlugin.tsx   # Toolbar ↔ Editor bridge
-│   ├── OnChangePlugin.tsx  # HTML serialization
-│   ├── ImagePlugin.tsx
+│   ├── ToolbarPlugin.tsx        # Toolbar ↔ Editor bridge
+│   ├── OnChangePlugin.tsx       # HTML/Markdown/JSON serialization
+│   ├── ImagePlugin.tsx          # INSERT_IMAGE_COMMAND handler
+│   ├── ImageActionMenuPlugin.tsx # Floating image toolbar
+│   ├── VideoPlugin.tsx          # INSERT_VIDEO_COMMAND handler
+│   ├── VideoActionMenuPlugin.tsx # Floating video toolbar
 │   ├── CodeHighlightPlugin.tsx
+│   ├── CodeActionMenuPlugin.tsx
 │   ├── FloatingLinkPlugin.tsx
-│   ├── TableActionPlugin.tsx
+│   ├── TableActionPlugin.tsx    # Floating table toolbar (borders, rows, cols)
+│   ├── TableCellResizerPlugin.tsx
 │   ├── KeyboardShortcutPlugin.tsx
+│   ├── TabEscapePlugin.tsx
+│   ├── RootClickPlugin.tsx
 │   ├── AutoSavePlugin.tsx
 │   └── ImperativeHandlePlugin.tsx
 ├── nodes/
-│   ├── ImageNode.tsx       # Custom image node
+│   ├── ImageNode.tsx            # Custom resizable/alignable image node
+│   ├── VideoNode.tsx            # Custom resizable/alignable video node
 │   └── index.ts
 ├── hooks/
-│   ├── useEditorToolbar.ts # Toolbar state hook
+│   ├── useEditorToolbar.ts      # Toolbar state hook
 │   └── useDebounce.ts
 └── utils/
-    ├── editorTheme.ts      # Lexical theme classes
-    └── htmlSerializer.ts   # HTML import/export
+    ├── editorTheme.ts           # Lexical theme class map
+    └── htmlSerializer.ts        # HTML import/export with post-processing
 ```
-
----
-
-## Empty State
-
-The editor returns `""` (empty string) instead of `<p><br></p>` when the editor contains no meaningful text content.
 
 ---
 
 ## Performance Notes
 
 - Toolbar buttons are `React.memo`'d
-- `onChange` is debounced (300ms default)
+- `onChange` / `onMarkdownChange` / `onJsonChange` are debounced (300ms default)
 - Update listeners are registered once and cleaned up on unmount
 - Feature-flag-disabled plugins are never mounted
-- Nodes list is memoized
+- Node list and initial config are `useMemo`'d (computed once on mount)

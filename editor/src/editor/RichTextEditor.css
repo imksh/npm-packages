@@ -192,6 +192,10 @@
   background-color: color-mix(in srgb, var(--color-primary, #2563eb) 25%, transparent);
 }
 
+::highlight(rte-selection-highlight) {
+  background-color: color-mix(in srgb, var(--color-primary, #2563eb) 30%, transparent);
+}
+
 .rte-root:focus {
   outline: none;
 }
@@ -641,6 +645,33 @@
   cursor: nwse-resize;
 }
 
+.rte-image-resize-nw {
+  left: -6px;
+  top: -6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  cursor: nwse-resize;
+}
+
+.rte-image-resize-ne {
+  right: -6px;
+  top: -6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  cursor: nesw-resize;
+}
+
+.rte-image-resize-sw {
+  left: -6px;
+  bottom: -6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  cursor: nesw-resize;
+}
+
 /* Image toolbar */
 .rte-image-toolbar {
   position: absolute;
@@ -743,7 +774,7 @@
 }
 
 .rte-font-size-input {
-  width: 60px;
+  width: 50px;
   height: 28px;
   padding: 0 6px;
   border: 1px solid var(--color-base-300, #e5e7eb);
@@ -761,6 +792,36 @@
 .rte-font-size-unit {
   color: color-mix(in srgb, var(--color-base-content, #111827) 50%, transparent);
   font-size: 12px;
+}
+
+.rte-font-size-apply-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: var(--color-primary, #2563eb);
+  color: var(--color-primary-content, #ffffff);
+  cursor: pointer;
+  margin-left: auto;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+.rte-font-size-apply-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.rte-font-size-apply-btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.rte-font-size-apply-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .rte-font-size-list {
@@ -1330,9 +1391,17 @@
 }
 
 .rte-table-no-borders,
+table[data-no-borders],
+table[style*="--rte-no-borders: 1"],
 .rte-table-no-borders .rte-table-cell,
-.rte-table-no-borders .rte-table-row {
+table[data-no-borders] td,
+table[data-no-borders] th,
+table[style*="--rte-no-borders: 1"] .rte-table-cell,
+.rte-table-no-borders .rte-table-row,
+table[data-no-borders] tr,
+table[style*="--rte-no-borders: 1"] .rte-table-row {
   border-color: transparent !important;
+  border: none !important;
 }
 
 .rte-table-cell-resizer {
@@ -1447,6 +1516,33 @@
   height: 12px;
   border-radius: 3px;
   cursor: nwse-resize;
+}
+
+.rte-video-resize-nw {
+  left: -6px;
+  top: -6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  cursor: nwse-resize;
+}
+
+.rte-video-resize-ne {
+  right: -6px;
+  top: -6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  cursor: nesw-resize;
+}
+
+.rte-video-resize-sw {
+  left: -6px;
+  bottom: -6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  cursor: nesw-resize;
 }
 
 /* Video toolbar */

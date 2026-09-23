@@ -107,7 +107,7 @@ export default function FloatingLinkPlugin(): React.ReactElement | null {
 
   const handleSave = useCallback(() => {
     if (editUrl.trim()) {
-      editor.dispatchCommand(TOGGLE_LINK_COMMAND, editUrl.trim());
+      editor.dispatchCommand(TOGGLE_LINK_COMMAND, { url: editUrl.trim(), target: '_blank', rel: 'noopener noreferrer' });
       setIsEditing(false);
     }
   }, [editor, editUrl]);

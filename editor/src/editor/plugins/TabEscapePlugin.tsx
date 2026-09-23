@@ -9,6 +9,7 @@ import {
   $createParagraphNode,
   $createTextNode,
   $isTextNode,
+  $isElementNode,
 } from "lexical";
 import { $isImageNode } from "../nodes/ImageNode";
 import { $isTableNode } from "@lexical/table";
@@ -44,10 +45,10 @@ export default function TabEscapePlugin(): null {
                   next = $createParagraphNode();
                   node.insertAfter(next);
                 }
-                if (next.selectStart) {
+                if ($isElementNode(next)) {
                   next.selectStart();
-                } else if (next.select) {
-                  next.select();
+                } else {
+                  next.selectNext();
                 }
                 handled = true;
                 event.preventDefault();
@@ -78,8 +79,11 @@ export default function TabEscapePlugin(): null {
                   next = $createParagraphNode();
                   parent.insertAfter(next);
                 }
-                if (next.selectStart) next.selectStart();
-                else if (next.select) next.select();
+                if ($isElementNode(next)) {
+                  next.selectStart();
+                } else {
+                  next.selectNext();
+                }
                 handled = true;
                 event.preventDefault();
               }

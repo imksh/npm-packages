@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Check } from 'lucide-react';
 import { FONT_SIZES } from '../types';
 
 interface FontSizeSelectorProps {
@@ -17,50 +18,121 @@ const FontSizeSelector: React.FC<FontSizeSelectorProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [customValue, setCustomValue] = useState('');
+  const customValueRef = useRef('');
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const savedRangeRef = useRef<Range | null>(null);
+
+  // Keep customValueRef in sync
+  useEffect(() => {
+    customValueRef.current = customValue;
+  }, [customValue]);
 
   // Display size without 'px'
   const displaySize = currentSize ? currentSize.replace('px', '') : '16';
 
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
+  const clearHighlight = useCallback(() => {
+    savedRangeRef.current = null;
+    if (typeof Highlight !== 'undefined' && CSS.highlights) {
+      try {
+        CSS.highlights.delete('rte-selection-highlight');
+      } catch {
+        // ignore if not supported
       }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
   }, []);
+
+  const saveDOMRange = useCallback(() => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) {
+      const range = sel.getRangeAt(0);
+      if (!range.collapsed) {
+        savedRangeRef.current = range.cloneRange();
+        if (typeof Highlight !== 'undefined' && CSS.highlights) {
+          try {
+            const highlight = new Highlight(savedRangeRef.current);
+            CSS.highlights.set('rte-selection-highlight', highlight);
+          } catch {
+            // ignore if not supported
+          }
+        }
+      }
+    }
+  }, []);
+
+  const toggleOpen = useCallback(() => {
+    setIsOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        saveDOMRange();
+        setCustomValue(displaySize);
+      } else {
+        clearHighlight();
+      }
+      return next;
+    });
+  }, [displaySize, saveDOMRange, clearHighlight]);
 
   const handleSelect = useCallback(
     (size: string) => {
+      clearHighlight();
       onChange(size);
       setIsOpen(false);
     },
-    [onChange],
+    [onChange, clearHighlight],
   );
 
   const handleCustomSubmit = useCallback(() => {
-    const num = parseInt(customValue, 10);
-    if (num >= 8 && num <= 144) {
+    const num = parseInt(customValueRef.current, 10);
+    if (!isNaN(num) && num >= 8 && num <= 144) {
+      clearHighlight();
       onChange(`${num}px`);
       setCustomValue('');
       setIsOpen(false);
     }
-  }, [customValue, onChange]);
+  }, [onChange, clearHighlight]);
+
+  // Close dropdown on outside click, and apply valid custom size if user entered one
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        const num = parseInt(customValueRef.current, 10);
+        if (!isNaN(num) && num >= 8 && num <= 144 && `${num}px` !== currentSize) {
+          onChange(`${num}px`);
+        }
+        clearHighlight();
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen, onChange, clearHighlight, currentSize]);
+
+  // Clean up selection highlight on unmount
+  useEffect(() => {
+    return () => {
+      clearHighlight();
+    };
+  }, [clearHighlight]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation();
         handleCustomSubmit();
-      }
-      if (e.key === 'Escape') {
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        clearHighlight();
         setIsOpen(false);
       }
     },
-    [handleCustomSubmit],
+    [handleCustomSubmit, clearHighlight],
   );
 
   return (
@@ -68,7 +140,11 @@ const FontSizeSelector: React.FC<FontSizeSelectorProps> = ({
       <button
         type="button"
         className="rte-font-size-trigger"
-        onClick={() => setIsOpen(!isOpen)}
+        onMouseDown={(e) => {
+          saveDOMRange();
+          e.preventDefault();
+        }}
+        onClick={toggleOpen}
         disabled={disabled}
         aria-label="Font size"
         aria-expanded={isOpen}
@@ -100,12 +176,24 @@ const FontSizeSelector: React.FC<FontSizeSelectorProps> = ({
               max={144}
               placeholder="Custom"
               value={customValue}
+              onFocus={saveDOMRange}
               onChange={(e) => setCustomValue(e.target.value)}
               onKeyDown={handleKeyDown}
               className="rte-font-size-input"
               aria-label="Custom font size"
             />
             <span className="rte-font-size-unit">px</span>
+            <button
+              type="button"
+              className="rte-font-size-apply-btn"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={handleCustomSubmit}
+              title="Apply font size"
+              aria-label="Apply font size"
+              disabled={!customValue || isNaN(parseInt(customValue, 10))}
+            >
+              <Check size={14} />
+            </button>
           </div>
           <div className="rte-font-size-list">
             {FONT_SIZES.map((size) => (
@@ -115,6 +203,9 @@ const FontSizeSelector: React.FC<FontSizeSelectorProps> = ({
                 role="option"
                 aria-selected={currentSize === size}
                 className={`rte-font-size-option ${currentSize === size ? 'rte-font-size-option--active' : ''}`}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                }}
                 onClick={() => handleSelect(size)}
               >
                 {size.replace('px', '')}

@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
-import type { LexicalEditor, ElementNode } from "lexical";
+import { useCallback, useEffect, useState, useRef } from "react";
+import type { LexicalEditor, ElementNode, RangeSelection } from "lexical";
 import {
   $getSelection,
   $isRangeSelection,
+  $setSelection,
+  $isTextNode,
   CAN_REDO_COMMAND,
   CAN_UNDO_COMMAND,
   COMMAND_PRIORITY_LOW,
@@ -65,10 +67,16 @@ export function useEditorToolbar(editor: LexicalEditor): {
 } {
   const [state, setState] = useState<ToolbarState>(INITIAL_TOOLBAR_STATE);
 
+  const lastSelectionRef = useRef<RangeSelection | null>(null);
+
   // ── Update toolbar state from selection ──────────────────────
   const updateToolbar = useCallback(() => {
     const selection = $getSelection();
     if (!$isRangeSelection(selection)) return;
+
+    // Cache the active range selection so toolbar actions (like dropdowns and inputs)
+    // can restore it even after the editor temporarily loses focus
+    lastSelectionRef.current = selection.clone();
 
     // Text formatting
     const isBold = selection.hasFormat("bold");
@@ -78,11 +86,25 @@ export function useEditorToolbar(editor: LexicalEditor): {
     const isCode = selection.hasFormat("code");
 
     // Font properties
-    const fontSize = $getSelectionStyleValueForProperty(
+    let fontSize = $getSelectionStyleValueForProperty(
       selection,
       "font-size",
       "16px",
     );
+
+    // If selection is collapsed, also inspect the anchor text node directly in case
+    // $getSelectionStyleValueForProperty skipped it due to boundary offset
+    if (selection.isCollapsed()) {
+      const anchorNode = selection.anchor.getNode();
+      if ($isTextNode(anchorNode)) {
+        const style = anchorNode.getStyle();
+        const match = style.match(/font-size:\s*([^;]+)/);
+        if (match) {
+          fontSize = match[1].trim();
+        }
+      }
+    }
+
     const fontColor = $getSelectionStyleValueForProperty(
       selection,
       "color",
@@ -217,7 +239,11 @@ export function useEditorToolbar(editor: LexicalEditor): {
   const formatBlock = useCallback(
     (blockType: BlockType) => {
       editor.update(() => {
-        const selection = $getSelection();
+        let selection = $getSelection();
+        if (!$isRangeSelection(selection) && lastSelectionRef.current) {
+          $setSelection(lastSelectionRef.current.clone());
+          selection = $getSelection();
+        }
         if (!$isRangeSelection(selection)) return;
 
         switch (blockType) {
@@ -250,6 +276,7 @@ export function useEditorToolbar(editor: LexicalEditor): {
             break;
         }
       });
+      editor.focus();
     },
     [editor],
   );
@@ -264,11 +291,16 @@ export function useEditorToolbar(editor: LexicalEditor): {
   const setFontSize = useCallback(
     (size: string) => {
       editor.update(() => {
-        const selection = $getSelection();
+        let selection = $getSelection();
+        if (!$isRangeSelection(selection) && lastSelectionRef.current) {
+          $setSelection(lastSelectionRef.current.clone());
+          selection = $getSelection();
+        }
         if ($isRangeSelection(selection)) {
           $patchStyleText(selection, { "font-size": size });
         }
       });
+      editor.focus();
     },
     [editor],
   );
@@ -276,11 +308,16 @@ export function useEditorToolbar(editor: LexicalEditor): {
   const setTextColor = useCallback(
     (color: string) => {
       editor.update(() => {
-        const selection = $getSelection();
+        let selection = $getSelection();
+        if (!$isRangeSelection(selection) && lastSelectionRef.current) {
+          $setSelection(lastSelectionRef.current.clone());
+          selection = $getSelection();
+        }
         if ($isRangeSelection(selection)) {
           $patchStyleText(selection, { color: color || null });
         }
       });
+      editor.focus();
     },
     [editor],
   );
@@ -288,18 +325,23 @@ export function useEditorToolbar(editor: LexicalEditor): {
   const setBgColor = useCallback(
     (color: string) => {
       editor.update(() => {
-        const selection = $getSelection();
+        let selection = $getSelection();
+        if (!$isRangeSelection(selection) && lastSelectionRef.current) {
+          $setSelection(lastSelectionRef.current.clone());
+          selection = $getSelection();
+        }
         if ($isRangeSelection(selection)) {
           $patchStyleText(selection, { "background-color": color || null });
         }
       });
+      editor.focus();
     },
     [editor],
   );
 
   const insertLink = useCallback(
     (url: string, text?: string) => {
-      editor.dispatchCommand(TOGGLE_LINK_COMMAND, url);
+      editor.dispatchCommand(TOGGLE_LINK_COMMAND, { url, title: text, target: '_blank', rel: 'noopener noreferrer' });
     },
     [editor],
   );

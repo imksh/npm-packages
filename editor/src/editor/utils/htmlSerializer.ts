@@ -6,29 +6,61 @@ import { $getRoot, type LexicalEditor } from 'lexical';
  * Replaces all existing content.
  */
 export function importHTML(editor: LexicalEditor, html: string): void {
-  editor.update(() => {
-    const root = $getRoot();
-    root.clear();
+  if (!html || html.trim() === '') {
+    editor.update(() => { $getRoot().clear(); });
+    return;
+  }
 
-    if (!html || html.trim() === '') {
-      return;
-    }
+  // Strip code-wrapper divs added by exportHTML so Lexical only sees raw <pre>.
+  const cleaned = html.replace(
+    /<div class="rte-code-wrapper">(<pre[\s\S]*?<\/pre>)[\s\S]*?<\/div>/gi,
+    '$1',
+  );
 
-    // Strip the code-wrapper divs added by exportHTML before parsing,
-    // so Lexical only sees the raw <pre> elements.
-    const cleaned = html.replace(
-      /<div class="rte-code-wrapper">(<pre[\s\S]*?<\/pre>)[\s\S]*?<\/div>/gi,
-      '$1',
-    );
-
-    const parser = new DOMParser();
-    const dom = parser.parseFromString(cleaned, 'text/html');
-    const nodes = $generateNodesFromDOM(editor, dom);
-
-    if (nodes.length > 0) {
-      root.append(...nodes);
+  // Pre-scan the incoming HTML to find which table indices carry data-no-borders.
+  // We do this BEFORE editor.update because after Lexical creates fresh DOM
+  // elements for each TableNode, the attribute is gone — we re-apply it in
+  // the onUpdate callback once Lexical has flushed to the live DOM.
+  const noBorderIndices = new Set<number>();
+  const tempParser = new DOMParser();
+  const tempDom = tempParser.parseFromString(cleaned, 'text/html');
+  tempDom.querySelectorAll('table').forEach((table, idx) => {
+    if (table.hasAttribute('data-no-borders')) {
+      noBorderIndices.add(idx);
     }
   });
+
+  editor.update(
+    () => {
+      const root = $getRoot();
+      root.clear();
+
+      const parser = new DOMParser();
+      const dom = parser.parseFromString(cleaned, 'text/html');
+      const nodes = $generateNodesFromDOM(editor, dom);
+
+      if (noBorderIndices.size > 0) {
+        let tableIndex = 0;
+        const traverse = (n: any) => {
+          if (n.getType() === 'table') {
+            if (noBorderIndices.has(tableIndex)) {
+              const writable = n.getWritable();
+              writable.__style = ((writable.__style || '') + ' --rte-no-borders: 1;').trim();
+            }
+            tableIndex++;
+          }
+          if (typeof n.getChildren === 'function') {
+            n.getChildren().forEach(traverse);
+          }
+        };
+        nodes.forEach(traverse);
+      }
+
+      if (nodes.length > 0) {
+        root.append(...nodes);
+      }
+    }
+  );
 }
 
 /** Inline copy-button SVG icons */
@@ -79,6 +111,56 @@ export function exportHTML(editor: LexicalEditor): string {
   // Normalize empty state
   if (isHTMLEmpty(html)) {
     return '';
+  }
+
+  // Lexical's TableCellNode.exportDOM() hardcodes `background-color: #f2f3f5`
+  // on every <th> that has no user-set custom background colour. This makes
+  // the header row/column appear grey in the preview even though the editor
+  // itself shows no colour. Strip it so preview == editor.
+  // Note: Browsers convert hex colors in inline styles to rgb() during outerHTML serialization.
+  html = html.replace(
+    /(<th\b[^>]*)\s+style="([^"]*)background-color:\s*(?:#f2f3f5|rgb\(\s*242\s*,\s*243\s*,\s*245\s*\))\s*;?([^"]*)"/gi,
+    (_, open, before, after) => {
+      const style = (before + after).replace(/;\s*$/, '').trim();
+      return style ? `${open} style="${style}"` : open;
+    },
+  );
+
+  // Stamp data-no-borders onto any table in the exported HTML whose live
+  // editor DOM element carries the attribute (set by toggleBorders directly
+  // on the DOM node, outside of Lexical state).
+  // We match by DOM order — Lexical serialises tables in the same order they
+  // appear in the editor root.
+  const editorRoot = editor.getRootElement();
+  if (editorRoot) {
+    const liveTables = Array.from(editorRoot.querySelectorAll('table[data-no-borders]'));
+    if (liveTables.length > 0) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const allLiveTables = Array.from(editorRoot.querySelectorAll('table'));
+      const exportedTables = Array.from(doc.querySelectorAll('table'));
+      let mutated = false;
+
+      liveTables.forEach((liveTable) => {
+        const idx = allLiveTables.indexOf(liveTable as HTMLTableElement);
+        const exportedTable = exportedTables[idx];
+        if (exportedTable) {
+          // Mark with attribute (for re-import) and apply inline styles so
+          // any HTML renderer shows no borders without needing our CSS class.
+          exportedTable.setAttribute('data-no-borders', 'true');
+          exportedTable.style.borderColor = 'transparent';
+          exportedTable.style.border = 'none';
+          exportedTable.querySelectorAll('td, th, tr').forEach((cell) => {
+            (cell as HTMLElement).style.border = 'none';
+          });
+          mutated = true;
+        }
+      });
+
+      if (mutated) {
+        html = doc.body.innerHTML;
+      }
+    }
   }
 
   // Wrap each <pre> block with the copy button wrapper

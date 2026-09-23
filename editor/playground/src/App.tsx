@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import { RichTextEditor, isHTMLEmpty } from "@imksh/editor";
 import type { RichTextEditorRef, RichTextEditorFeatures } from "@imksh/editor";
 import "../../src/editor/RichTextEditor.css";
+import { Star } from "lucide-react";
 
 // ─── Feature flag config ────────────────────────────────────────
 interface FeatureConfig {
@@ -265,6 +266,15 @@ export default function App() {
             <RichTextEditor
               ref={editorRef}
               value={INITIAL_HTML}
+              customToolbarButtons={[
+                {
+                  key: "my-action",
+                  icon: <Star size={16} />,
+                  label: "My Action",
+                  onClick: () => alert("Custom button clicked!"),
+                  active: false,
+                },
+              ]}
               onChange={setHtml}
               onMarkdownChange={setMarkdown}
               onJsonChange={setJson}
@@ -274,7 +284,7 @@ export default function App() {
                 return new Promise((resolve) => {
                   setTimeout(() => {
                     resolve(
-                      "https://plus.unsplash.com/premium_photo-1786552941093-cfa31e3fe2d0?q=80&w=1475&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                      "https://plus.unsplash.com/premium_photo-1786552941093-cfa31e3fe2d0?q=80&w=1475&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
                     );
                   }, 5000);
                 });
@@ -299,7 +309,7 @@ export default function App() {
                     >
                       {TAB_LABELS[tab]}
                     </button>
-                  )
+                  ),
                 )}
               </div>
               {activeTab !== "preview" && (

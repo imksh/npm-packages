@@ -7,6 +7,7 @@ import {
   SELECTION_CHANGE_COMMAND,
   $getNodeByKey,
   $getNearestNodeFromDOMNode,
+  $isElementNode,
 } from "lexical";
 import {
   $isTableCellNode,

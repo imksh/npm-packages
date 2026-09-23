@@ -51,6 +51,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
       <button
         type="button"
         className="rte-toolbar-btn rte-color-trigger"
+        onMouseDown={(e) => e.preventDefault()}
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
         aria-label={label}
@@ -89,6 +90,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
                 style={{
                   backgroundColor: preset.value || (mode === 'text' ? 'var(--color-base-content, #111827)' : 'var(--color-base-100, #ffffff)'),
                 }}
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => handleSelect(preset.value)}
                 title={preset.name}
                 aria-label={preset.name}

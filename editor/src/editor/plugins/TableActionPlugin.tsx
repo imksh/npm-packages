@@ -20,7 +20,7 @@ import { $findMatchingParent, mergeRegister } from '@lexical/utils';
 import {
   AlignLeft, AlignCenter, AlignRight,
   ArrowUpToLine, ArrowDownToLine, ArrowLeftToLine, ArrowRightToLine,
-  Trash2, Table as TableIcon, Grid3X3
+  Trash2, SquareDashed
 } from 'lucide-react';
 
 /**
@@ -32,6 +32,7 @@ export default function TableActionPlugin(): React.ReactElement | null {
   const [activeTableKey, setActiveTableKey] = useState<string | null>(null);
   const [tableCellNodeKey, setTableCellNodeKey] = useState<string | null>(null);
   const [position, setPosition] = useState({ top: -10000, left: -10000 });
+  const [hasBorders, setHasBorders] = useState(true);
   const toolbarRef = useRef<HTMLDivElement>(null);
 
   const updatePosition = useCallback(() => {
@@ -81,8 +82,11 @@ export default function TableActionPlugin(): React.ReactElement | null {
               setTableCellNodeKey(cellNode.getKey());
               const tableNode = $findMatchingParent(cellNode, $isTableNode);
               if (tableNode && $isTableNode(tableNode)) {
-                setActiveTableKey(tableNode.getKey());
+                const key = tableNode.getKey();
+                setActiveTableKey(key);
                 updatePosition();
+                const style = (tableNode as any).__style || '';
+                setHasBorders(!style.includes('--rte-no-borders: 1'));
               }
             } else {
               setActiveTableKey(null);
@@ -228,14 +232,25 @@ export default function TableActionPlugin(): React.ReactElement | null {
   }, [editor, activeTableKey]);
 
   const toggleBorders = useCallback(() => {
+    if (!activeTableKey) return;
+    
     editor.update(() => {
-      if (!activeTableKey) return;
-      const tableDOM = editor.getElementByKey(activeTableKey);
-      if (tableDOM) {
-        // Simple approach: toggle a class on the rendered DOM element.
-        // It resets on unmount, but suffices for visual toggle in the session.
-        tableDOM.classList.toggle('rte-table-no-borders');
+      const node = $getNodeByKey(activeTableKey) as any;
+      if (!node || node.getType() !== 'table') return;
+
+      const writable = node.getWritable();
+      const currentStyle = writable.__style || '';
+      const nowNoBorders = !currentStyle.includes('--rte-no-borders: 1');
+
+      if (nowNoBorders) {
+        writable.__style = `${currentStyle} --rte-no-borders: 1;`.trim();
+      } else {
+        writable.__style = currentStyle.replace('--rte-no-borders: 1;', '').replace('--rte-no-borders: 1', '').trim();
       }
+      
+      // Tell Lexical the node changed so it updates the live DOM element
+      node.markDirty();
+      setHasBorders(!nowNoBorders);
     });
   }, [editor, activeTableKey]);
 
@@ -294,12 +309,17 @@ export default function TableActionPlugin(): React.ReactElement | null {
 
       <div className="rte-toolbar-divider" style={{ height: '16px' }} />
       
-      <button type="button" className="rte-floating-toolbar-btn" onClick={toggleBorders} title="Toggle Borders">
-        <Grid3X3 size={16} />
+      <button
+        type="button"
+        className={`rte-floating-toolbar-btn${!hasBorders ? ' rte-floating-toolbar-btn--active' : ''}`}
+        onClick={toggleBorders}
+        title={hasBorders ? 'Remove Borders' : 'Restore Borders'}
+      >
+        <SquareDashed size={16} />
       </button>
       
       <button type="button" className="rte-floating-toolbar-btn rte-floating-toolbar-btn--danger" onClick={deleteTable} title="Delete Table">
-        <TableIcon size={16} />
+        <Trash2 size={16} />
       </button>
     </div>
   );

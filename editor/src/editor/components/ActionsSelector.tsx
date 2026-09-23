@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Settings2, Undo2, Redo2, Maximize, Minimize } from 'lucide-react';
-import type { RichTextEditorFeatures } from '../types';
+import type { RichTextEditorFeatures, CustomToolbarButton } from '../types';
 
 interface ActionsSelectorProps {
   onUndo: () => void;
@@ -11,6 +11,7 @@ interface ActionsSelectorProps {
   isFullscreen: boolean;
   features: RichTextEditorFeatures;
   disabled?: boolean;
+  customToolbarButtons?: CustomToolbarButton[];
 }
 
 const ActionsSelector: React.FC<ActionsSelectorProps> = ({
@@ -22,6 +23,7 @@ const ActionsSelector: React.FC<ActionsSelectorProps> = ({
   isFullscreen,
   features,
   disabled = false,
+  customToolbarButtons,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -113,6 +115,25 @@ const ActionsSelector: React.FC<ActionsSelectorProps> = ({
                 {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
                 <span>{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</span>
               </button>
+            )}
+            {/* Custom toolbar buttons in the collapsed dropdown */}
+            {customToolbarButtons && customToolbarButtons.length > 0 && (
+              customToolbarButtons.map((btn) => (
+                <button
+                  key={btn.key}
+                  type="button"
+                  role="option"
+                  className={`rte-font-size-option${btn.active ? ' rte-font-size-option--active' : ''}`}
+                  onClick={() => handleAction(btn.onClick)}
+                  disabled={btn.disabled}
+                  aria-label={btn.label}
+                  title={btn.label}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '8px', padding: '4px 8px', height: 'auto', width: '100%', opacity: btn.disabled ? 0.5 : 1 }}
+                >
+                  {btn.icon}
+                  <span>{btn.label}</span>
+                </button>
+              ))
             )}
           </div>
         </div>

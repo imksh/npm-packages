@@ -43,6 +43,52 @@ type SerializedVideoNode = Spread<
   SerializedLexicalNode
 >;
 
+
+const getYouTubeEmbedUrl = (
+  url: string,
+  autoplay?: boolean,
+  loop?: boolean,
+  muted?: boolean,
+  controls?: boolean
+) => {
+  if (!url) {
+    return '';
+  }
+  let videoId = '';
+  try {
+    const urlObj = new URL(url);
+    if (urlObj.hostname.includes('youtube.com')) {
+      if (urlObj.pathname.startsWith('/shorts/')) {
+        videoId = urlObj.pathname.split('/shorts/')[1]?.split('?')[0] || '';
+      } else if (urlObj.pathname.startsWith('/embed/')) {
+        videoId = urlObj.pathname.split('/embed/')[1]?.split('?')[0] || '';
+      } else {
+        videoId = urlObj.searchParams.get('v') || '';
+      }
+    } else if (urlObj.hostname.includes('youtu.be')) {
+      videoId = urlObj.pathname.slice(1).split('?')[0];
+    }
+  } catch {
+    // ignore
+  }
+  
+  if (videoId) {
+    let embedUrl = `https://www.youtube.com/embed/${videoId}?`;
+    const params = new URLSearchParams();
+    if (autoplay) params.append('autoplay', '1');
+    if (loop) {
+      params.append('loop', '1');
+      params.append('playlist', videoId);
+    }
+    if (muted) params.append('mute', '1');
+    if (controls === false) params.append('controls', '0');
+    
+    const qs = params.toString();
+    return qs ? `${embedUrl}${qs}` : embedUrl.slice(0, -1);
+  }
+  return url;
+};
+
 export const INSERT_VIDEO_COMMAND: LexicalCommand<VideoPayload> =
   createCommand('INSERT_VIDEO_COMMAND');
 
@@ -52,14 +98,18 @@ export const ON_VIDEO_DELETE_COMMAND: LexicalCommand<string> =
 function $convertVideoElement(domNode: HTMLElement): DOMConversionOutput | null {
   const video = domNode as HTMLVideoElement;
   if (video.src) {
-    const width = video.width || video.videoWidth;
-    const height = video.height || video.videoHeight;
+    // Prefer the HTML width attribute (set by exportDOM), then fall back
+    // to inline style.width, then to the video's intrinsic width.
+    const attrWidth = video.getAttribute('width');
+    const styleWidth = video.style.width ? parseInt(video.style.width, 10) : 0;
+    const resolvedWidth = (attrWidth ? parseInt(attrWidth, 10) : 0) || styleWidth || video.videoWidth;
+
     const alignment = (video.getAttribute('data-alignment') as VideoAlignment) || 'inline';
-    
+
     const node = $createVideoNode({
       src: video.src,
-      width: width || 'inherit',
-      height: height || 'inherit',
+      width: resolvedWidth || 'inherit',
+      height: 'inherit',
       alignment,
       autoplay: video.autoplay,
       loop: video.loop,
@@ -69,6 +119,41 @@ function $convertVideoElement(domNode: HTMLElement): DOMConversionOutput | null 
     return { node };
   }
   return null;
+}
+
+// Handles the <span class="rte-video-export-wrapper"> produced by exportDOM
+// so that exported HTML round-trips correctly when loaded back into the editor.
+function $convertVideoWrapperElement(domNode: HTMLElement): DOMConversionOutput | null {
+  const video = domNode.querySelector('video') || domNode.querySelector('iframe');
+  if (!video) return null;
+
+  // Derive alignment from the wrapper span's float / display style.
+  let alignment: VideoAlignment = 'inline';
+  const float = domNode.style.cssFloat || domNode.style.float || '';
+  const display = domNode.style.display || '';
+  if (float === 'left') alignment = 'left';
+  else if (float === 'right') alignment = 'right';
+  else if (display === 'block') alignment = 'center';
+
+  // Read the video's data-alignment attribute as a higher-priority fallback.
+  const dataAlign = video.getAttribute('data-alignment') as VideoAlignment | null;
+  if (dataAlign) alignment = dataAlign;
+
+  const attrWidth = video.getAttribute('width');
+  const styleWidth = video.style.width ? parseInt(video.style.width, 10) : 0;
+  const resolvedWidth = (attrWidth ? parseInt(attrWidth, 10) : 0) || styleWidth || 0;
+
+  const node = $createVideoNode({
+    src: video.src,
+    width: resolvedWidth || 'inherit',
+    height: 'inherit',
+    alignment,
+    autoplay: video.autoplay,
+    loop: video.loop,
+    muted: video.muted,
+    controls: video.controls,
+  });
+  return { node };
 }
 
 export class VideoNode extends DecoratorNode<React.ReactElement> {
@@ -118,6 +203,23 @@ export class VideoNode extends DecoratorNode<React.ReactElement> {
         conversion: $convertVideoElement,
         priority: 0,
       }),
+      iframe: () => ({
+        conversion: $convertVideoElement,
+        priority: 0,
+      }),
+      span: (node: Node) => {
+        const el = node as HTMLElement;
+        if (
+          el.classList.contains('rte-video-export-wrapper') ||
+          el.getAttribute('class') === 'rte-video-export-wrapper'
+        ) {
+          return {
+            conversion: $convertVideoWrapperElement,
+            priority: 2,
+          };
+        }
+        return null;
+      },
     };
   }
 
@@ -159,33 +261,60 @@ export class VideoNode extends DecoratorNode<React.ReactElement> {
   }
 
   exportDOM(): DOMExportOutput {
-    const span = document.createElement('span');
-    span.className = 'rte-video-export-wrapper';
-    span.style.display = 'inline-block';
+    const wrapper = document.createElement('span');
+    wrapper.className = 'rte-video-export-wrapper';
+    wrapper.style.display = 'block';
+    wrapper.style.margin = '12px 0';
     
-    if (this.__alignment === 'left') span.style.cssFloat = 'left';
-    else if (this.__alignment === 'right') span.style.cssFloat = 'right';
-    else if (this.__alignment === 'center') {
-      span.style.display = 'block';
-      span.style.margin = '0 auto';
-      span.style.textAlign = 'center';
+    const youtubeUrl = getYouTubeEmbedUrl(this.__src, this.__autoplay, this.__loop, this.__muted, this.__controls);
+    const isYoutube = youtubeUrl !== this.__src;
+    
+    const media = isYoutube ? document.createElement('iframe') : document.createElement('video');
+    
+    if (this.__alignment === 'left') {
+      media.style.cssFloat = 'left';
+      media.style.margin = '0 16px 16px 0';
+    } else if (this.__alignment === 'right') {
+      media.style.cssFloat = 'right';
+      media.style.margin = '0 0 16px 16px';
+    } else if (this.__alignment === 'center') {
+      wrapper.style.textAlign = 'center';
+      media.style.display = 'inline-block';
+    } else {
+      media.style.display = 'inline-block';
     }
     
-    const video = document.createElement('video');
-    video.setAttribute('src', this.__src);
-    video.setAttribute('data-alignment', this.__alignment);
-    if (this.__autoplay) video.setAttribute('autoplay', 'true');
-    if (this.__loop) video.setAttribute('loop', 'true');
-    if (this.__muted) video.setAttribute('muted', 'true');
-    if (this.__controls) video.setAttribute('controls', 'true');
+    if (isYoutube) {
+      media.setAttribute('src', youtubeUrl);
+      media.setAttribute('frameborder', '0');
+      media.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+      media.setAttribute('allowfullscreen', 'true');
+    } else {
+      media.setAttribute('src', this.__src);
+      if (this.__autoplay) media.setAttribute('autoplay', 'true');
+      if (this.__loop) media.setAttribute('loop', 'true');
+      if (this.__muted) media.setAttribute('muted', 'true');
+      if (this.__controls) media.setAttribute('controls', 'true');
+    }
+    
+    media.setAttribute('data-alignment', this.__alignment);
 
     if (this.__width !== 'inherit') {
-      video.style.width = `${this.__width}px`;
-      video.style.height = 'auto';
+      // Set both the HTML attribute (read back by $convertVideoElement on re-import)
+      // and the inline style (used by the UI renderer for display).
+      media.setAttribute('width', String(this.__width));
+      media.style.width = `${this.__width}px`;
+      media.style.height = 'auto';
+      if (isYoutube) media.style.aspectRatio = '16/9';
+    } else if (isYoutube) {
+      media.setAttribute('width', '560');
+      media.style.width = '560px';
+      media.style.height = 'auto';
+      media.style.aspectRatio = '16/9';
     }
     
-    span.appendChild(video);
-    return { element: span };
+    wrapper.appendChild(media);
+    return { element: wrapper };
   }
 
   createDOM(config: EditorConfig): HTMLElement {
@@ -232,7 +361,29 @@ export class VideoNode extends DecoratorNode<React.ReactElement> {
     self.__alignment = alignment;
   }
 
+
+  setAutoplay(autoplay: boolean): void {
+    const self = this.getWritable();
+    self.__autoplay = autoplay;
+  }
+
+  setLoop(loop: boolean): void {
+    const self = this.getWritable();
+    self.__loop = loop;
+  }
+
+  setMuted(muted: boolean): void {
+    const self = this.getWritable();
+    self.__muted = muted;
+  }
+
+  setControls(controls: boolean): void {
+    const self = this.getWritable();
+    self.__controls = controls;
+  }
+
   decorate(): React.ReactElement {
+
     return (
       <VideoComponent
         src={this.__src}
@@ -291,7 +442,9 @@ function VideoComponent({
   nodeKey,
 }: VideoComponentProps): React.ReactElement {
   const [editor] = useLexicalComposerContext();
+  const youtubeUrl = getYouTubeEmbedUrl(src, autoplay, loop, muted, controls);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey);
   const [isResizing, setIsResizing] = useState(false);
   const isEditable = editor.isEditable();
@@ -300,7 +453,7 @@ function VideoComponent({
     (event: MouseEvent) => {
       if (isResizing) return false;
 
-      if (event.target === videoRef.current) {
+      if (event.target === videoRef.current || event.target === overlayRef.current) {
         if (!event.shiftKey) {
           clearSelection();
         }
@@ -339,7 +492,7 @@ function VideoComponent({
   }, [editor, handleClick, handleDelete]);
 
   const handleResizeMouseDown = useCallback(
-    (event: React.MouseEvent, direction: 'e' | 'se') => {
+    (event: React.MouseEvent, direction: 'e' | 'se' | 'nw' | 'ne' | 'sw') => {
       if (!isEditable) return;
       event.preventDefault();
       event.stopPropagation();
@@ -351,7 +504,8 @@ function VideoComponent({
 
       const handleMouseMove = (e: MouseEvent) => {
         const diff = e.clientX - startX;
-        const newWidth = Math.max(50, startWidth + diff);
+        const multiplier = direction.includes('w') ? -1 : 1;
+        const newWidth = Math.max(50, startWidth + diff * multiplier);
         editor.update(() => {
           const node = $getNodeByKey(nodeKey);
           if ($isVideoNode(node)) {
@@ -372,8 +526,9 @@ function VideoComponent({
     [editor, isEditable, nodeKey, width],
   );
 
+  const isYoutube = youtubeUrl !== src;
   const videoStyle: React.CSSProperties = {
-    width: width !== 'inherit' ? `${width}px` : undefined,
+    width: width !== 'inherit' ? `${width}px` : (isYoutube ? '560px' : undefined),
     height: 'auto',
     maxWidth: '100%',
   };
@@ -384,23 +539,52 @@ function VideoComponent({
       draggable={false}
     >
       <span className={`rte-video-inner ${isSelected ? 'rte-video-selected' : ''}`}>
-        <video
-          ref={videoRef}
-          src={src}
-          style={videoStyle}
-          className="rte-video-element"
-          draggable={false}
-          controls={controls}
-          autoPlay={autoplay}
-          loop={loop}
-          muted={muted}
-        />
+        {youtubeUrl !== src ? (
+          <>
+            <iframe
+              src={youtubeUrl}
+              style={{ ...videoStyle, border: 'none', aspectRatio: '16/9', pointerEvents: isResizing ? 'none' : 'auto' }}
+              className="rte-video-element"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              title="YouTube video player"
+            />
+            {isEditable && !isSelected && (
+              <div
+                ref={overlayRef}
+                style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, cursor: 'pointer' }}
+              />
+            )}
+          </>
+        ) : (
+          <video
+            ref={videoRef}
+            src={src}
+            style={{ ...videoStyle, pointerEvents: isResizing ? 'none' : 'auto' }}
+            className="rte-video-element"
+            draggable={false}
+            controls={controls}
+            autoPlay={autoplay}
+            loop={loop}
+            muted={muted}
+          />
+        )}
 
         {isSelected && isEditable && (
           <>
             <div
-              className="rte-video-resize-handle rte-video-resize-e"
-              onMouseDown={(e) => handleResizeMouseDown(e, 'e')}
+              className="rte-video-resize-handle rte-video-resize-nw"
+              onMouseDown={(e) => handleResizeMouseDown(e, 'nw')}
+              title="Drag to resize"
+            />
+            <div
+              className="rte-video-resize-handle rte-video-resize-ne"
+              onMouseDown={(e) => handleResizeMouseDown(e, 'ne')}
+              title="Drag to resize"
+            />
+            <div
+              className="rte-video-resize-handle rte-video-resize-sw"
+              onMouseDown={(e) => handleResizeMouseDown(e, 'sw')}
               title="Drag to resize"
             />
             <div

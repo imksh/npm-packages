@@ -62,22 +62,59 @@ export const ON_IMAGE_DELETE_COMMAND: LexicalCommand<string> =
 function $convertImageElement(domNode: HTMLElement): DOMConversionOutput | null {
   const img = domNode as HTMLImageElement;
   if (img.src) {
-    const width = img.width || img.naturalWidth;
-    const height = img.height || img.naturalHeight;
+    // Prefer the HTML width attribute (set by exportDOM), then fall back
+    // to inline style.width, then to the image's natural width.
+    const attrWidth = img.getAttribute('width');
+    const styleWidth = img.style.width ? parseInt(img.style.width, 10) : 0;
+    const resolvedWidth = (attrWidth ? parseInt(attrWidth, 10) : 0) || styleWidth || img.naturalWidth;
+
     const alignment = (img.getAttribute('data-alignment') as ImageAlignment) || 'inline';
     const caption = img.getAttribute('data-caption') || '';
-    
+
     const node = $createImageNode({
       src: img.src,
       altText: img.alt || '',
       caption,
-      width: width || 'inherit',
-      height: height || 'inherit',
+      width: resolvedWidth || 'inherit',
+      height: 'inherit',
       alignment,
     });
     return { node };
   }
   return null;
+}
+
+// Handles the <span class="rte-image-export-wrapper"> produced by exportDOM
+// so that exported HTML round-trips correctly when loaded back into the editor.
+function $convertImageWrapperElement(domNode: HTMLElement): DOMConversionOutput | null {
+  const img = domNode.querySelector('img');
+  if (!img) return null;
+
+  // Derive alignment from the wrapper span's float / display style.
+  let alignment: ImageAlignment = 'inline';
+  const float = domNode.style.cssFloat || domNode.style.float || '';
+  const display = domNode.style.display || '';
+  if (float === 'left') alignment = 'left';
+  else if (float === 'right') alignment = 'right';
+  else if (display === 'block') alignment = 'center';
+
+  // Read the img's data-alignment attribute as a higher-priority fallback.
+  const dataAlign = img.getAttribute('data-alignment') as ImageAlignment | null;
+  if (dataAlign) alignment = dataAlign;
+
+  const attrWidth = img.getAttribute('width');
+  const styleWidth = img.style.width ? parseInt(img.style.width, 10) : 0;
+  const resolvedWidth = (attrWidth ? parseInt(attrWidth, 10) : 0) || styleWidth || 0;
+
+  const node = $createImageNode({
+    src: img.src,
+    altText: img.alt || '',
+    caption: img.getAttribute('data-caption') || '',
+    width: resolvedWidth || 'inherit',
+    height: 'inherit',
+    alignment,
+  });
+  return { node };
 }
 
 // ─── Image Node ──────────────────────────────────────────────────
@@ -122,6 +159,19 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
         conversion: $convertImageElement,
         priority: 0,
       }),
+      span: (node: Node) => {
+        const el = node as HTMLElement;
+        if (
+          el.classList.contains('rte-image-export-wrapper') ||
+          el.getAttribute('class') === 'rte-image-export-wrapper'
+        ) {
+          return {
+            conversion: $convertImageWrapperElement,
+            priority: 2, // Higher than default so it wins over generic span handling
+          };
+        }
+        return null;
+      },
     };
   }
 
@@ -157,17 +207,24 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
   }
 
   exportDOM(): DOMExportOutput {
-    const span = document.createElement('span');
-    span.className = 'rte-image-export-wrapper';
-    span.style.display = 'inline-block';
+    const wrapper = document.createElement('span');
+    wrapper.className = 'rte-image-export-wrapper';
+    wrapper.style.display = 'block';
+    wrapper.style.margin = '12px 0';
+
+    const container = document.createElement('span');
     
-    // Applying alignment as a style if not inline
-    if (this.__alignment === 'left') span.style.cssFloat = 'left';
-    else if (this.__alignment === 'right') span.style.cssFloat = 'right';
-    else if (this.__alignment === 'center') {
-      span.style.display = 'block';
-      span.style.margin = '0 auto';
-      span.style.textAlign = 'center';
+    if (this.__alignment === 'left') {
+      container.style.cssFloat = 'left';
+      container.style.margin = '0 16px 16px 0';
+    } else if (this.__alignment === 'right') {
+      container.style.cssFloat = 'right';
+      container.style.margin = '0 0 16px 16px';
+    } else if (this.__alignment === 'center') {
+      wrapper.style.textAlign = 'center';
+      container.style.display = 'inline-block';
+    } else {
+      container.style.display = 'inline-block';
     }
     
     const img = document.createElement('img');
@@ -177,11 +234,14 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
     if (this.__caption) img.setAttribute('data-caption', this.__caption);
 
     if (this.__width !== 'inherit') {
+      // Set both the HTML attribute (read back by $convertImageElement on re-import)
+      // and the inline style (used by the UI renderer for display).
+      img.setAttribute('width', String(this.__width));
       img.style.width = `${this.__width}px`;
       img.style.height = 'auto'; // Maintain aspect ratio
     }
     
-    span.appendChild(img);
+    container.appendChild(img);
     
     if (this.__caption) {
       const cap = document.createElement('span');
@@ -191,10 +251,12 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
       cap.style.fontSize = '0.85em';
       cap.style.color = '#6b7280';
       cap.innerText = this.__caption;
-      span.appendChild(cap);
+      container.appendChild(cap);
     }
 
-    return { element: span };
+    wrapper.appendChild(container);
+
+    return { element: wrapper };
   }
 
   createDOM(config: EditorConfig): HTMLElement {
@@ -360,7 +422,7 @@ function ImageComponent({
 
   // ── Resize handlers (Locks Aspect Ratio via CSS) ────────────
   const handleResizeMouseDown = useCallback(
-    (event: React.MouseEvent, direction: 'e' | 'se') => {
+    (event: React.MouseEvent, direction: 'e' | 'se' | 'nw' | 'ne' | 'sw') => {
       if (!isEditable) return;
       event.preventDefault();
       event.stopPropagation();
@@ -372,9 +434,11 @@ function ImageComponent({
 
       const handleMouseMove = (e: MouseEvent) => {
         const diff = e.clientX - startX;
-        // If 'e' (east), width grows. If 'se', width also grows.
+        // If dragging from the left side (west), moving left increases width.
+        // If dragging from the right side (east), moving right increases width.
+        const multiplier = direction.includes('w') ? -1 : 1;
         // Aspect ratio is naturally maintained by CSS height: auto
-        const newWidth = Math.max(50, startWidth + diff);
+        const newWidth = Math.max(50, startWidth + diff * multiplier);
         editor.update(() => {
           const node = $getNodeByKey(nodeKey);
           if ($isImageNode(node)) {
@@ -442,8 +506,18 @@ function ImageComponent({
         {isSelected && isEditable && (
           <>
             <div
-              className="rte-image-resize-handle rte-image-resize-e"
-              onMouseDown={(e) => handleResizeMouseDown(e, 'e')}
+              className="rte-image-resize-handle rte-image-resize-nw"
+              onMouseDown={(e) => handleResizeMouseDown(e, 'nw')}
+              title="Drag to resize"
+            />
+            <div
+              className="rte-image-resize-handle rte-image-resize-ne"
+              onMouseDown={(e) => handleResizeMouseDown(e, 'ne')}
+              title="Drag to resize"
+            />
+            <div
+              className="rte-image-resize-handle rte-image-resize-sw"
+              onMouseDown={(e) => handleResizeMouseDown(e, 'sw')}
               title="Drag to resize"
             />
             <div

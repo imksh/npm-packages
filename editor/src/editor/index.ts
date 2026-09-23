@@ -19,6 +19,7 @@ export type {
   ToolbarState,
   ToolbarActions,
   ImagePayload,
+  VideoPayload,
   InsertTablePayload,
   BlockType,
   ElementAlignment,
@@ -27,6 +28,7 @@ export type {
   ColorPreset,
   OnChangePluginProps,
   AutoSavePluginProps,
+  CustomToolbarButton,
 } from "./types";
 
 // ── Constants ───────────────────────────────────────────────────
