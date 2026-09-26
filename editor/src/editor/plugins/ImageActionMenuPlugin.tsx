@@ -9,7 +9,7 @@ import {
 } from 'lexical';
 import { mergeRegister } from '@lexical/utils';
 import { $isImageNode, type ImageAlignment, ON_IMAGE_DELETE_COMMAND } from '../nodes/ImageNode';
-import { AlignLeft, AlignCenter, AlignRight, Trash2, Image as ImageIcon } from 'lucide-react';
+import { AlignLeft, AlignCenter, AlignRight, Trash2, Image as ImageIcon, Square } from 'lucide-react';
 import ImageDialog from '../components/ImageDialog';
 
 interface ImageActionMenuPluginProps {
@@ -24,6 +24,7 @@ export default function ImageActionMenuPlugin({
   const [editor] = useLexicalComposerContext();
   const [activeImageKey, setActiveImageKey] = useState<string | null>(null);
   const [alignment, setAlignment] = useState<ImageAlignment>('inline');
+  const [rounded, setRounded] = useState<boolean>(true);
   const [position, setPosition] = useState({ top: -10000, left: -10000 });
   const [showReplaceDialog, setShowReplaceDialog] = useState(false);
   const toolbarRef = useRef<HTMLDivElement>(null);
@@ -66,6 +67,7 @@ export default function ImageActionMenuPlugin({
               if (nodes.length === 1 && $isImageNode(nodes[0])) {
                 setActiveImageKey(nodes[0].getKey());
                 setAlignment(nodes[0].getAlignment());
+                setRounded(nodes[0].getRounded());
                 updatePosition();
                 return;
               }
@@ -82,6 +84,7 @@ export default function ImageActionMenuPlugin({
             const node = $getNodeByKey(activeImageKey);
             if ($isImageNode(node)) {
               setAlignment(node.getAlignment());
+              setRounded(node.getRounded());
             } else {
               setActiveImageKey(null);
             }
@@ -114,6 +117,16 @@ export default function ImageActionMenuPlugin({
       }
     });
   }, [editor, activeImageKey]);
+
+  const handleRounded = useCallback(() => {
+    editor.update(() => {
+      if (!activeImageKey) return;
+      const node = $getNodeByKey(activeImageKey);
+      if ($isImageNode(node)) {
+        node.setRounded(!rounded);
+      }
+    });
+  }, [editor, activeImageKey, rounded]);
 
   const handleDelete = useCallback(() => {
     editor.update(() => {
@@ -173,6 +186,15 @@ export default function ImageActionMenuPlugin({
           title="Float Right"
         >
           <AlignRight size={16} />
+        </button>
+        <div className="rte-toolbar-divider" style={{ height: '16px' }} />
+        <button
+          type="button"
+          className={`rte-floating-toolbar-btn ${rounded ? 'active' : ''}`}
+          onClick={handleRounded}
+          title="Toggle Rounded Corners"
+        >
+          <Square size={16} rx={rounded ? 4 : 0} />
         </button>
         <div className="rte-toolbar-divider" style={{ height: '16px' }} />
         <button

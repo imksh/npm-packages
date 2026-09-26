@@ -174,7 +174,7 @@
 /* ─── Content Area ──────────────────────────────────────────────── */
 .rte-content-wrapper {
   position: relative;
-  overflow-x: auto; /* Scrolls when a wide table (or other wide content) overflows */
+  overflow-x: auto;
 }
 
 .rte-root {
@@ -482,28 +482,37 @@
   padding: 2px 0;
 }
 
+
 /* ─── Table ─────────────────────────────────────────────────────── */
 .rte-table {
-  width: 100%;       /* Responsive default; overridden by inline style after column resize */
-  max-width: 100%;
+  width: 100%;         /* Fills container by default; SE-handle drag sets a % via inline style */
+  max-width: 100%;     /* Never wider than its container */
+  table-layout: fixed; /* Honour explicit cell widths — px values become proportional weights */
   border-collapse: collapse;
   margin: 16px 0;
   border-radius: 8px;
   border: 1px solid var(--color-base-300, #e5e7eb);
-  /* display: table (browser default) — do NOT override with block.
-     display:block disconnects the outer block from the inner table
-     layout, causing the border to extend past the last column.
-     Overflow for wide tables is handled by .rte-content-wrapper. */
 }
 
+.rte-table-align-center,
 .rte-table[style*="text-align: center"] {
   margin-left: auto;
   margin-right: auto;
+  float: none;
 }
 
+.rte-table-align-right,
 .rte-table[style*="text-align: right"] {
-  margin-left: auto;
-  margin-right: 0;
+  float: right;
+  margin-left: 16px;
+  margin-bottom: 16px;
+}
+
+.rte-table-align-left,
+.rte-table[style*="text-align: left"] {
+  float: left;
+  margin-right: 16px;
+  margin-bottom: 16px;
 }
 
 .rte-table-row {
@@ -612,7 +621,6 @@
 
 .rte-image-element {
   display: block;
-  border-radius: 8px;
   max-width: 100%;
   height: auto;
 }
@@ -1384,11 +1392,6 @@
 }
 
 
-/* ─── Table Enhancements ────────────────────────────────────────── */
-.rte-table-scroll-container {
-  overflow-x: auto;
-  max-width: 100%;
-}
 
 .rte-table-no-borders,
 table[data-no-borders],
@@ -1404,18 +1407,46 @@ table[style*="--rte-no-borders: 1"] .rte-table-row {
   border: none !important;
 }
 
+/* ─── Table Cell Edge Resizer (col / row drag) ───────────────────── */
 .rte-table-cell-resizer {
   position: fixed;
-  width: 8px;
   background: transparent;
-  cursor: col-resize;
-  z-index: 10;
+  z-index: 20;
+  /* cursor is set inline */
 }
 
 .rte-table-cell-resizer:hover,
 .rte-table-cell-resizer:active {
-  background: color-mix(in srgb, var(--color-primary, #2563eb) 50%, transparent);
+  background: color-mix(in srgb, var(--color-primary, #2563eb) 40%, transparent);
 }
+
+/* ─── Table Selection Border (appears on click, like image) ─────── */
+.rte-table-selection-border {
+  position: fixed;
+  pointer-events: none;
+  border: 2px solid var(--color-primary, #2563eb);
+  border-radius: 9px;
+  z-index: 15;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary, #2563eb) 20%, transparent);
+}
+
+/* ─── Table SE Corner Resize Handle ─────────────────────────────── */
+.rte-table-resize-handle {
+  position: fixed;
+  width: 12px;
+  height: 12px;
+  background: var(--color-primary, #2563eb);
+  border: 2px solid var(--color-primary-content, #ffffff);
+  border-radius: 3px;
+  cursor: nwse-resize;
+  z-index: 25;
+}
+
+.rte-table-resize-handle:hover {
+  background: color-mix(in srgb, var(--color-primary, #2563eb) 85%, #000);
+  transform: scale(1.15);
+}
+
 
 /* ─── Image Enhancements ────────────────────────────────────────── */
 .rte-image-caption-wrapper {

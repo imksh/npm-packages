@@ -69,6 +69,10 @@ export const editorTheme: EditorThemeClasses = {
     variable: 'rte-token-variable',
   },
   table: 'rte-table',
+  tableAlignment: {
+    center: 'rte-table-align-center',
+    right: 'rte-table-align-right',
+  },
   tableCell: 'rte-table-cell',
   tableCellHeader: 'rte-table-cell-header',
   tableRow: 'rte-table-row',

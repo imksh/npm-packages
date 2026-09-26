@@ -36,6 +36,7 @@ export interface ImagePayload {
   width?: number | 'inherit';
   height?: number | 'inherit';
   alignment?: ImageAlignment;
+  rounded?: boolean;
   key?: NodeKey;
 }
 
@@ -47,6 +48,7 @@ type SerializedImageNode = Spread<
     width: number | 'inherit';
     height: number | 'inherit';
     alignment: ImageAlignment;
+    rounded: boolean;
   },
   SerializedLexicalNode
 >;
@@ -68,7 +70,7 @@ function $convertImageElement(domNode: HTMLElement): DOMConversionOutput | null 
     const styleWidth = img.style.width ? parseInt(img.style.width, 10) : 0;
     const resolvedWidth = (attrWidth ? parseInt(attrWidth, 10) : 0) || styleWidth || img.naturalWidth;
 
-    const alignment = (img.getAttribute('data-alignment') as ImageAlignment) || 'inline';
+    const alignment = (img.getAttribute('data-alignment') as ImageAlignment) || 'left';
     const caption = img.getAttribute('data-caption') || '';
 
     const node = $createImageNode({
@@ -78,6 +80,7 @@ function $convertImageElement(domNode: HTMLElement): DOMConversionOutput | null 
       width: resolvedWidth || 'inherit',
       height: 'inherit',
       alignment,
+      rounded: img.getAttribute('data-rounded') !== 'false', // Default to true
     });
     return { node };
   }
@@ -91,7 +94,7 @@ function $convertImageWrapperElement(domNode: HTMLElement): DOMConversionOutput 
   if (!img) return null;
 
   // Derive alignment from the wrapper span's float / display style.
-  let alignment: ImageAlignment = 'inline';
+  let alignment: ImageAlignment = 'left';
   const float = domNode.style.cssFloat || domNode.style.float || '';
   const display = domNode.style.display || '';
   if (float === 'left') alignment = 'left';
@@ -113,6 +116,7 @@ function $convertImageWrapperElement(domNode: HTMLElement): DOMConversionOutput 
     width: resolvedWidth || 'inherit',
     height: 'inherit',
     alignment,
+    rounded: img.getAttribute('data-rounded') !== 'false',
   });
   return { node };
 }
@@ -125,6 +129,7 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
   __width: number | 'inherit';
   __height: number | 'inherit';
   __alignment: ImageAlignment;
+  __rounded: boolean;
 
   static getType(): string {
     return 'image';
@@ -138,6 +143,7 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
       node.__width,
       node.__height,
       node.__alignment,
+      node.__rounded,
       node.__key,
     );
   }
@@ -150,6 +156,7 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
       width: serializedNode.width,
       height: serializedNode.height,
       alignment: serializedNode.alignment,
+      rounded: serializedNode.rounded,
     });
   }
 
@@ -181,7 +188,8 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
     caption: string = '',
     width: number | 'inherit' = 'inherit',
     height: number | 'inherit' = 'inherit',
-    alignment: ImageAlignment = 'inline',
+    alignment: ImageAlignment = 'left',
+    rounded: boolean = true,
     key?: NodeKey,
   ) {
     super(key);
@@ -191,6 +199,7 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
     this.__width = width;
     this.__height = height;
     this.__alignment = alignment;
+    this.__rounded = rounded;
   }
 
   exportJSON(): SerializedImageNode {
@@ -203,6 +212,7 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
       width: this.__width,
       height: this.__height,
       alignment: this.__alignment,
+      rounded: this.__rounded,
     };
   }
 
@@ -231,6 +241,10 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
     img.setAttribute('src', this.__src);
     img.setAttribute('alt', this.__altText);
     img.setAttribute('data-alignment', this.__alignment);
+    img.setAttribute('data-rounded', String(this.__rounded));
+    if (this.__rounded) {
+      img.style.borderRadius = '8px';
+    }
     if (this.__caption) img.setAttribute('data-caption', this.__caption);
 
     if (this.__width !== 'inherit') {
@@ -272,7 +286,8 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
       prevNode.__width !== this.__width ||
       prevNode.__height !== this.__height ||
       prevNode.__caption !== this.__caption ||
-      prevNode.__src !== this.__src
+      prevNode.__src !== this.__src ||
+      prevNode.__rounded !== this.__rounded
     );
   }
 
@@ -283,6 +298,7 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
   getWidth(): number | 'inherit' { return this.__width; }
   getHeight(): number | 'inherit' { return this.__height; }
   getAlignment(): ImageAlignment { return this.__alignment; }
+  getRounded(): boolean { return this.__rounded; }
 
   setSrc(src: string): void {
     const self = this.getWritable();
@@ -309,6 +325,11 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
     self.__alignment = alignment;
   }
 
+  setRounded(rounded: boolean): void {
+    const self = this.getWritable();
+    self.__rounded = rounded;
+  }
+
   // ── Decorate ───────────────────────────────────────────────────
   decorate(): React.ReactElement {
     return (
@@ -318,6 +339,7 @@ export class ImageNode extends DecoratorNode<React.ReactElement> {
         caption={this.__caption}
         width={this.__width}
         alignment={this.__alignment}
+        rounded={this.__rounded}
         nodeKey={this.__key}
       />
     );
@@ -333,7 +355,8 @@ export function $createImageNode(payload: ImagePayload): ImageNode {
       payload.caption ?? '',
       payload.width ?? 'inherit',
       payload.height ?? 'inherit',
-      payload.alignment ?? 'inline',
+      payload.alignment ?? 'left',
+      payload.rounded ?? true,
       payload.key,
     ),
   );
@@ -352,6 +375,7 @@ interface ImageComponentProps {
   caption: string;
   width: number | 'inherit';
   alignment: ImageAlignment;
+  rounded: boolean;
   nodeKey: NodeKey;
 }
 
@@ -361,6 +385,7 @@ function ImageComponent({
   caption,
   width,
   alignment,
+  rounded,
   nodeKey,
 }: ImageComponentProps): React.ReactElement {
   const [editor] = useLexicalComposerContext();
@@ -498,7 +523,10 @@ function ImageComponent({
           ref={imageRef}
           src={src}
           alt={altText}
-          style={imgStyle}
+          style={{
+            ...imgStyle,
+            borderRadius: rounded ? '8px' : '0px',
+          }}
           className="rte-image-element"
           draggable={false}
         />

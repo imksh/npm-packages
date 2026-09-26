@@ -104,7 +104,7 @@ function $convertVideoElement(domNode: HTMLElement): DOMConversionOutput | null 
     const styleWidth = video.style.width ? parseInt(video.style.width, 10) : 0;
     const resolvedWidth = (attrWidth ? parseInt(attrWidth, 10) : 0) || styleWidth || video.videoWidth;
 
-    const alignment = (video.getAttribute('data-alignment') as VideoAlignment) || 'inline';
+    const alignment = (video.getAttribute('data-alignment') as VideoAlignment) || 'left';
 
     const node = $createVideoNode({
       src: video.src,
@@ -128,7 +128,7 @@ function $convertVideoWrapperElement(domNode: HTMLElement): DOMConversionOutput 
   if (!video) return null;
 
   // Derive alignment from the wrapper span's float / display style.
-  let alignment: VideoAlignment = 'inline';
+  let alignment: VideoAlignment = 'left';
   const float = domNode.style.cssFloat || domNode.style.float || '';
   const display = domNode.style.display || '';
   if (float === 'left') alignment = 'left';
@@ -148,10 +148,10 @@ function $convertVideoWrapperElement(domNode: HTMLElement): DOMConversionOutput 
     width: resolvedWidth || 'inherit',
     height: 'inherit',
     alignment,
-    autoplay: video.autoplay,
-    loop: video.loop,
-    muted: video.muted,
-    controls: video.controls,
+    autoplay: video instanceof HTMLVideoElement ? video.autoplay : video.hasAttribute('autoplay'),
+    loop: video instanceof HTMLVideoElement ? video.loop : video.hasAttribute('loop'),
+    muted: video instanceof HTMLVideoElement ? video.muted : video.hasAttribute('muted'),
+    controls: video instanceof HTMLVideoElement ? video.controls : video.hasAttribute('controls') || true,
   });
   return { node };
 }
@@ -227,7 +227,7 @@ export class VideoNode extends DecoratorNode<React.ReactElement> {
     src: string,
     width: number | 'inherit' = 'inherit',
     height: number | 'inherit' = 'inherit',
-    alignment: VideoAlignment = 'inline',
+    alignment: VideoAlignment = 'left',
     autoplay: boolean = false,
     loop: boolean = false,
     muted: boolean = false,
@@ -405,7 +405,7 @@ export function $createVideoNode(payload: VideoPayload): VideoNode {
       payload.src,
       payload.width ?? 'inherit',
       payload.height ?? 'inherit',
-      (payload.alignment as VideoAlignment) ?? 'inline',
+      (payload.alignment as VideoAlignment) ?? 'left',
       payload.autoplay ?? false,
       payload.loop ?? false,
       payload.muted ?? false,

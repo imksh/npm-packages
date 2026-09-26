@@ -131,28 +131,51 @@ export function exportHTML(editor: LexicalEditor): string {
   // on the DOM node, outside of Lexical state).
   // We match by DOM order — Lexical serialises tables in the same order they
   // appear in the editor root.
+  //
+  // Also: Transfer the live table's inline width (set by the SE resize handle
+  // directly on the DOM) into the exported table so preview matches editor.
   const editorRoot = editor.getRootElement();
   if (editorRoot) {
-    const liveTables = Array.from(editorRoot.querySelectorAll('table[data-no-borders]'));
-    if (liveTables.length > 0) {
+    const allLiveTables = Array.from(editorRoot.querySelectorAll('table'));
+    const liveNoBorderTables = Array.from(editorRoot.querySelectorAll('table[data-no-borders]'));
+
+    // Check if any table has a non-100% width or data-no-borders
+    const hasCustomWidths = allLiveTables.some((t) => {
+      const w = (t as HTMLElement).style.width;
+      return w && w !== '100%' && w !== '';
+    });
+
+    if (liveNoBorderTables.length > 0 || hasCustomWidths) {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
-      const allLiveTables = Array.from(editorRoot.querySelectorAll('table'));
       const exportedTables = Array.from(doc.querySelectorAll('table'));
       let mutated = false;
 
-      liveTables.forEach((liveTable) => {
-        const idx = allLiveTables.indexOf(liveTable as HTMLTableElement);
+      allLiveTables.forEach((liveTable, idx) => {
         const exportedTable = exportedTables[idx];
-        if (exportedTable) {
-          // Mark with attribute (for re-import) and apply inline styles so
-          // any HTML renderer shows no borders without needing our CSS class.
+        if (!exportedTable) return;
+
+        // ── Transfer data-no-borders ────────────────────────────────────────
+        if (liveTable.hasAttribute('data-no-borders')) {
           exportedTable.setAttribute('data-no-borders', 'true');
           exportedTable.style.borderColor = 'transparent';
           exportedTable.style.border = 'none';
           exportedTable.querySelectorAll('td, th, tr').forEach((cell) => {
             (cell as HTMLElement).style.border = 'none';
           });
+          mutated = true;
+        }
+
+        // ── Transfer table width from SE resize handle ──────────────────────
+        const liveWidth = (liveTable as HTMLElement).style.width;
+        if (liveWidth && liveWidth !== '100%') {
+          exportedTable.style.width = liveWidth;
+          mutated = true;
+        }
+
+        // ── Transfer left alignment class ───────────────────────────────────
+        if (liveTable.classList.contains('rte-table-align-left')) {
+          exportedTable.classList.add('rte-table-align-left');
           mutated = true;
         }
       });
@@ -168,6 +191,81 @@ export function exportHTML(editor: LexicalEditor): string {
     /(<pre[^>]*>(?:[\s\S]*?)<\/pre>)/gi,
     `<div class="rte-code-wrapper">$1${COPY_BTN_HTML}</div>`,
   );
+
+  // ── Normalise table column widths for preview ──────────────────────────────
+  // Lexical stores column widths on <colgroup><col style="width:Xpx"> elements,
+  // NOT on <td> inline styles (even though it also writes those).
+  // With table-layout:fixed, <col> widths take precedence in column sizing.
+  // We convert BOTH <col> and <td> widths to proportional percentages so the
+  // preview renders the same column proportions as the editor at any width.
+  {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+    let tablesMutated = false;
+
+    doc.querySelectorAll("table").forEach((table) => {
+      // ── 1. Collect px widths ──────────────────────────────────────────────
+      // Try <colgroup><col> first (Lexical's primary source), then <td>/<th>.
+      const cols = Array.from(table.querySelectorAll(":scope > colgroup > col")) as HTMLElement[];
+      let pxWidths: number[] = [];
+
+      // Try cols first
+      if (cols.length > 0) {
+        pxWidths = cols.map((col) => {
+          const w = col.style.width;
+          if (w && w.endsWith("px")) return parseFloat(w);
+          const wa = col.getAttribute("width");
+          if (wa) return parseFloat(wa);
+          return 0;
+        });
+      }
+
+      // If cols had no widths, read from first-row cells instead
+      const hasColWidths = pxWidths.some((w) => w > 0);
+      if (!hasColWidths) {
+        const firstRow = table.querySelector("tr");
+        if (!firstRow) return;
+        pxWidths = Array.from(firstRow.children).map((c) => {
+          const w = (c as HTMLElement).style.width;
+          if (w && w.endsWith("px")) return parseFloat(w);
+          return 0;
+        });
+      }
+
+      const hasWidths = pxWidths.some((w) => w > 0);
+      if (!hasWidths) return; // No explicit widths — browser distributes equally, that's fine
+
+      const total = pxWidths.reduce((s, w) => s + w, 0);
+      if (total === 0) return;
+
+      // ── 2. Convert <col> widths to percentages ────────────────────────────
+      cols.forEach((col, ci) => {
+        const w = pxWidths[ci] ?? pxWidths[pxWidths.length - 1];
+        const pct = ((w / total) * 100).toFixed(4);
+        col.style.width = `${pct}%`;
+        col.removeAttribute("width"); // remove legacy attribute if present
+      });
+
+      // ── 3. Convert <td>/<th> widths to percentages ────────────────────────
+      Array.from(table.querySelectorAll("tr")).forEach((row) => {
+        Array.from(row.children).forEach((cell, ci) => {
+          const w = pxWidths[ci] ?? pxWidths[pxWidths.length - 1];
+          const pct = ((w / total) * 100).toFixed(4);
+          (cell as HTMLElement).style.width = `${pct}%`;
+        });
+      });
+
+      // ── 4. Ensure the table uses fixed layout so percentages are honoured ─
+      table.style.tableLayout = "fixed";
+      if (!table.style.width) table.style.width = "100%";
+
+      tablesMutated = true;
+    });
+
+    if (tablesMutated) {
+      html = doc.body.innerHTML;
+    }
+  }
 
   return html;
 }

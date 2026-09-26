@@ -90,7 +90,7 @@ export default function App() {
   const [showToolbar, setShowToolbar] = useState(true);
   const [copied, setCopied] = useState(false);
   const [cleared, setCleared] = useState(false);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [theme, setTheme] = useState<"dark" | "light">("light");
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
