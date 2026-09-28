@@ -136,9 +136,9 @@ export default function TableCellResizerPlugin(): React.ReactElement | null {
     return () => document.removeEventListener("mousemove", onMouseMove);
   }, [isCellResizing, isTableResizing, editor]);
 
-  // ── Sync Table Alignment Class for "left" ─────────────────────────────────
-  // Lexical's internal alignTableElement ignores "left" format, so we manually
-  // add our float class to allow text wrapping around left-aligned tables.
+  // ── Sync Custom Table State (Alignment, Width, Borders) ───────────────────
+  // Lexical's internal TableNode ignores custom alignment, width, and styles.
+  // We manually sync them to the DOM when the node updates.
   useEffect(() => {
     return editor.registerMutationListener(TableNode, (nodeMutations) => {
       editor.getEditorState().read(() => {
@@ -149,13 +149,28 @@ export default function TableCellResizerPlugin(): React.ReactElement | null {
               const dom = editor.getElementByKey(nodeKey);
               if (dom) {
                 // dom is the Lexical wrapper, the actual table is inside it if scrollable,
-                // but usually the dom IS the table. Let's add it to the table element.
+                // but usually the dom IS the table.
                 const tableEl = dom.tagName === "TABLE" ? dom : dom.querySelector("table");
                 if (tableEl) {
+                  // Alignment
                   if (node.getFormatType() === "left") {
                     tableEl.classList.add("rte-table-align-left");
                   } else {
                     tableEl.classList.remove("rte-table-align-left");
+                  }
+                  
+                  // No-Borders
+                  const style = (node as any).__style || '';
+                  if (style.includes('--rte-no-borders: 1')) {
+                    tableEl.setAttribute('data-no-borders', 'true');
+                  } else {
+                    tableEl.removeAttribute('data-no-borders');
+                  }
+
+                  // Width
+                  const width = (node as any).__width;
+                  if (width) {
+                    tableEl.style.width = width;
                   }
                 }
               }
@@ -340,13 +355,21 @@ export default function TableCellResizerPlugin(): React.ReactElement | null {
       };
       const onUp = () => {
         setIsTableResizing(false);
+        const finalWidth = selectedTable.style.width;
+        editor.update(() => {
+          const tableNode = $getNearestNodeFromDOMNode(selectedTable);
+          if (tableNode && $isTableNode(tableNode)) {
+            const writable = tableNode.getWritable() as any;
+            writable.__width = finalWidth;
+          }
+        });
         document.removeEventListener("mousemove", onMove);
         document.removeEventListener("mouseup", onUp);
       };
       document.addEventListener("mousemove", onMove);
       document.addEventListener("mouseup", onUp);
     },
-    [selectedTable],
+    [selectedTable, editor],
   );
 
   // ── Render overlays ───────────────────────────────────────────────────────

@@ -57,7 +57,13 @@ type OutputTab = "html" | "markdown" | "json" | "preview";
 // ─── Component ──────────────────────────────────────────────────
 export default function App() {
   const editorRef = useRef<RichTextEditorRef>(null);
-  const [html, setHtml] = useState<string>(INITIAL_HTML);
+  const [html, setHtml] = useState<string>(
+    localStorage.getItem("editor") || INITIAL_HTML,
+  );
+
+  useEffect(() => {
+    localStorage.setItem("editor", html);
+  }, [html]);
   const [markdown, setMarkdown] = useState<string>("");
   const [json, setJson] = useState<string>("");
   const [features, setFeatures] = useState<Required<RichTextEditorFeatures>>({
@@ -265,7 +271,7 @@ export default function App() {
           <div className="pg-editor-card">
             <RichTextEditor
               ref={editorRef}
-              value={INITIAL_HTML}
+              value={html}
               customToolbarButtons={[
                 {
                   key: "my-action",

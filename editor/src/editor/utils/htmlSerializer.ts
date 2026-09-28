@@ -17,17 +17,17 @@ export function importHTML(editor: LexicalEditor, html: string): void {
     '$1',
   );
 
-  // Pre-scan the incoming HTML to find which table indices carry data-no-borders.
+  // Pre-scan the incoming HTML to find which table indices carry data-no-borders and custom widths.
   // We do this BEFORE editor.update because after Lexical creates fresh DOM
-  // elements for each TableNode, the attribute is gone — we re-apply it in
-  // the onUpdate callback once Lexical has flushed to the live DOM.
-  const noBorderIndices = new Set<number>();
+  // elements for each TableNode, the attributes/styles are gone.
+  const tableProps = new Map<number, { noBorders: boolean; width: string }>();
   const tempParser = new DOMParser();
   const tempDom = tempParser.parseFromString(cleaned, 'text/html');
   tempDom.querySelectorAll('table').forEach((table, idx) => {
-    if (table.hasAttribute('data-no-borders')) {
-      noBorderIndices.add(idx);
-    }
+    tableProps.set(idx, {
+      noBorders: table.hasAttribute('data-no-borders'),
+      width: table.style.width || '',
+    });
   });
 
   editor.update(
@@ -39,13 +39,19 @@ export function importHTML(editor: LexicalEditor, html: string): void {
       const dom = parser.parseFromString(cleaned, 'text/html');
       const nodes = $generateNodesFromDOM(editor, dom);
 
-      if (noBorderIndices.size > 0) {
+      if (tableProps.size > 0) {
         let tableIndex = 0;
         const traverse = (n: any) => {
           if (n.getType() === 'table') {
-            if (noBorderIndices.has(tableIndex)) {
+            const props = tableProps.get(tableIndex);
+            if (props) {
               const writable = n.getWritable();
-              writable.__style = ((writable.__style || '') + ' --rte-no-borders: 1;').trim();
+              if (props.noBorders) {
+                writable.__style = ((writable.__style || '') + ' --rte-no-borders: 1;').trim();
+              }
+              if (props.width) {
+                writable.__width = props.width;
+              }
             }
             tableIndex++;
           }
