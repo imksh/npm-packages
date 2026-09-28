@@ -17,16 +17,22 @@ export function importHTML(editor: LexicalEditor, html: string): void {
     '$1',
   );
 
-  // Pre-scan the incoming HTML to find which table indices carry data-no-borders and custom widths.
+  // Pre-scan the incoming HTML to find which table indices carry data-no-borders, custom widths, and alignment.
   // We do this BEFORE editor.update because after Lexical creates fresh DOM
   // elements for each TableNode, the attributes/styles are gone.
-  const tableProps = new Map<number, { noBorders: boolean; width: string }>();
+  const tableProps = new Map<number, { noBorders: boolean; width: string; alignment: string | null }>();
   const tempParser = new DOMParser();
   const tempDom = tempParser.parseFromString(cleaned, 'text/html');
   tempDom.querySelectorAll('table').forEach((table, idx) => {
+    let alignment = null;
+    if (table.classList.contains('rte-table-align-left')) alignment = 'left';
+    else if (table.classList.contains('rte-table-align-right')) alignment = 'right';
+    else if (table.classList.contains('rte-table-align-center')) alignment = 'center';
+
     tableProps.set(idx, {
       noBorders: table.hasAttribute('data-no-borders'),
       width: table.style.width || '',
+      alignment,
     });
   });
 
@@ -51,6 +57,9 @@ export function importHTML(editor: LexicalEditor, html: string): void {
               }
               if (props.width) {
                 writable.__width = props.width;
+              }
+              if (props.alignment) {
+                writable.setFormat(props.alignment);
               }
             }
             tableIndex++;
@@ -179,9 +188,15 @@ export function exportHTML(editor: LexicalEditor): string {
           mutated = true;
         }
 
-        // ── Transfer left alignment class ───────────────────────────────────
+        // ── Transfer alignment class ───────────────────────────────────
         if (liveTable.classList.contains('rte-table-align-left')) {
           exportedTable.classList.add('rte-table-align-left');
+          mutated = true;
+        } else if (liveTable.classList.contains('rte-table-align-right')) {
+          exportedTable.classList.add('rte-table-align-right');
+          mutated = true;
+        } else if (liveTable.classList.contains('rte-table-align-center')) {
+          exportedTable.classList.add('rte-table-align-center');
           mutated = true;
         }
       });

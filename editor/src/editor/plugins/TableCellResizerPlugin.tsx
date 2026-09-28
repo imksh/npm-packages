@@ -153,10 +153,10 @@ export default function TableCellResizerPlugin(): React.ReactElement | null {
                 const tableEl = dom.tagName === "TABLE" ? dom : dom.querySelector("table");
                 if (tableEl) {
                   // Alignment
-                  if (node.getFormatType() === "left") {
-                    tableEl.classList.add("rte-table-align-left");
-                  } else {
-                    tableEl.classList.remove("rte-table-align-left");
+                  tableEl.classList.remove("rte-table-align-left", "rte-table-align-right", "rte-table-align-center");
+                  const format = node.getFormatType();
+                  if (format === "left" || format === "right" || format === "center") {
+                    tableEl.classList.add(`rte-table-align-${format}`);
                   }
                   
                   // No-Borders
