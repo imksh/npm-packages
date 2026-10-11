@@ -72,9 +72,9 @@ export default function Accordion({ title, children }: AccordionProps) {
           style={{ position: "absolute", width: "100%", paddingHorizontal: 16, paddingBottom: 16 }}
         >
           {/* This inner view is measured */}
-          <View ref={aref as any}>
+          <Animated.View ref={aref}>
             {children}
-          </View>
+          </Animated.View>
         </View>
       </Animated.View>
     </View>

@@ -2,14 +2,14 @@
 import React, { useEffect, useRef } from "react";
 import { Pagination } from "./Pagination";
 
-export interface TableColumn<T = any> {
+export interface TableColumn<T = Record<string, unknown>> {
   header: React.ReactNode | string;
   accessor?: keyof T | string;
-  render?: (value: any, row: T, index: number) => React.ReactNode;
+  render?: (value: unknown, row: T, index: number) => React.ReactNode;
   headerClass?: string;
 }
 
-interface TableProps<T = any> {
+interface TableProps<T = Record<string, unknown>> {
   columns: TableColumn<T>[];
   data: T[];
   loading?: boolean;
@@ -24,7 +24,7 @@ interface TableProps<T = any> {
   header?: React.ReactNode; // custom header content to render above the table
 }
 
-const Table = <T extends Record<string, any>>({
+const Table = <T extends Record<string, unknown>>({
   columns = [],
   data = [],
   loading = false,

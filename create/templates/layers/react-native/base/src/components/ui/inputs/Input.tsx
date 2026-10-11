@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   View,
   TextInput,
@@ -16,11 +16,16 @@ export interface InputProps extends TextInputProps {
   leftIcon?: keyof typeof Ionicons.glyphMap;
   rightIcon?: keyof typeof Ionicons.glyphMap;
   onRightIconPress?: () => void;
+  placeHolder?: string;
+  style?: import("react-native").StyleProp<import("react-native").ViewStyle>;
   helperText?: string;
   containerStyle?: import("react-native").StyleProp<
     import("react-native").ViewStyle
   >;
   labelOnBorder?: boolean;
+  className?: string;
+  weight?: "normal" | "medium" | "bold" | "semibold" | "black";
+  size?: "sm" | "md" | "lg";
 }
 
 export default function Input({
@@ -31,8 +36,12 @@ export default function Input({
   onRightIconPress,
   helperText,
   style,
+  placeHolder = "",
   containerStyle,
   labelOnBorder = false,
+  className = "mb-2",
+  weight = "normal",
+  size = "md",
   ...props
 }: InputProps) {
   const { colorScheme } = useColorScheme();
@@ -45,13 +54,22 @@ export default function Input({
       ? theme.primary
       : theme.base300;
 
+  const inputHeight = size === "sm" ? 40 : size === "lg" ? 64 : 52;
+  const inputFontSize = size === "sm" ? 14 : size === "lg" ? 18 : 16;
+  const iconSize = size === "sm" ? 16 : size === "lg" ? 24 : 20;
+  const labelSize = size === "sm" ? "xs" : size === "lg" ? "lg" : "base";
   return (
-    <View className="mb-4 relative">
+    <View
+      className={`${className} relative ${props.editable === false ? "opacity-50" : ""}`}
+    >
       {!labelOnBorder && label && (
         <Txt
           color={theme.baseContent}
-          weight="semibold"
           style={{ marginBottom: 6 }}
+          weight={weight}
+          variant={labelSize}
+          adjustsFontSizeToFit
+          numberOfLines={1}
         >
           {label} {error ? "*" : ""}{" "}
         </Txt>
@@ -63,7 +81,7 @@ export default function Input({
             position: "absolute",
             top: -6,
             left: 12,
-            backgroundColor: theme.base100,
+            backgroundColor: theme.base200,
             paddingHorizontal: 6,
             zIndex: 10,
           }}
@@ -85,12 +103,12 @@ export default function Input({
           {
             flexDirection: "row",
             alignItems: "center",
-            backgroundColor: theme.base100,
+            backgroundColor: theme.base200,
             borderWidth: 1,
             borderColor,
             borderRadius: 12,
             paddingHorizontal: 12,
-            height: 52,
+            height: inputHeight,
           },
           containerStyle,
         ]}
@@ -98,7 +116,7 @@ export default function Input({
         {leftIcon && (
           <Ionicons
             name={leftIcon}
-            size={20}
+            size={iconSize}
             color={isFocused ? theme.primary : theme.secondary}
             style={{ marginRight: 8 }}
           />
@@ -109,12 +127,13 @@ export default function Input({
             {
               flex: 1,
               color: theme.baseContent,
-              fontSize: 16,
+              fontSize: inputFontSize,
               height: "100%",
             },
             style,
           ]}
           placeholderTextColor={theme.secondary}
+          placeholder={placeHolder}
           onFocus={(e) => {
             setIsFocused(true);
             props.onFocus?.(e);
@@ -133,7 +152,7 @@ export default function Input({
           >
             <Ionicons
               name={rightIcon}
-              size={20}
+              size={iconSize}
               color={theme.secondary}
               style={{ marginLeft: 8 }}
             />

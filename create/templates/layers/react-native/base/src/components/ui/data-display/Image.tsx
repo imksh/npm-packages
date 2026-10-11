@@ -1,13 +1,13 @@
 import React from "react";
-import { Image as ExpoImage, ImageProps as ExpoImageProps } from "expo-image";
+import { Image as ExpoImage, ImageProps as ExpoImageProps, ImageSource } from "expo-image";
 import { View, ActivityIndicator, DimensionValue } from "react-native";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../../constants/Colors";
 
 export interface ImageProps extends Omit<ExpoImageProps, "source"> {
   fallbackIcon?: React.ReactNode;
-  src?: string | number | any;
-  source?: any;
+  src?: string | number | ImageSource;
+  source?: ImageSource | string | number;
   width?: DimensionValue;
   height?: DimensionValue;
 }

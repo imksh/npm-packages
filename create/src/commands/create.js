@@ -39,6 +39,8 @@ export default async function createCommand(projectName, options) {
     'next-ts',
     'react-native',
     'mern-react-native',
+    'electron',
+    'electron-ts',
     'production-fullstack',
     'fullstack-prisma'
   ];

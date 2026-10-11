@@ -7,6 +7,13 @@
     "start": "tsx src/index.ts",
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
+    "lint": "eslint . --ext .ts --max-warnings 0",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.{ts,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,json}\"",
+    "circular-check": "dpdm --circular --no-warning --no-tree --exit-code circular:1 \"src/**/*.ts\"",
+    "ts-prune": "ts-prune",
+    "ts-purns": "ts-prune",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
     "generate:vapid": "node ./src/utils/generateVapidKeys.js"
@@ -30,7 +37,8 @@
     "web-push": "^3.6.6",
     "pg": "^8.11.3",
     "@prisma/adapter-pg": "^7.0.0",
-    "expo-server-sdk": "^3.10.0"
+    "expo-server-sdk": "^3.10.0",
+    "google-auth-library": "^9.14.2"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
@@ -41,12 +49,18 @@
     "@types/jsonwebtoken": "^9.0.5",
     "@types/morgan": "^1.9.9",
     "@types/multer": "^1.4.11",
-    "@types/nodemailer": "^6.4.14",
-    "@types/web-push": "^3.6.3",
     "@types/node": "^20.9.0",
+    "@types/nodemailer": "^6.4.14",
+    "@types/pg": "^8.11.0",
+    "@types/web-push": "^3.6.3",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "dpdm": "^3.14.0",
+    "eslint": "^8.53.0",
+    "prettier": "^3.4.2",
     "prisma": "^7.0.0",
+    "ts-prune": "^0.10.3",
     "tsx": "^4.23.1",
-    "typescript": "^5.2.2",
-    "@types/pg": "^8.11.0"
+    "typescript": "^5.2.2"
   }
 }

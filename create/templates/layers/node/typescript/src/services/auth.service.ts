@@ -1,4 +1,5 @@
-import User from "../models/user.model.js";
+import { OAuth2Client } from "google-auth-library";
+import User, { type IUser } from "../models/user.model.js";
 import Otp from "../models/otp.model.js";
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/jwt.js";
@@ -6,28 +7,55 @@ import { sendOtpEmail } from "../utils/emailOtp.js";
 import {
   uploadSingleToCloudinary,
   deleteFromCloudinary,
+  type CloudinaryUploadFile,
 } from "../utils/cloudinaryUpload.js";
 import logger from "../utils/logger.js";
+import { ApiError } from "../utils/ApiError.js";
 
-export const signup = async ({ name, email, phone, password, otp }: any) => {
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || "");
+
+export interface SignupDTO {
+  name: string;
+  email: string;
+  phone?: string;
+  password: string;
+  otp: string;
+}
+
+export interface LoginDTO {
+  email: string;
+  password: string;
+}
+
+export interface VerifyOtpDTO {
+  email: string;
+  otp: string;
+}
+
+export interface UpdateProfileDTO {
+  name?: string;
+  phone?: string;
+  file?: CloudinaryUploadFile;
+}
+
+export interface UserWithSave {
+  password?: string;
+  save: () => Promise<unknown>;
+}
+
+export const signup = async ({ name, email, phone, password, otp }: SignupDTO) => {
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    const err: any = new Error("User already exists");
-    err.status = 409;
-    throw err;
+    throw new ApiError(409, "User already exists");
   }
 
   const existingOtp = await Otp.findOne({ email });
   if (!existingOtp) {
-    const err: any = new Error("OTP match failed");
-    err.status = 400;
-    throw err;
+    throw new ApiError(400, "OTP match failed");
   }
   const isMatched = await bcrypt.compare(otp, existingOtp.otp);
   if (!isMatched) {
-    const err: any = new Error("OTP match failed");
-    err.status = 400;
-    throw err;
+    throw new ApiError(400, "OTP match failed");
   }
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
@@ -44,27 +72,23 @@ export const signup = async ({ name, email, phone, password, otp }: any) => {
   await existingOtp.deleteOne(); // delete OTP after successful signup
   return newUser;
 };
-export const login = async ({ email, password }: any) => {
+
+export const login = async ({ email, password }: LoginDTO) => {
   const user = await User.findOne({ email });
   if (!user || !user.password) {
-    const err: any = new Error("Invalid Credentials");
-    err.status = 401;
-    throw err;
+    throw new ApiError(401, "Invalid Credentials");
   }
   const isValid = await bcrypt.compare(password, user.password);
   if (!isValid) {
-    const err: any = new Error("Invalid Credentials");
-    err.status = 401;
-    throw err;
+    throw new ApiError(401, "Invalid Credentials");
   }
   return user;
 };
+
 export const generateSignupOtp = async (email: string) => {
   const user = await User.findOne({ email });
   if (user) {
-    const err: any = new Error("User already exists");
-    err.status = 409;
-    throw err;
+    throw new ApiError(409, "User already exists");
   }
   const existingOtp = await Otp.findOne({ email });
   if (existingOtp) {
@@ -76,12 +100,11 @@ export const generateSignupOtp = async (email: string) => {
   await sendOtpEmail(email, otp);
   return true;
 };
+
 export const generateOtp = async (email: string) => {
   const user = await User.findOne({ email });
   if (!user) {
-    const err: any = new Error("User not found");
-    err.status = 404;
-    throw err;
+    throw new ApiError(404, "User not found");
   }
   const existingOtp = await Otp.findOne({ email });
   if (existingOtp) {
@@ -93,42 +116,37 @@ export const generateOtp = async (email: string) => {
   await sendOtpEmail(email, otp);
   return true;
 };
-export const verifyOtp = async ({ email, otp }: any) => {
+
+export const verifyOtp = async ({ email, otp }: VerifyOtpDTO) => {
   const user = await User.findOne({ email });
   if (!user) {
-    const err: any = new Error("User not found");
-    err.status = 404;
-    throw err;
+    throw new ApiError(404, "User not found");
   }
   const existingOtp = await Otp.findOne({ email });
   if (!existingOtp) {
-    const err: any = new Error("OTP match failed");
-    err.status = 400;
-    throw err;
+    throw new ApiError(400, "OTP match failed");
   }
   const isMatched = await bcrypt.compare(otp, existingOtp.otp);
   if (!isMatched) {
-    const err: any = new Error("OTP match failed");
-    err.status = 400;
-    throw err;
+    throw new ApiError(400, "OTP match failed");
   }
   return user;
 };
-export const resetPassword = async (user: any, newPassword: any) => {
+
+export const resetPassword = async (user: UserWithSave, newPassword: string) => {
   const hashedPassword = await bcrypt.hash(newPassword, 10);
   user.password = hashedPassword;
   await user.save();
   return true;
 };
+
 export const updateProfile = async (
-  userId: any,
-  { name, phone, file }: any,
+  userId: string,
+  { name, phone, file }: UpdateProfileDTO,
 ) => {
   const user = await User.findById(userId);
   if (!user) {
-    const err: any = new Error("User not found");
-    err.status = 404;
-    throw err;
+    throw new ApiError(404, "User not found");
   }
   if (name) user.name = name;
   if (phone) user.phone = phone;
@@ -153,13 +171,38 @@ export const updateProfile = async (
 export const savePushToken = async (userId: string, token: string) => {
   const user = await User.findById(userId);
   if (!user) {
-    const err: any = new Error("User not found");
-    err.status = 404;
-    throw err;
+    throw new ApiError(404, "User not found");
   }
   if (!user.expoPushTokens.includes(token)) {
     user.expoPushTokens.push(token);
     await user.save();
+  }
+  return user;
+};
+
+export const googleLogin = async (idToken: string) => {
+  const ticket = await googleClient.verifyIdToken({
+    idToken,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+  const payload = ticket.getPayload();
+  if (!payload) {
+    throw new ApiError(401, "Invalid Google Token");
+  }
+  const { email, name, picture } = payload;
+  if (!email) {
+    throw new ApiError(400, "Email not found in Google Token");
+  }
+
+  let user = await User.findOne({ email });
+  if (!user) {
+    user = await User.create({
+      name: name || "User",
+      email: email.toLowerCase(),
+      role: "user",
+      password: "",
+      avatar: { url: picture || `https://placehold.co/600x400?text=${name?.charAt(0).toUpperCase() || 'U'}`, publicId: "" },
+    });
   }
   return user;
 };

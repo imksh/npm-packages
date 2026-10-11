@@ -11,15 +11,15 @@ import { Colors } from "../../../constants/Colors";
 import { Txt } from "../../common/Typography";
 
 export interface SwitchProps {
-  checked: boolean;
-  onChange?: (checked: boolean) => void;
+  value: boolean;
+  onChange?: (value: boolean) => void;
   label?: string;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
 }
 
 export default function Switch({
-  checked,
+  value,
   onChange,
   label,
   disabled,
@@ -28,11 +28,11 @@ export default function Switch({
   const { colorScheme } = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
   
-  const progress = useSharedValue(checked ? 1 : 0);
+  const progress = useSharedValue(value ? 1 : 0);
 
   useEffect(() => {
-    progress.value = withTiming(checked ? 1 : 0, { duration: 250 });
-  }, [checked, progress]);
+    progress.value = withTiming(value ? 1 : 0, { duration: 250 });
+  }, [value, progress]);
 
   const trackStyle = useAnimatedStyle(() => {
     const backgroundColor = interpolateColor(
@@ -53,7 +53,7 @@ export default function Switch({
     <TouchableOpacity
       activeOpacity={0.8}
       disabled={disabled}
-      onPress={() => onChange && onChange(!checked)}
+      onPress={() => onChange && onChange(!value)}
       style={[{ flexDirection: "row", alignItems: "center", opacity: disabled ? 0.5 : 1 }, style]}
     >
       <Animated.View

@@ -1,5 +1,4 @@
-import React from "react";
-import { Text, TextProps } from "react-native";
+import { Text, TextProps, TextStyle } from "react-native";
 export const FontFamily = {
   regular: "InterRegular",
   medium: "InterMedium",
@@ -80,30 +79,65 @@ export const Txt = ({
   const hasColorClass = className.split(" ").some((c) => {
     if (!c.startsWith("text-")) return false;
     const val = c.substring(5).split("/")[0]; // handle potential opacity suffix like text-white/80
-    const isSize = ["xxs", "xs", "sm", "base", "md", "lg", "xl", "2xl", "3xl", "4xl", "5xl", "6xl", "7xl", "caption"].includes(val);
-    return !isSize;
+    const nonColors = [
+      "xxs",
+      "xs",
+      "sm",
+      "base",
+      "md",
+      "lg",
+      "xl",
+      "2xl",
+      "3xl",
+      "4xl",
+      "5xl",
+      "6xl",
+      "7xl",
+      "caption",
+      "center",
+      "left",
+      "right",
+      "justify",
+      "start",
+      "end",
+      "wrap",
+      "nowrap",
+      "balance",
+      "pretty",
+      "clip",
+      "ellipsis",
+      "truncate",
+    ];
+    return !nonColors.includes(val);
   });
-  const defaultColorClass = hasColorClass || color
-    ? ""
-    : variant === "xs"
-      ? "text-secondary"
-      : "text-base-content";
-    
-  const customStyles: any = {};
+  const defaultColorClass =
+    hasColorClass || color
+      ? ""
+      : variant === "xs" || variant === "caption"
+        ? "text-secondary"
+        : "text-base-content";
+
+  const customStyles: TextStyle = {};
   if (color) customStyles.color = color;
   if (align) customStyles.textAlign = align;
 
   // Intercept font weight classes from Nativewind or weight prop
   let finalClassName = className;
-  
-  const resolvedWeight = weight || (
-    finalClassName.includes("font-black") || finalClassName.includes("font-extrabold") ? "black" :
-    finalClassName.includes("font-bold") ? "bold" :
-    finalClassName.includes("font-semibold") ? "semibold" :
-    finalClassName.includes("font-medium") ? "medium" : null
-  );
 
-  if (resolvedWeight === "black" || resolvedWeight === "extrabold") {
+  const resolvedWeight =
+    weight ||
+    (finalClassName.includes("font-black") ||
+    finalClassName.includes("font-extrabold")
+      ? "black"
+      : finalClassName.includes("font-bold")
+        ? "bold"
+        : finalClassName.includes("font-semibold")
+          ? "semibold"
+          : finalClassName.includes("font-medium")
+            ? "medium"
+            : null);
+
+  if (resolvedWeight === "black") {
     customStyles.fontFamily = FontFamily.extrabold;
     customStyles.fontWeight = "normal"; // Prevent Android fallback
   } else if (resolvedWeight === "bold") {
@@ -132,6 +166,7 @@ export const Txt = ({
     <Text
       className={`${defaultColorClass} ${finalClassName}`}
       style={[baseStyle, customStyles, style]}
+      textBreakStrategy="simple"
       {...props}
     >
       {children}

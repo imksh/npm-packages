@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css,json}\"",
+    "circular-check": "dpdm --circular --no-warning --no-tree --exit-code circular:1 \"src/**/*.{ts,tsx}\"",
+    "ts-prune": "ts-prune",
+    "ts-purns": "ts-prune"
   },
   "dependencies": {
     "@imksh/ui": "^0.1.0",
@@ -23,9 +29,12 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dpdm": "^3.14.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "prettier": "^3.4.2",
     "tailwindcss": "^4",
+    "ts-prune": "^0.10.3",
     "typescript": "^5"
   }
 }

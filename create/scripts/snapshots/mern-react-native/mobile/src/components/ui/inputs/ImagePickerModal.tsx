@@ -2,7 +2,7 @@ import React from "react";
 import { View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Txt } from "@/components/common/Typography";
-import BottomModal from "@/components/ui/BottomModal";
+import Drawer from "@/components/ui/Drawer";
 import Button from "@/components/ui/buttons/Button";
 
 export type ImagePickerSource = "camera" | "gallery" | "both";
@@ -93,7 +93,7 @@ export default function ImagePickerModal({
   };
 
   return (
-    <BottomModal isOpen={isOpen} onClose={onClose}>
+    <Drawer isOpen={isOpen} onClose={onClose} position="bottom">
       <View className="p-6">
         <Txt variant="lg" className="font-bold mb-1 text-center">
           {title}
@@ -124,6 +124,6 @@ export default function ImagePickerModal({
           )}
         </View>
       </View>
-    </BottomModal>
+    </Drawer>
   );
 }

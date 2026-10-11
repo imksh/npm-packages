@@ -162,9 +162,9 @@ export default function DocViewerScreen() {
               onPageChanged={(page) => {
                 setCurrentPage(page);
               }}
-              onError={(error: any) => {
-
-                if (error?.message?.toLowerCase().includes('password')) {
+              onError={(error: unknown) => {
+                const err = error as { message?: string };
+                if (err?.message?.toLowerCase().includes('password')) {
                   setIsPasswordRequired(true);
                   setErrorMsg('Incorrect password. Please try again.');
                 }

@@ -45,13 +45,14 @@ export default function EditProfileScreen() {
           uri: avatarUri,
           name: filename,
           type,
-        } as any);
+        } as unknown as Blob);
       }
 
       // Only update if something changed
+      const rnFormData = formData as unknown as { getParts?: () => unknown[] };
       if (
-        (formData as any).getParts &&
-        (formData as any).getParts().length === 0
+        rnFormData.getParts &&
+        rnFormData.getParts().length === 0
       ) {
         router.back();
         return;
@@ -65,10 +66,9 @@ export default function EditProfileScreen() {
       } else {
         toast.error(res.data.message);
       }
-
-      console.log(res.data.data);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || error.message);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } }; message?: string };
+      toast.error(err.response?.data?.message || err.message || "Failed to update profile");
     } finally {
       setLoading(false);
     }

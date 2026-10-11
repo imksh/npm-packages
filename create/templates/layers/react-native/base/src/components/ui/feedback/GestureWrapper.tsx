@@ -1,6 +1,13 @@
 import React from "react";
 import { StyleProp, ViewStyle } from "react-native";
-import { Gesture, GestureDetector, GestureType } from "react-native-gesture-handler";
+import {
+  Gesture,
+  GestureDetector,
+  GestureType,
+  GestureStateChangeEvent,
+  GestureUpdateEvent,
+  PanGestureHandlerEventPayload,
+} from "react-native-gesture-handler";
 import Animated, { runOnJS } from "react-native-reanimated";
 
 interface GestureWrapperProps {
@@ -12,9 +19,9 @@ interface GestureWrapperProps {
   onDoubleTap?: () => void;
   
   // Pan/Drag Gestures
-  onPanStart?: (e: any) => void;
-  onPanUpdate?: (e: any) => void;
-  onPanEnd?: (e: any) => void;
+  onPanStart?: (e: GestureStateChangeEvent<PanGestureHandlerEventPayload>) => void;
+  onPanUpdate?: (e: GestureUpdateEvent<PanGestureHandlerEventPayload>) => void;
+  onPanEnd?: (e: GestureStateChangeEvent<PanGestureHandlerEventPayload>) => void;
 
   // Swipe Gestures
   onSwipeLeft?: () => void;

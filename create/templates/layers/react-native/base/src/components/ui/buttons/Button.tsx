@@ -1,4 +1,3 @@
-import React from "react";
 import {
   TouchableOpacity,
   ActivityIndicator,
@@ -32,6 +31,7 @@ export interface ButtonProps extends TouchableOpacityProps {
   isFullWidth?: boolean;
   soft?: boolean;
   outline?: boolean;
+  className?: string;
 }
 
 export default function Button({
@@ -46,6 +46,7 @@ export default function Button({
   outline = false,
   style,
   disabled,
+  className = "",
   ...props
 }: ButtonProps) {
   const { colorScheme } = useColorScheme();
@@ -109,7 +110,8 @@ export default function Button({
   const vStyles = getVariantStyles();
   if (outline) {
     vStyles.border = vStyles.bg === "transparent" ? theme.base300 : vStyles.bg;
-    vStyles.text = vStyles.bg === "transparent" ? theme.baseContent : vStyles.bg;
+    vStyles.text =
+      vStyles.bg === "transparent" ? theme.baseContent : vStyles.bg;
     vStyles.bg = "transparent";
   } else if (soft && variant !== "ghost" && variant !== "outline") {
     vStyles.text = vStyles.bg;
@@ -124,9 +126,10 @@ export default function Button({
     <TouchableOpacity
       activeOpacity={0.7}
       disabled={isDisabled}
+      className={className}
       style={[
         {
-          backgroundColor: vStyles.bg as any,
+          backgroundColor: vStyles.bg,
           height: sStyles.height,
           paddingHorizontal: sStyles.px,
           borderRadius: 12,
@@ -134,7 +137,7 @@ export default function Button({
           alignItems: "center",
           justifyContent: "center",
           opacity: isDisabled ? 0.6 : 1,
-          borderWidth: (variant === "outline" || outline) ? 1 : 0,
+          borderWidth: variant === "outline" || outline ? 1 : 0,
           borderColor: vStyles.border,
           width: isFullWidth ? "100%" : undefined,
         },
@@ -144,13 +147,29 @@ export default function Button({
     >
       {/* Loading overlay */}
       {isLoading && (
-        <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, justifyContent: "center", alignItems: "center" }}>
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <ActivityIndicator color={vStyles.text} size="small" />
         </View>
       )}
 
       {/* Button content (hidden while loading to maintain dimensions) */}
-      <View style={{ flexDirection: "row", alignItems: "center", opacity: isLoading ? 0 : 1 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          opacity: isLoading ? 0 : 1,
+        }}
+      >
         {leftIcon && (
           <Ionicons
             name={leftIcon}
@@ -163,6 +182,10 @@ export default function Button({
           color={vStyles.text}
           weight="semibold"
           style={{ fontSize: sStyles.fontSize }}
+          allowFontScaling={true}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          adjustsFontSizeToFit
         >
           {label}
         </Txt>

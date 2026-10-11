@@ -1,5 +1,5 @@
 import webpush from "../config/webPush.js";
-import { Expo, ExpoPushMessage, ExpoPushTicket } from "expo-server-sdk";
+import { Expo, ExpoPushMessage } from "expo-server-sdk";
 import logger from "./logger.js";
 import { prisma } from "../config/prisma.js";
 
@@ -34,11 +34,15 @@ export const sendPushToUser = async (
       await Promise.allSettled(
         webSubs.map(async (sub) => {
           if (!sub.endpoint || !sub.keys) return;
-          const pushSub = { endpoint: sub.endpoint, keys: sub.keys as any };
+          const pushSub = {
+            endpoint: sub.endpoint,
+            keys: sub.keys as unknown as { p256dh: string; auth: string },
+          };
           try {
             await webpush.sendNotification(pushSub, payload);
-          } catch (err: any) {
-            if (err.statusCode === 404 || err.statusCode === 410) {
+          } catch (err: unknown) {
+            const error = err as { statusCode?: number };
+            if (error.statusCode === 404 || error.statusCode === 410) {
               await prisma.pushSubscription.delete({ where: { id: sub.id } }).catch(() => {});
             } else {
               logger.error("Web Push Error", err);
@@ -66,12 +70,12 @@ export const sendPushToUser = async (
       for (const chunk of chunks) {
         try {
           await expo.sendPushNotificationsAsync(chunk);
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error("Error sending push notification chunk", error);
         }
       }
     }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error("Error sending push notification to user", error);
   }
 };

@@ -10,7 +10,7 @@ const Loading = ({
 }: {
   className?: string;
   bgClass?: string;
-  animationData?: any;
+  animationData?: object;
 }) => {
   return (
     <div

@@ -5,8 +5,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
 import { Colors } from '../../constants/Colors';
 import { getTabConfig } from '../../config/tabNavigation';
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 
-const TabItem = ({ isFocused, onPress, onLongPress, iconName, colors }: any) => {
+interface TabItemProps {
+  isFocused: boolean;
+  onPress: () => void;
+  onLongPress: () => void;
+  iconName: keyof typeof Ionicons.glyphMap;
+  colors: (typeof Colors)[keyof typeof Colors];
+}
+
+const TabItem = ({ isFocused, onPress, onLongPress, iconName, colors }: TabItemProps) => {
   return (
     <TouchableOpacity
       accessibilityRole="button"
@@ -18,7 +27,7 @@ const TabItem = ({ isFocused, onPress, onLongPress, iconName, colors }: any) => 
     >
       <View style={styles.tabItem}>
         <Ionicons 
-          name={iconName as any} 
+          name={iconName} 
           size={28} 
           color={isFocused ? colors.primary : colors.baseContent + '60'} 
         />
@@ -27,7 +36,7 @@ const TabItem = ({ isFocused, onPress, onLongPress, iconName, colors }: any) => 
   );
 };
 
-export default function ClassicTabBar({ state, descriptors, navigation }: any) {
+export default function ClassicTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const { colorScheme } = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
@@ -43,15 +52,9 @@ export default function ClassicTabBar({ state, descriptors, navigation }: any) {
         elevation:1
       }
     ]}>
-      {state.routes.map((route: any, index: number) => {
+      {state.routes.map((route, index: number) => {
         const { options } = descriptors[route.key];
         const tabConfig = getTabConfig(route.name);
-        const label = options.tabBarLabel !== undefined
-          ? options.tabBarLabel
-          : options.title !== undefined
-          ? options.title
-          : tabConfig?.title || route.name;
-
         const isFocused = state.index === index;
 
         const onPress = () => {
@@ -73,8 +76,8 @@ export default function ClassicTabBar({ state, descriptors, navigation }: any) {
           });
         };
 
-        let iconName: any = tabConfig?.baseIcon || "home";
-        iconName = isFocused ? iconName : `${iconName}-outline`;
+        const baseIcon = tabConfig?.baseIcon || "home";
+        const iconName = (isFocused ? baseIcon : `${baseIcon}-outline`) as keyof typeof Ionicons.glyphMap;
 
         return (
           <TabItem

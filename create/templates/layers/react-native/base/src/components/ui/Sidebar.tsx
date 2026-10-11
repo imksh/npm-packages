@@ -21,7 +21,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthStore } from "../../store/useAuthStore";
 import { sidebarConfig } from "../../config/sidebar.config";
-import { router } from "expo-router";
+import { router, type Href } from "expo-router";
 import Image from "./data-display/Image";
 
 const { width } = Dimensions.get("window");
@@ -40,10 +40,10 @@ const MenuItem = ({
   onPress,
   colors,
 }: {
-  icon: any;
+  icon: keyof typeof Ionicons.glyphMap;
   label: string;
   onPress?: () => void;
-  colors: any;
+  colors: (typeof Colors)[keyof typeof Colors];
 }) => (
   <TouchableOpacity
     activeOpacity={0.7}
@@ -217,7 +217,7 @@ export default function Sidebar({
                     label={item.label}
                     onPress={() => {
                       onClose();
-                      router.push(item.route as any);
+                      router.push(item.route as Href);
                     }}
                     colors={colors}
                   />

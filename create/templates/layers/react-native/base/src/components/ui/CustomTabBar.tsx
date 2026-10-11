@@ -6,15 +6,23 @@ import { useColorScheme } from "nativewind";
 import { Colors } from "../../constants/Colors";
 import { getTabConfig } from "../../config/tabNavigation";
 import { LinearGradient } from "expo-linear-gradient";
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+
+interface TabItemProps {
+  isFocused: boolean;
+  onPress: () => void;
+  onLongPress: () => void;
+  iconName: keyof typeof Ionicons.glyphMap;
+  colors: (typeof Colors)[keyof typeof Colors];
+}
 
 const TabItem = ({
   isFocused,
   onPress,
   onLongPress,
   iconName,
-  label,
   colors,
-}: any) => {
+}: TabItemProps) => {
   return (
     <TouchableOpacity
       accessibilityRole="button"
@@ -39,7 +47,7 @@ const TabItem = ({
           ]}
         >
           <Ionicons
-            name={iconName as any}
+            name={iconName}
             size={isFocused ? 20 : 24}
             color={isFocused ? colors.primaryContent : colors.secondary}
           />
@@ -49,25 +57,10 @@ const TabItem = ({
   );
 };
 
-const CenterButton = ({ colors, onPress }: any) => {
-  return (
-    <View style={styles.centerButtonWrapper}>
-      <TouchableOpacity
-        activeOpacity={0.9}
-        onPress={onPress}
-        style={[
-          styles.centerButton,
-          {
-            backgroundColor: colors.primary,
-            shadowColor: colors.primary,
-          },
-        ]}
-      >
-        <Ionicons name="add" size={32} color={colors.primaryContent} />
-      </TouchableOpacity>
-    </View>
-  );
-};
+export interface CustomTabBarProps extends BottomTabBarProps {
+  showCenterButton?: boolean;
+  onCenterButtonPress?: () => void;
+}
 
 export default function CustomTabBar({
   state,
@@ -75,7 +68,7 @@ export default function CustomTabBar({
   navigation,
   showCenterButton = true,
   onCenterButtonPress,
-}: any) {
+}: CustomTabBarProps) {
   const insets = useSafeAreaInsets();
   const { colorScheme } = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
@@ -86,7 +79,8 @@ export default function CustomTabBar({
     return null;
   }
 
-  const bottomOffset = insets.bottom > 0 ? insets.bottom : 20;
+  // Since we are using a global SafeAreaView, we don't need to manually add bottom safe area
+  const bottomOffset = insets.bottom > 0 ? 5 : 20; // Just a small spacing above the global safe area
   const totalTabBarHeight = bottomOffset + 70; // 70 is the height of the tab bar container
 
   return (
@@ -113,63 +107,80 @@ export default function CustomTabBar({
           },
         ]}
       >
-        {state.routes.map((route: any, index: number) => {
-          const { options } = descriptors[route.key];
-          if (
-            options.href === null ||
-            options.tabBarItemStyle?.display === "none"
-          )
-            return null;
+        {(() => {
+          const children: React.ReactNode[] = [];
 
-          const tabConfig = getTabConfig(route.name);
-          const label =
-            options.tabBarLabel !== undefined
-              ? options.tabBarLabel
-              : options.title !== undefined
-                ? options.title
-                : tabConfig?.title || route.name;
-
-          const isFocused = state.index === index;
-
-          const onPress = () => {
-            const event = navigation.emit({
-              type: "tabPress",
-              target: route.key,
-              canPreventDefault: true,
-            });
-
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name, route.params);
+          state.routes.forEach((route, index: number) => {
+            const { options } = descriptors[route.key];
+            if (
+              options.href === null ||
+              options.tabBarItemStyle?.display === "none"
+            ) {
+              return;
             }
-          };
 
-          const onLongPress = () => {
-            navigation.emit({
-              type: "tabLongPress",
-              target: route.key,
-            });
-          };
+            const tabConfig = getTabConfig(route.name);
+            const label =
+              options.tabBarLabel !== undefined
+                ? options.tabBarLabel
+                : options.title !== undefined
+                  ? options.title
+                  : tabConfig?.title || route.name;
 
-          let iconName: any = tabConfig?.baseIcon || "home";
-          iconName = isFocused ? iconName : `${iconName}-outline`;
+            const isFocused = state.index === index;
 
-          return (
-            <React.Fragment key={route.key}>
-              {showCenterButton &&
-                index === Math.floor(state.routes.length / 2) && (
-                  <CenterButton colors={colors} onPress={onCenterButtonPress} />
-                )}
+            const onPress = () => {
+              const event = navigation.emit({
+                type: "tabPress",
+                target: route.key,
+                canPreventDefault: true,
+              });
+
+              if (!isFocused && !event.defaultPrevented) {
+                navigation.navigate(route.name, route.params);
+              }
+            };
+
+            const onLongPress = () => {
+              navigation.emit({
+                type: "tabLongPress",
+                target: route.key,
+              });
+            };
+
+            const baseIcon = tabConfig?.baseIcon || "home";
+            const iconName = (isFocused ? baseIcon : `${baseIcon}-outline`) as keyof typeof Ionicons.glyphMap;
+
+            if (
+              showCenterButton &&
+              index === Math.floor(state.routes.length / 2)
+            ) {
+              children.push(
+                <TabItem
+                  key="center-btn"
+                  isFocused={false}
+                  onPress={onCenterButtonPress}
+                  iconName="add"
+                  colors={colors}
+                />,
+              );
+            }
+
+            children.push(
               <TabItem
+                key={route.key}
                 isFocused={isFocused}
                 onPress={onPress}
                 onLongPress={onLongPress}
                 iconName={iconName}
                 label={label as string}
                 colors={colors}
-              />
-            </React.Fragment>
-          );
-        })}
+              />,
+            );
+          });
+
+          return children;
+        })()}
       </View>
     </View>
   );
@@ -217,22 +228,5 @@ const styles = StyleSheet.create({
     marginTop: 6,
     position: "absolute",
     bottom: -6,
-  },
-  centerButtonWrapper: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  centerButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: -40,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 15,
-    elevation: 15,
   },
 });

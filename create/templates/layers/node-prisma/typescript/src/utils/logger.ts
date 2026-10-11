@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const colors = {
   reset: "\x1b[0m",
   info: "\x1b[36m", // Cyan
@@ -18,7 +19,7 @@ export const logger = {
   info: (msg: string) => console.log(formatMessage("info", msg)),
   success: (msg: string) => console.log(formatMessage("success", msg)),
   warn: (msg: string) => console.warn(formatMessage("warn", msg)),
-  error: (msg: string, err?: any) => {
+  error: (msg: string, err?: unknown) => {
     console.error(formatMessage("error", msg));
     if (err) console.error(err);
   },

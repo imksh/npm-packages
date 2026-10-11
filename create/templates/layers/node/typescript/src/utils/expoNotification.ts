@@ -10,7 +10,7 @@ const expo = new Expo();
 export interface PushMessagePayload {
   title: string;
   body: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 /**

@@ -10,6 +10,7 @@ import Input from "./Input";
 import { toast } from "@/utils/toast";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 import { LocationLoader } from "../../common/LocationLoader";
+import ScreenHeader from "@/components/common/ScreenHeader";
 
 export interface LocationDetails {
   addressLine1: string;
@@ -40,11 +41,12 @@ export default function WebLocationPicker({
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searching, setSearching] = useState(false);
-  
+
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [animationDone, setAnimationDone] = useState(false);
   const [positionFetched, setPositionFetched] = useState(false);
-  
+  const [showWebView, setShowWebView] = useState(true);
+
   const [mapCenter, setMapCenter] = useState({
     latitude: initialCoordinate?.latitude || 28.6139,
     longitude: initialCoordinate?.longitude || 77.209,
@@ -56,7 +58,6 @@ export default function WebLocationPicker({
 
   useEffect(() => {
     if (initialCoordinate?.latitude && initialCoordinate?.longitude) {
-       
       setMapCenter(initialCoordinate);
       setCurrentCenter(initialCoordinate);
     }
@@ -69,6 +70,7 @@ export default function WebLocationPicker({
   }, [animationDone, positionFetched]);
 
   const requestLocationAndOpenMap = async () => {
+    setShowWebView(true);
     setModalVisible(true);
     setLoadingLocation(true);
     setAnimationDone(false);
@@ -84,7 +86,9 @@ export default function WebLocationPicker({
         }
 
         if (!initialCoordinate?.latitude) {
-          let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+          let location = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced,
+          });
           setMapCenter({
             latitude: location.coords.latitude,
             longitude: location.coords.longitude,
@@ -120,13 +124,51 @@ export default function WebLocationPicker({
           latitude: currentCenter.latitude,
           longitude: currentCenter.longitude,
         };
-        onLocationSelected(details);
-        setModalVisible(false);
+
+        // Hide WebView first to prevent Android crash when Modal closes
+        setShowWebView(false);
+        setTimeout(() => {
+          onLocationSelected(details);
+          setModalVisible(false);
+          setLoading(false);
+        }, 150);
+        return;
       }
     } catch (error) {
       console.warn("Geocoding failed", error);
     }
     setLoading(false);
+  };
+
+  const [fetchingCurrentLocation, setFetchingCurrentLocation] = useState(false);
+
+  const handleCurrentLocation = async () => {
+    setFetchingCurrentLocation(true);
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        toast.error("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+
+      const lat = location.coords.latitude;
+      const lng = location.coords.longitude;
+
+      setCurrentCenter({ latitude: lat, longitude: lng });
+      webViewRef.current?.injectJavaScript(`
+        map.setView([${lat}, ${lng}], 15);
+        true;
+      `);
+    } catch (error) {
+      console.warn("Failed to get current location", error);
+      toast.error("Failed to get current location");
+    } finally {
+      setFetchingCurrentLocation(false);
+    }
   };
 
   const handleSearch = async () => {
@@ -142,11 +184,10 @@ export default function WebLocationPicker({
           true;
         `);
       } else {
-        toast.success("Location not found");
+        toast.error("Location not found");
       }
-    } catch (error) {
-      console.warn("Search failed", error);
-      toast.error("Failed to search location");
+    } catch {
+      toast.error("Failed to search");
     }
     setSearching(false);
   };
@@ -163,7 +204,8 @@ export default function WebLocationPicker({
     } catch {}
   };
 
-  const htmlContent = useMemo(() => `
+  const htmlContent = useMemo(
+    () => `
     <!DOCTYPE html>
     <html>
     <head>
@@ -188,7 +230,7 @@ export default function WebLocationPicker({
       <div class="center-marker">📍</div>
       <script>
         var map = L.map('map', { zoomControl: false, attributionControl: false }).setView([${mapCenter.latitude}, ${mapCenter.longitude}], 15);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           maxZoom: 19
         }).addTo(map);
 
@@ -203,7 +245,9 @@ export default function WebLocationPicker({
       </script>
     </body>
     </html>
-  `, [mapCenter.latitude, mapCenter.longitude]);
+  `,
+    [mapCenter.latitude, mapCenter.longitude],
+  );
 
   return (
     <>
@@ -223,14 +267,18 @@ export default function WebLocationPicker({
             />
             <Txt color={theme.baseContent} weight="semibold">
               {initialCoordinate?.latitude
-                ? "Update Location on Map"
-                : "Pick from Map"}
+                ? "Update Location"
+                : "Pick from map"}
             </Txt>
           </View>
           {loading && !modalVisible ? (
             <ActivityIndicator color={theme.primary} />
           ) : (
-            <Ionicons name="chevron-forward" size={20} color={theme.secondary} />
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={theme.secondary}
+            />
           )}
         </TouchableOpacity>
       )}
@@ -251,68 +299,94 @@ export default function WebLocationPicker({
           </View>
         ) : (
           <View className="flex-1 bg-base-100">
-            <View
-              className="h-16 flex-row items-center justify-between px-4 border-b border-base-300 pt-4 bg-base-100"
-              style={{ zIndex: 10 }}
-            >
-            <TouchableOpacity onPress={() => setModalVisible(false)}>
-              <Ionicons name="close" size={28} color={theme.baseContent} />
-            </TouchableOpacity>
-            <Txt weight="bold" style={{ fontSize: 18 }}>
-              Select Location
-            </Txt>
-            <View style={{ width: 28 }} />
-          </View>
+            <ScreenHeader
+              icon="close"
+              onBack={() => setModalVisible(false)}
+              title="Select Location"
+            />
 
-          <View className="px-4 py-3 bg-base-100 flex-row items-center border-b border-base-200 gap-4">
-            <View className="flex-1" style={{ marginBottom: -16 }}>
-              <Input
-                placeholder="Search city, area, etc."
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                onSubmitEditing={handleSearch}
-                returnKeyType="search"
-                containerStyle={{ marginBottom: 0 }}
-                leftIcon="search"
+            <View className="px-4 py-3 bg-base-100 flex-row items-center border-b border-base-200 gap-4">
+              <View className="flex-1" style={{ marginBottom: -8 }}>
+                <Input
+                  placeholder="Search Location"
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  onSubmitEditing={handleSearch}
+                  returnKeyType="search"
+                  containerStyle={{ marginBottom: 0 }}
+                  leftIcon="search"
+                />
+              </View>
+              <Button
+                onPress={handleSearch}
+                isLoading={searching}
+                label="Go"
+                variant="primary"
+                soft
+                size="md"
+                className=""
               />
             </View>
-            <Button 
-              onPress={handleSearch} 
-              isLoading={searching} 
-              label="Go" 
-              variant="primary"
-              soft
-              size="md"
-              className="my-auto"
-            />
-          </View>
 
-          <View className="flex-1 relative">
-            <WebView
-              ref={webViewRef}
-              source={{ html: htmlContent }}
-              onMessage={handleMessage}
-              style={{ flex: 1 }}
-              javaScriptEnabled={true}
-              scrollEnabled={false}
-              bounces={false}
-              startInLoadingState={true}
-              renderLoading={() => (
-                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f0f0f0' }}>
-                  <ActivityIndicator size="large" color={theme.primary} />
-                </View>
+            <View className="flex-1 relative">
+              {showWebView && (
+                <WebView
+                  ref={webViewRef}
+                  source={{ html: htmlContent }}
+                  onMessage={handleMessage}
+                  style={{ flex: 1 }}
+                  javaScriptEnabled={true}
+                  scrollEnabled={false}
+                  bounces={false}
+                  startInLoadingState={true}
+                  renderLoading={() => (
+                    <View
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        backgroundColor: "#f0f0f0",
+                      }}
+                    >
+                      <ActivityIndicator size="large" color={theme.primary} />
+                    </View>
+                  )}
+                />
               )}
-            />
-          </View>
 
-          <View className="p-4 bg-base-100 border-t border-base-300 pb-8">
-            <Button
-              label="Confirm Location"
-              onPress={handleConfirmLocation}
-              isLoading={loading}
-              variant="primary"
-            />
-          </View>
+              <TouchableOpacity
+                onPress={handleCurrentLocation}
+                disabled={fetchingCurrentLocation}
+                className="absolute bottom-6 right-4 w-12 h-12 rounded-full items-center justify-center shadow-lg border border-base-200"
+                style={{
+                  backgroundColor: theme.base100,
+                  elevation: 5,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 3.84,
+                }}
+              >
+                {fetchingCurrentLocation ? (
+                  <ActivityIndicator size="small" color={theme.primary} />
+                ) : (
+                  <Ionicons name="locate" size={24} color={theme.primary} />
+                )}
+              </TouchableOpacity>
+            </View>
+
+            <View className="p-4 bg-base-100 border-t border-base-300 pb-8">
+              <Button
+                label="Confirm Location"
+                onPress={handleConfirmLocation}
+                isLoading={loading}
+                variant="primary"
+              />
+            </View>
           </View>
         )}
       </Modal>

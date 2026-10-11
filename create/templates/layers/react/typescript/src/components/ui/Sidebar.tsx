@@ -89,7 +89,7 @@ const Sidebar = () => {
             >
               {navigation
                 .filter((item) => {
-                  const orgRole = (user as any)?.orgRole;
+                  const orgRole = user?.orgRole;
                   const isUserAdmin =
                     user?.role === "ADMIN" ||
                     orgRole === "OWNER" ||

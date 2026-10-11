@@ -6,8 +6,10 @@ import { useColorScheme } from "nativewind";
 import { Colors } from "../constants/Colors";
 import "./global.css";
 import Loading from "@/components/common/Loading";
+import BiometricLock from "@/components/ui/BiometricLock";
 
 import { PaperProvider } from "react-native-paper";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFonts } from "expo-font";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -61,8 +63,8 @@ export default function RootLayout() {
     if (!user && !inAuthGroup) {
       // Redirect to the auth group
       router.replace("/(auth)/login");
-    } else if (user && inAuthGroup) {
-      // Redirect away from auth
+    } else if (user && (inAuthGroup || !segments[0])) {
+      // Redirect away from auth or root to main app tabs
       router.replace("/(tabs)");
     }
   }, [user, isCheckingAuth, segments]);
@@ -79,20 +81,26 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <PaperProvider>
         <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.base100 },
-          }}
-        >
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="(auth)"
-            options={{ headerShown: false, animation: "fade" }}
-          />
-        </Stack>
-        <Toast />
+        <BiometricLock>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.base100 },
+            }}
+          >
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="(auth)"
+              options={{ headerShown: false, animation: "fade" }}
+            />
+            <Stack.Screen
+              name="doc-viewer"
+              options={{ presentation: "fullScreenModal" }}
+            />
+          </Stack>
+        </BiometricLock>
       </PaperProvider>
+      <Toast />
     </GestureHandlerRootView>
   );
 }

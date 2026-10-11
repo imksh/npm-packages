@@ -58,6 +58,8 @@ imksh create my-app --template next --skip-install
 - `next-ts`: Next.js App Router boilerplate with TypeScript.
 - `react-native`: Expo React Native template with NativeWind, Zustand, and React Navigation.
 - `mern-react-native`: Full-stack Expo React Native client + Express/Node server.
+- `electron`: Electron + React boilerplate.
+- `electron-ts`: Electron + React boilerplate with TypeScript.
 
 ## Adding Templates
 

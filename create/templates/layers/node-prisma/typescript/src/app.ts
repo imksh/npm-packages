@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from "express";
+import express, { Request, Response } from "express";
 import helmet from "helmet";
 import cors from "cors";
 import compression from "compression";
@@ -7,6 +7,7 @@ import morgan from "morgan";
 import apiRoutes from "./routes/index.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
 import { apiLimiter } from "./middleware/rateLimiter.js";
+import { SuccessResponse } from "./utils/SuccessResponse.js";
 
 const app = express();
 
@@ -27,7 +28,7 @@ app.use(apiLimiter);
 app.use("/api", apiRoutes);
 
 app.get("/api/health", (req: Request, res: Response) => {
-  res.status(200).json({ success: true, message: "API is running" });
+  SuccessResponse(res, 200, "API is running");
 });
 
 app.use(notFound);

@@ -10,12 +10,12 @@ const LottieIcon = memo(
     loop = true,
     autoplay = true,
   }: {
-    animation: any;
+    animation: object;
     className?: string;
     loop?: boolean;
     autoplay?: boolean;
   }) => {
-    const containerRef = useRef(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     const isInView = useInView(containerRef, {
       once: true,

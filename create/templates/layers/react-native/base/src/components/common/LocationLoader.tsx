@@ -1,5 +1,5 @@
 import React, { useEffect, ReactElement, useState } from "react";
-import { View, Dimensions, StyleSheet } from "react-native";
+import { View, Dimensions, StyleSheet, DimensionValue } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Txt } from "./Typography";
 import { useColorScheme } from "nativewind";
@@ -49,21 +49,41 @@ const DARK_MAP = {
 };
 
 // ─── Map Primitives ───
-const Water = ({ top, left, w, h, rx = 8, dark }: any) => (
+interface MapShapeProps {
+  top: number;
+  left: number;
+  w: number;
+  h: number;
+  rx?: number;
+  dark?: boolean;
+}
+
+const Water = ({ top, left, w, h, rx = 8, dark }: MapShapeProps) => (
   <View style={{
     position: "absolute", top, left, width: w, height: h,
     backgroundColor: dark ? DARK_MAP.water : LIGHT_MAP.water,
     borderRadius: rx, opacity: 0.9,
   }} />
 );
-const Park = ({ top, left, w, h, rx = 6, dark }: any) => (
+
+const Park = ({ top, left, w, h, rx = 6, dark }: MapShapeProps) => (
   <View style={{
     position: "absolute", top, left, width: w, height: h,
     backgroundColor: dark ? DARK_MAP.park : LIGHT_MAP.park,
     borderRadius: rx, opacity: dark ? 0.6 : 0.55,
   }} />
 );
-const Block = ({ top, left, w, h, shade = 0, dark }: any) => {
+
+interface BlockProps {
+  top: number;
+  left: number;
+  w: number;
+  h: number;
+  shade?: number;
+  dark?: boolean;
+}
+
+const Block = ({ top, left, w, h, shade = 0, dark }: BlockProps) => {
   const palette = dark ? DARK_MAP.block : LIGHT_MAP.block;
   return (
     <View style={{
@@ -73,7 +93,17 @@ const Block = ({ top, left, w, h, shade = 0, dark }: any) => {
     }} />
   );
 };
-const Road = ({ top, left, w, h, major = false, dark }: any) => (
+
+interface RoadProps {
+  top: number;
+  left: number;
+  w: number;
+  h: number;
+  major?: boolean;
+  dark?: boolean;
+}
+
+const Road = ({ top, left, w, h, major = false, dark }: RoadProps) => (
   <View style={{
     position: "absolute", top, left, width: w, height: h,
     backgroundColor: major ? (dark ? DARK_MAP.road : LIGHT_MAP.road)
@@ -81,7 +111,15 @@ const Road = ({ top, left, w, h, major = false, dark }: any) => (
     opacity: major ? 0.95 : 0.75,
   }} />
 );
-const LaneDash = ({ top, left, vertical = false, dark }: any) => (
+
+interface LaneDashProps {
+  top: number;
+  left: number;
+  vertical?: boolean;
+  dark?: boolean;
+}
+
+const LaneDash = ({ top, left, vertical = false, dark }: LaneDashProps) => (
   <View style={{
     position: "absolute", top, left,
     width: vertical ? 2 : 12, height: vertical ? 12 : 2,
@@ -154,7 +192,16 @@ const MapWorld = ({ dark }: { dark: boolean }) => {
 };
 
 // ─── MOVING TRAFFIC DOT ───
-const TrafficDot = ({ startX, startY, endX, endY, delay, color }: any) => {
+interface TrafficDotProps {
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+  delay: number;
+  color: string;
+}
+
+const TrafficDot = ({ startX, startY, endX, endY, delay, color }: TrafficDotProps) => {
   const x = useSharedValue(startX);
   const y = useSharedValue(startY);
 
@@ -181,7 +228,15 @@ const TrafficDot = ({ startX, startY, endX, endY, delay, color }: any) => {
 };
 
 // ─── PROPERTY PRICE PIN ───
-const PropertyPin = ({ top, left, delay, price, color }: any) => {
+interface PropertyPinProps {
+  top: number;
+  left: number;
+  delay: number;
+  price: string;
+  color: string;
+}
+
+const PropertyPin = ({ top, left, delay, price, color }: PropertyPinProps) => {
   const scale = useSharedValue(0);
   const opacity = useSharedValue(0);
   const bounce = useSharedValue(0);
@@ -328,7 +383,7 @@ const AltitudeBar = ({ primary }: { primary: string }) => {
   }, []);
 
   const barStyle = useAnimatedStyle(() => ({
-    height: `${prog.value * 100}%` as any,
+    height: `${prog.value * 100}%` as DimensionValue,
     opacity: interpolate(prog.value, [0, 0.1], [0, 1], Extrapolation.CLAMP),
   }));
 

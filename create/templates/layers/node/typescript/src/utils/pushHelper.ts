@@ -1,7 +1,7 @@
 import webpush from "../config/webPush.js";
-import { Expo, ExpoPushMessage, ExpoPushTicket } from "expo-server-sdk";
+import { Expo, ExpoPushMessage } from "expo-server-sdk";
 import logger from "./logger.js";
-import PushSubscription from "../models/pushSubscription.model.js";
+import PushSubscription, { type IPushSubscription } from "../models/pushSubscription.model.js";
 
 const expo = new Expo();
 
@@ -19,7 +19,7 @@ export const sendPushToUser = async (
   url: string = "/",
 ) => {
   try {
-    const subscriptions = await PushSubscription.find({ user: userId });
+    const subscriptions: IPushSubscription[] = await PushSubscription.find({ user: userId });
 
     if (subscriptions.length === 0) return;
 
@@ -30,13 +30,17 @@ export const sendPushToUser = async (
     if (webSubs.length > 0) {
       const payload = JSON.stringify({ title, body, url });
       await Promise.allSettled(
-        webSubs.map(async (sub) => {
+        webSubs.map(async (sub: IPushSubscription) => {
           if (!sub.endpoint || !sub.keys) return;
-          const pushSub = { endpoint: sub.endpoint, keys: sub.keys as any };
+          const pushSub = {
+            endpoint: sub.endpoint,
+            keys: sub.keys as { p256dh: string; auth: string },
+          };
           try {
             await webpush.sendNotification(pushSub, payload);
-          } catch (err: any) {
-            if (err.statusCode === 404 || err.statusCode === 410) {
+          } catch (err: unknown) {
+            const error = err as { statusCode?: number };
+            if (error.statusCode === 404 || error.statusCode === 410) {
               await sub.deleteOne();
             } else {
               logger.error("Web Push Error", err);
@@ -64,12 +68,12 @@ export const sendPushToUser = async (
       for (const chunk of chunks) {
         try {
           await expo.sendPushNotificationsAsync(chunk);
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error("Error sending push notification chunk", error);
         }
       }
     }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error("Error sending push notification to user", error);
   }
 };

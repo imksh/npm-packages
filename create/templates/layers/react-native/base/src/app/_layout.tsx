@@ -63,8 +63,8 @@ export default function RootLayout() {
     if (!user && !inAuthGroup) {
       // Redirect to the auth group
       router.replace("/(auth)/login");
-    } else if (user && inAuthGroup) {
-      // Redirect away from auth
+    } else if (user && (inAuthGroup || !segments[0])) {
+      // Redirect away from auth or root to main app tabs
       router.replace("/(tabs)");
     }
   }, [user, isCheckingAuth, segments]);
@@ -99,8 +99,8 @@ export default function RootLayout() {
             />
           </Stack>
         </BiometricLock>
-        <Toast />
       </PaperProvider>
+      <Toast />
     </GestureHandlerRootView>
   );
 }

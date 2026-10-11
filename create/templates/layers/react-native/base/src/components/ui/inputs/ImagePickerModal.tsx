@@ -2,8 +2,9 @@ import React from "react";
 import { View } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Txt } from "@/components/common/Typography";
-import BottomModal from "@/components/ui/BottomModal";
+import Drawer from "@/components/ui/Drawer";
 import Button from "@/components/ui/buttons/Button";
+
 
 export type ImagePickerSource = "camera" | "gallery" | "both";
 
@@ -23,6 +24,7 @@ export interface ImagePickerModalProps {
   subtitle?: string;
   allowsEditing?: boolean;
   allowsMultipleSelection?: boolean;
+  aspectRatio?: [number, number];
 }
 
 export default function ImagePickerModal({
@@ -34,9 +36,9 @@ export default function ImagePickerModal({
   title = "Select Image Source",
   subtitle = "Choose where to pick your image from",
   allowsEditing = false,
+  aspectRatio = [1, 1],
   allowsMultipleSelection = false,
 }: ImagePickerModalProps) {
-
   const launchPicker = async (type: "gallery" | "camera") => {
     onClose();
 
@@ -51,10 +53,10 @@ export default function ImagePickerModal({
 
           result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ["images"],
-            quality: 0.8,
+            quality: 0.6,
             allowsEditing: !allowsMultipleSelection && allowsEditing, // multi-select cannot have editing on some OS
             allowsMultipleSelection,
-            aspect: allowsEditing ? [16, 9] : undefined, // Assuming a common aspect ratio if cropped
+            aspect: allowsEditing ? aspectRatio : undefined, // Assuming a common aspect ratio if cropped
           });
         } else {
           const perm = await ImagePicker.requestCameraPermissionsAsync();
@@ -62,23 +64,47 @@ export default function ImagePickerModal({
 
           result = await ImagePicker.launchCameraAsync({
             mediaTypes: ["images"],
-            quality: 0.8,
+            quality: 0.6,
             allowsEditing,
-            aspect: allowsEditing ? [16, 9] : undefined,
+            aspect: allowsEditing ? aspectRatio : undefined,
           });
         }
 
-        if (result && !result.canceled && result.assets && result.assets.length > 0) {
-          const mappedAssets = result.assets.map(asset => {
-            const filename = asset.uri.split("/").pop() || "image.jpg";
-            const match = /\.(\w+)$/.exec(filename);
-            const mimeType = match ? `image/${match[1]}` : "image/jpeg";
-            return {
-              uri: asset.uri,
-              name: filename,
-              type: mimeType,
-            };
-          });
+        if (
+          result &&
+          !result.canceled &&
+          result.assets &&
+          result.assets.length > 0
+        ) {
+          const mappedAssets = await Promise.all(
+            result.assets.map(async (asset) => {
+              let finalUri = asset.uri;
+
+              // Resize image if it's too large to save bandwidth
+              if (asset.width > 1024 || asset.height > 1024) {
+                const resizeAction =
+                  asset.width > asset.height
+                    ? { resize: { width: 1024 } }
+                    : { resize: { height: 1024 } };
+
+                const manipResult = await ImageManipulator.manipulateAsync(
+                  asset.uri,
+                  [resizeAction],
+                  { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG },
+                );
+                finalUri = manipResult.uri;
+              }
+
+              const filename = finalUri.split("/").pop() || "image.jpg";
+              const match = /\.(\w+)$/.exec(filename);
+              const mimeType = match ? `image/${match[1]}` : "image/jpeg";
+              return {
+                uri: finalUri,
+                name: filename,
+                type: mimeType,
+              };
+            }),
+          );
 
           if (allowsMultipleSelection && onImagesSelected) {
             onImagesSelected(mappedAssets);
@@ -93,7 +119,7 @@ export default function ImagePickerModal({
   };
 
   return (
-    <BottomModal isOpen={isOpen} onClose={onClose}>
+    <Drawer isOpen={isOpen} onClose={onClose} position="bottom">
       <View className="p-6">
         <Txt variant="lg" className="font-bold mb-1 text-center">
           {title}
@@ -124,6 +150,6 @@ export default function ImagePickerModal({
           )}
         </View>
       </View>
-    </BottomModal>
+    </Drawer>
   );
 }

@@ -6,6 +6,11 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
+    "format": "prettier --write \"src/**/*.{js,json}\"",
+    "format:check": "prettier --check \"src/**/*.{js,json}\"",
+    "circular-check": "dpdm --circular --no-warning --no-tree --exit-code circular:1 \"src/**/*.js\"",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
     "generate:vapid": "node ./src/utils/generateVapidKeys.js"
@@ -29,7 +34,10 @@
     "web-push": "^3.6.6"
   },
   "devDependencies": {
+    "dpdm": "^3.14.0",
+    "eslint": "^8.53.0",
     "nodemon": "^3.0.1",
+    "prettier": "^3.4.2",
     "prisma": "^5.6.0"
   }
 }

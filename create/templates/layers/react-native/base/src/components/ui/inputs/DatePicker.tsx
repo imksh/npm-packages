@@ -4,7 +4,7 @@ import { Txt } from "../../common/Typography";
 import { Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../../constants/Colors";
-import BottomModal from "../BottomModal";
+import Drawer from "../Drawer";
 import Button from "../buttons/Button";
 import dayjs from "dayjs";
 
@@ -104,7 +104,7 @@ export default function DatePicker({
         <Ionicons name="calendar-outline" size={18} color={colors.primary} />
       </TouchableOpacity>
 
-      <BottomModal isOpen={isOpen} onClose={() => setIsOpen(false)} heightPercent={0.65}>
+      <Drawer isOpen={isOpen} onClose={() => setIsOpen(false)} position="bottom" sizePercent={0.65}>
         <View className="p-4 flex-1">
           <Txt variant="lg" className="font-bold text-center mb-4">
             {label}
@@ -180,7 +180,7 @@ export default function DatePicker({
             <Button label="Close" variant="outline" onPress={() => setIsOpen(false)} className="w-full" />
           </View>
         </View>
-      </BottomModal>
+      </Drawer>
     </View>
   );
 }

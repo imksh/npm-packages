@@ -1,19 +1,46 @@
+import { OAuth2Client } from "google-auth-library";
 import bcrypt from "bcrypt";
 import { prisma } from "../config/prisma.js";
 import { sendOtpEmail } from "../utils/emailOtp.js";
 import {
   uploadSingleToCloudinary,
   deleteFromCloudinary,
+  type CloudinaryUploadFile,
 } from "../utils/cloudinaryUpload.js";
 import logger from "../utils/logger.js";
-export const signup = async ({ name, email, phone, password }: any) => {
+import { ApiError } from "../utils/ApiError.js";
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || "");
+
+export interface SignupDTO {
+  name: string;
+  email: string;
+  phone?: string;
+  password: string;
+}
+
+export interface LoginDTO {
+  email: string;
+  password: string;
+}
+
+export interface VerifyOtpDTO {
+  email: string;
+  otp: string;
+}
+
+export interface UpdateProfileDTO {
+  name?: string;
+  phone?: string;
+  file?: CloudinaryUploadFile;
+}
+
+export const signup = async ({ name, email, phone, password }: SignupDTO) => {
   const existingUser = await prisma.user.findUnique({
     where: { email },
   });
   if (existingUser) {
-    const err: any = new Error("User already exists");
-    err.status = 409;
-    throw err;
+    throw new ApiError(409, "User already exists");
   }
 
   const salt = await bcrypt.genSalt(10);
@@ -33,33 +60,29 @@ export const signup = async ({ name, email, phone, password }: any) => {
 
   return newUser;
 };
-export const login = async ({ email, password }: any) => {
+
+export const login = async ({ email, password }: LoginDTO) => {
   const user = await prisma.user.findUnique({
     where: { email },
   });
   if (!user) {
-    const err: any = new Error("User not found");
-    err.status = 404;
-    throw err;
+    throw new ApiError(404, "User not found");
   }
 
   const isValid = await bcrypt.compare(password, user.password);
   if (!isValid) {
-    const err: any = new Error("Invalid Credentials");
-    err.status = 401;
-    throw err;
+    throw new ApiError(401, "Invalid Credentials");
   }
 
   return user;
 };
+
 export const generateOtp = async (email: string) => {
   const user = await prisma.user.findUnique({
     where: { email },
   });
   if (!user) {
-    const err: any = new Error("User not found");
-    err.status = 404;
-    throw err;
+    throw new ApiError(404, "User not found");
   }
 
   const existingOtp = await prisma.otp.findUnique({
@@ -84,35 +107,31 @@ export const generateOtp = async (email: string) => {
   await sendOtpEmail(email, otp);
   return true;
 };
-export const verifyOtp = async ({ email, otp }: any) => {
+
+export const verifyOtp = async ({ email, otp }: VerifyOtpDTO) => {
   const user = await prisma.user.findUnique({
     where: { email },
   });
   if (!user) {
-    const err: any = new Error("User not found");
-    err.status = 404;
-    throw err;
+    throw new ApiError(404, "User not found");
   }
 
   const existingOtp = await prisma.otp.findUnique({
     where: { email },
   });
   if (!existingOtp) {
-    const err: any = new Error("OTP match failed");
-    err.status = 400;
-    throw err;
+    throw new ApiError(400, "OTP match failed");
   }
 
   const isMatched = await bcrypt.compare(otp, existingOtp.otp);
   if (!isMatched) {
-    const err: any = new Error("OTP match failed");
-    err.status = 400;
-    throw err;
+    throw new ApiError(400, "OTP match failed");
   }
 
   return user;
 };
-export const resetPassword = async (user: any, newPassword: any) => {
+
+export const resetPassword = async (user: { id: string }, newPassword: string) => {
   const hashedPassword = await bcrypt.hash(newPassword, 10);
   await prisma.user.update({
     where: { id: user.id },
@@ -120,20 +139,24 @@ export const resetPassword = async (user: any, newPassword: any) => {
   });
   return true;
 };
+
 export const updateProfile = async (
-  userId: any,
-  { name, phone, file }: any,
+  userId: string,
+  { name, phone, file }: UpdateProfileDTO,
 ) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
   });
   if (!user) {
-    const err: any = new Error("User not found");
-    err.status = 404;
-    throw err;
+    throw new ApiError(404, "User not found");
   }
 
-  const updateData: any = {};
+  const updateData: {
+    name?: string;
+    phone?: string;
+    avatarUrl?: string;
+    avatarPublicId?: string;
+  } = {};
   if (name) updateData.name = name;
   if (phone) updateData.phone = phone;
 
@@ -158,4 +181,33 @@ export const updateProfile = async (
   });
 
   return updatedUser;
+};
+
+export const googleLogin = async (idToken: string) => {
+  const ticket = await googleClient.verifyIdToken({
+    idToken,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+  const payload = ticket.getPayload();
+  if (!payload) {
+    throw new ApiError(401, "Invalid Google Token");
+  }
+  const { email, name, picture } = payload;
+  if (!email) {
+    throw new ApiError(400, "Email not found in Google Token");
+  }
+
+  let user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    user = await prisma.user.create({
+      data: {
+        name: name || "User",
+        email: email.toLowerCase(),
+        password: "",
+        avatarUrl: picture || `https://placehold.co/600x400?text=${name?.charAt(0).toUpperCase() || 'U'}`,
+        avatarPublicId: "",
+      }
+    });
+  }
+  return user;
 };

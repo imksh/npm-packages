@@ -7,6 +7,7 @@ export interface User {
   email: string;
   phone?: string;
   role: string;
+  orgRole?: string;
   avatar?: {
     url?: string;
     publicId?: string;
@@ -14,6 +15,20 @@ export interface User {
   createdAt?: string;
   updatedAt?: string;
 }
+
+interface ApiErrorResponse {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+  message?: string;
+}
+
+const getErrorMessage = (err: unknown): string => {
+  const apiErr = err as ApiErrorResponse;
+  return apiErr.response?.data?.message || apiErr.message || "An unexpected error occurred";
+};
 
 export interface AuthState {
   user: User | null;
@@ -39,9 +54,9 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await authService.sendOtp(email);
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       set({
-        error: err.response?.data?.message || err.message,
+        error: getErrorMessage(err),
         loading: false,
       });
       return false;
@@ -62,9 +77,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         loading: false,
       });
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       set({
-        error: err.response?.data?.message || err.message,
+        error: getErrorMessage(err),
         loading: false,
       });
       return false;
@@ -85,9 +100,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         loading: false,
       });
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       set({
-        error: err.response?.data?.message || err.message,
+        error: getErrorMessage(err),
         loading: false,
       });
       return false;
@@ -101,7 +116,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const { data } = await authService.getMe();
       set({ user: data.data, isCheckingAuth: false });
-    } catch (err: any) {
+    } catch {
       set({ isCheckingAuth: false });
     } finally {
       set({ isCheckingAuth: false });
@@ -114,9 +129,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       const { data } = await authService.updateMe(updates);
       set({ user: data.data, loading: false });
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       set({
-        error: err.response?.data?.message || err.message,
+        error: getErrorMessage(err),
         loading: false,
       });
       return false;

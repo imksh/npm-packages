@@ -2,9 +2,11 @@ import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../utils/jwt.js";
 import logger from "../utils/logger.js";
 import { prisma } from "../config/prisma.js";
+import { ApiError } from "../utils/ApiError.js";
 
 export const protect = async (
   req: Request,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   res: Response,
   next: NextFunction,
 ) => {
@@ -20,15 +22,13 @@ export const protect = async (
   }
 
   if (!token) {
-    return res
-      .status(401)
-      .json({ message: "Not authorized, no token provided" });
+    return next(new ApiError(401, "Not authorized, no token provided"));
   }
 
   try {
-    const decoded: any = verifyToken(token);
+    const decoded = verifyToken(token) as { id: string } | null;
     if (!decoded) {
-      return res.status(401).json({ message: "Not authorized, invalid token" });
+      return next(new ApiError(401, "Not authorized, invalid token"));
     }
 
     const user = await prisma.user.findUnique({
@@ -36,20 +36,16 @@ export const protect = async (
     });
 
     if (!user) {
-      return res
-        .status(401)
-        .json({ message: "Not authorized, user not found" });
+      return next(new ApiError(401, "Not authorized, user not found"));
     }
 
-    const safeUser: any = { ...user };
+    const safeUser: Record<string, unknown> = { ...user };
     delete safeUser.password;
 
     req.user = safeUser;
     return next();
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Auth middleware error", error);
-    return res
-      .status(401)
-      .json({ message: "Not authorized, token verification failed" });
+    return next(new ApiError(401, "Not authorized, token verification failed"));
   }
 };

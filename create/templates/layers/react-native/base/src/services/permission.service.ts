@@ -175,13 +175,11 @@ class PermissionService {
     const Notifications = require("expo-notifications");
 
     if (!Device.isDevice) {
-      console.log("Must use physical device for Push Notifications");
       return null;
     }
 
     const hasPermission = await this.requirePermission("notification");
     if (!hasPermission) {
-      console.log("User denied push notification permissions");
       return null;
     }
 

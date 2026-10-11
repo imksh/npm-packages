@@ -14,9 +14,11 @@ export const authService = {
   login: (email: string, password: string) =>
     api.post("/auth/login", { email, password }),
 
+  googleLogin: (idToken: string) => api.post("/auth/google", { idToken }),
+
   getMe: () => api.get("/auth/me"),
 
-  updateMe: (data: any) => api.put("/auth/me", data),
+  updateMe: (data: FormData | Record<string, unknown>) => api.put("/auth/me", data),
 
   logout: () => api.post("/auth/logout"),
 

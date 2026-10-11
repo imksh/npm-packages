@@ -1,6 +1,7 @@
 import { verifyToken } from "../utils/jwt.js";
 import logger from "../utils/logger.js";
 import { prisma } from "../config/db.js";
+import { ApiError } from "../utils/ApiError.js";
 
 export const protect = async (req, res, next) => {
   let token;
@@ -14,13 +15,13 @@ export const protect = async (req, res, next) => {
   }
 
   if (!token) {
-    return res.status(401).json({ message: "Not authorized, no token provided" });
+    return next(new ApiError(401, "Not authorized, no token provided"));
   }
 
   try {
     const decoded = verifyToken(token);
     if (!decoded) {
-      return res.status(401).json({ message: "Not authorized, invalid token" });
+      return next(new ApiError(401, "Not authorized, invalid token"));
     }
 
     const user = await prisma.user.findUnique({
@@ -28,7 +29,7 @@ export const protect = async (req, res, next) => {
     });
 
     if (!user) {
-      return res.status(401).json({ message: "Not authorized, user not found" });
+      return next(new ApiError(401, "Not authorized, user not found"));
     }
 
     // Exclude password
@@ -39,6 +40,6 @@ export const protect = async (req, res, next) => {
     return next();
   } catch (error) {
     logger.error("Auth middleware error", error);
-    return res.status(401).json({ message: "Not authorized, token verification failed" });
+    return next(new ApiError(401, "Not authorized, token verification failed"));
   }
 };

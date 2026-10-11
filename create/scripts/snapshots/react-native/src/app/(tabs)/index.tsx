@@ -38,7 +38,7 @@ import CircularProgress from "@/components/ui/feedback/CircularProgress";
 import Skeleton from "@/components/ui/feedback/Skeleton";
 import { GestureWrapper } from "@/components/ui/feedback/GestureWrapper";
 
-import BottomModal from "@/components/ui/BottomModal";
+import Drawer from "@/components/ui/Drawer";
 import Tabs from "@/components/ui/navigation/Tabs";
 import { useColorScheme } from "nativewind";
 import { Colors } from "@/constants/Colors";
@@ -424,11 +424,12 @@ const Index = () => {
         <FloatingActionButton icon="add" onPress={() => setIsModalOpen(true)} />
       </View>
 
-      {/* Interactive Bottom Modal */}
-      <BottomModal
+      {/* Interactive Drawer */}
+      <Drawer
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        heightPercent={0.45}
+        position="bottom"
+        sizePercent={0.45}
       >
         <VStack spacing={20} className="px-4 py-2">
           <View className="h-16 w-16 bg-primary/10 rounded-full items-center justify-center self-center mb-2">
@@ -456,7 +457,7 @@ const Index = () => {
             onPress={() => setIsModalOpen(false)}
           />
         </VStack>
-      </BottomModal>
+      </Drawer>
     </View>
   );
 };

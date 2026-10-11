@@ -2,13 +2,17 @@ import React, { useState, useCallback } from "react";
 import { View } from "react-native";
 import { useAuthStore } from "../../store/useAuthStore";
 import { Txt } from "../../components/common/Typography";
-import { Redirect, router, useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import ScrollContainer from "../../components/ui/layout/ScrollContainer";
 import Input from "../../components/ui/inputs/Input";
 import Button from "../../components/ui/buttons/Button";
 import Tabs from "../../components/ui/navigation/Tabs";
 import Image from "@/components/ui/data-display/Image";
 import logo from "../../../assets/images/logo/logo.png";
+import GoogleAuthButton from "../../components/common/GoogleAuthButton";
+import { ActivityIndicator } from "react-native-paper";
+import { useColorScheme } from "nativewind";
+import { Colors } from "@/constants/Colors";
 
 export default function LoginScreen() {
   const {
@@ -22,6 +26,9 @@ export default function LoginScreen() {
     clearError,
     demoLogin,
   } = useAuthStore();
+  const { colorScheme } = useColorScheme();
+  const colors = Colors[colorScheme ?? "light"];
+  const [isNavigating, setIsNavigating] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -55,13 +62,13 @@ export default function LoginScreen() {
   };
 
   const handleSubmit = async () => {
-    let ok;
+    let ok = false;
     if (mode === "login") {
       ok = await login(form.email, form.password);
     } else {
       if (!otpSent) {
-        ok = await sendOtp(form.email);
-        if (ok) {
+        const sent = await sendOtp(form.email);
+        if (sent) {
           setOtpSent(true);
           setTimer(60);
         }
@@ -69,10 +76,17 @@ export default function LoginScreen() {
         ok = await signup(form.name, form.email, form.password, form.otp);
       }
     }
+    if (ok && (mode === "login" || otpSent)) {
+      setIsNavigating(true);
+    }
   };
 
-  if (!isCheckingAuth && user) {
-    return <Redirect href="/(tabs)" />;
+  if (isNavigating || (!isCheckingAuth && user)) {
+    return (
+      <View className="flex-1 bg-base-100 items-center justify-center">
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
   }
 
   return (
@@ -204,13 +218,23 @@ export default function LoginScreen() {
             <View className="mt-2">
               <Button
                 label="Demo Login"
-                onPress={() => demoLogin()}
+                onPress={async () => {
+                  await demoLogin();
+                  setIsNavigating(true);
+                }}
                 isLoading={loading}
                 variant="outline"
                 isFullWidth
               />
             </View>
           )}
+
+          <GoogleAuthButton
+            isLogin={mode === "login"}
+            onSuccess={() => {
+              setIsNavigating(true);
+            }}
+          />
 
           {mode === "signup" && otpSent && (
             <View className="mt-2">

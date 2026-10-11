@@ -12,7 +12,7 @@ export interface AppNotification {
   type: string;
   url: string | null;
   isRead: boolean;
-  metadata: any | null;
+  metadata: Record<string, unknown> | null;
   createdAt: string;
 }
 
@@ -47,9 +47,12 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         unreadCount,
         loading: false,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message =
+        (error as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message || "Failed to fetch notifications";
       set({
-        error: error.response?.data?.message || "Failed to fetch notifications",
+        error: message,
         loading: false,
       });
     }
@@ -58,45 +61,38 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   markAsRead: async (id: string) => {
     try {
       // Optimistic update
-      const { notifications, unreadCount } = get();
-      const updated = notifications.map(n => 
-        n.id === id ? { ...n, isRead: true } : n
-      );
-      
-      set({ 
-        notifications: updated, 
-        unreadCount: Math.max(0, unreadCount - 1) 
-      });
+      set((state) => ({
+        notifications: state.notifications.map((n) =>
+          n.id === id ? { ...n, isRead: true } : n
+        ),
+        unreadCount: Math.max(0, state.unreadCount - 1),
+      }));
 
       await notificationService.markAsRead(id);
-    } catch{
-      // Revert if failed
+    } catch {
+      // Revert if API fails
       get().fetchNotifications();
     }
   },
 
   markAllAsRead: async () => {
     try {
-      const { notifications } = get();
-      const updated = notifications.map(n => ({ ...n, isRead: true }));
-      
-      set({ 
-        notifications: updated, 
-        unreadCount: 0 
-      });
+      set((state) => ({
+        notifications: state.notifications.map((n) => ({ ...n, isRead: true })),
+        unreadCount: 0,
+      }));
 
       await notificationService.markAllAsRead();
-    } catch{
+    } catch {
       get().fetchNotifications();
     }
   },
 
   registerForPushNotificationsAsync: async () => {
-    let token;
+    let token: string | undefined;
 
-    const isExpoGo = Constants.appOwnership === 'expo';
-    if (isExpoGo && Platform.OS === 'android') {
-      console.log('Skipping push notification registration: not supported in Expo Go on Android (SDK 53+).');
+    const isExpoGo = Constants.appOwnership === "expo";
+    if (isExpoGo && Platform.OS === "android") {
       return;
     }
 
@@ -106,12 +102,12 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const Device = require("expo-device");
 
-      if (Platform.OS === 'android') {
-        await Notifications.setNotificationChannelAsync('default', {
-          name: 'default',
+      if (Platform.OS === "android") {
+        await Notifications.setNotificationChannelAsync("default", {
+          name: "default",
           importance: Notifications.AndroidImportance.MAX,
           vibrationPattern: [0, 250, 250, 250],
-          lightColor: '#FF231F7C',
+          lightColor: "#FF231F7C",
         });
       }
 
@@ -119,13 +115,12 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         const { status: existingStatus } = await Notifications.getPermissionsAsync();
         let finalStatus = existingStatus;
         
-        if (existingStatus !== 'granted') {
+        if (existingStatus !== "granted") {
           const { status } = await Notifications.requestPermissionsAsync();
           finalStatus = status;
         }
         
-        if (finalStatus !== 'granted') {
-          console.log('Failed to get push token for push notification!');
+        if (finalStatus !== "granted") {
           return;
         }
         
@@ -136,17 +131,16 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
         token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
         
-        // Send token to backend
-        try {
-          await notificationService.registerPushToken(token);
-        } catch (e) {
-          console.error("Failed to save push token to server", e);
+        if (token) {
+          try {
+            await notificationService.registerPushToken(token);
+          } catch {
+            // Token registration failed silently
+          }
         }
-      } else {
-        console.log('Must use physical device for Push Notifications');
       }
-    } catch (e) {
-      console.warn("Failed to setup push notifications dynamically:", e);
+    } catch {
+      // Notification setup failed silently
     }
 
     return token;

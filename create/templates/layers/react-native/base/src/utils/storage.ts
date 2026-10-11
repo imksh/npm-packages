@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Save data
-export const save = async (key: string, value: any) => {
+export const save = async (key: string, value: unknown) => {
   if (!key || !value) return; 
   try {
     const jsonValue = JSON.stringify(value);

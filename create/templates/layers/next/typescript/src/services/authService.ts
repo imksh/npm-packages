@@ -12,7 +12,7 @@ export const authService = {
 
   getMe: () => api.get("/auth/me"),
 
-  updateMe: (data: any) => api.put("/auth/me", data),
+  updateMe: (data: FormData | Record<string, unknown>) => api.put("/auth/me", data),
 
   logout: () =>
     api.post("/auth/logout"),

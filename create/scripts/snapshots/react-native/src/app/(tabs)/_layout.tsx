@@ -1,4 +1,4 @@
-import { Tabs, Redirect } from "expo-router";
+import { Tabs } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../constants/Colors";
 import CustomTabBar from "../../components/ui/CustomTabBar";
@@ -10,7 +10,7 @@ const TabLayout = () => {
   const { user, isCheckingAuth } = useAuthStore();
 
   if (!isCheckingAuth && !user) {
-    return <Redirect href="/login" />;
+    return null;
   }
 
   return (
@@ -19,7 +19,7 @@ const TabLayout = () => {
         <CustomTabBar
           {...props}
           showCenterButton={false}
-          onCenterButtonPress={() => console.log("Create button pressed!")}
+          onCenterButtonPress={() => {}}
         />
       )}
       screenOptions={{

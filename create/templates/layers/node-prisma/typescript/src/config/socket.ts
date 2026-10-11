@@ -1,12 +1,13 @@
-import { Server } from "socket.io";
+import { Server as SocketIOServer } from "socket.io";
+import type { Server as HttpServer } from "http";
 import logger from "../utils/logger.js";
 
-let io: Server;
+let io: SocketIOServer;
 
 const userSocketMap: { [key: string]: Set<string> } = {};
 
-const initializeSocket = (server: any) => {
-  io = new Server(server, {
+const initializeSocket = (server: HttpServer) => {
+  io = new SocketIOServer(server, {
     cors: {
       origin: ["http://localhost:5173"],
       credentials: true,

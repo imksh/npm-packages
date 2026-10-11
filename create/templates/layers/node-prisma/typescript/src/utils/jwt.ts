@@ -1,7 +1,13 @@
 import jwt from "jsonwebtoken";
 import { Response } from "express";
 
-export const generateToken = (user: any, res?: Response) => {
+export interface UserTokenPayload {
+  _id?: unknown;
+  id?: unknown;
+  [key: string]: unknown;
+}
+
+export const generateToken = (user: UserTokenPayload, res?: Response) => {
   const payload = { id: user._id || user.id };
   const JWT_SECRET = process.env.JWT_SECRET || "fallbacksecret";
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "30d" });
@@ -21,7 +27,7 @@ export const verifyToken = (token: string) => {
   try {
     const JWT_SECRET = process.env.JWT_SECRET || "fallbacksecret";
     return jwt.verify(token, JWT_SECRET);
-  } catch (error) {
+  } catch {
     return null;
   }
 };

@@ -21,8 +21,8 @@ const createLimiter = ({
     legacyHeaders: false,
     skipSuccessfulRequests,
 
-    keyGenerator: (req: any) => {
-      return req.user?.id || req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    keyGenerator: (req: Request) => {
+      return String(req.user?.id || req.user?._id || req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown");
     },
 
     handler: (req: Request, res: Response) => {

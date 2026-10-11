@@ -1,6 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
+import { IconType } from "react-icons";
 import {
   FaTriangleExclamation,
   FaCircleInfo,
@@ -10,7 +11,7 @@ import {
 
 const variants: Record<
   "warning" | "error" | "success" | "info",
-  { icon: any; iconBg: string; iconColor: string; button: string }
+  { icon: IconType; iconBg: string; iconColor: string; button: string }
 > = {
   warning: {
     icon: FaTriangleExclamation,

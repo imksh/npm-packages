@@ -11,6 +11,20 @@ import { useNotificationStore } from "./useNotificationStore";
 // called from a useEffect, the promise is already resolved or very close.
 const _prefetchedUser: Promise<User | null> = get("user");
 
+interface ApiErrorResponse {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+  message?: string;
+}
+
+const getErrorMessage = (err: unknown): string => {
+  const apiErr = err as ApiErrorResponse;
+  return apiErr.response?.data?.message || apiErr.message || "An unexpected error occurred";
+};
+
 export interface AuthState {
   user: User | null;
   loading: boolean;
@@ -31,6 +45,7 @@ export interface AuthState {
     role?: string,
   ) => Promise<boolean>;
   login: (email: string, password: string) => Promise<boolean>;
+  googleLogin: (idToken: string) => Promise<boolean>;
   demoLogin: () => Promise<void>;
   getMe: () => Promise<void>;
   updateProfile: (updates: Partial<User> | FormData) => Promise<boolean>;
@@ -111,9 +126,9 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await authService.sendOtp(email);
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       set({
-        error: err.response?.data?.message || err.message,
+        error: getErrorMessage(err),
         loading: false,
       });
       return false;
@@ -154,9 +169,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       notifStore.registerForPushNotificationsAsync();
       notifStore.fetchNotifications();
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       set({
-        error: err.response?.data?.message || err.message,
+        error: getErrorMessage(err),
         loading: false,
       });
       return false;
@@ -185,9 +200,39 @@ export const useAuthStore = create<AuthState>((set) => ({
       notifStore.registerForPushNotificationsAsync();
       notifStore.fetchNotifications();
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       set({
-        error: err.response?.data?.message || err.message,
+        error: getErrorMessage(err),
+        loading: false,
+      });
+      return false;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  googleLogin: async (idToken: string) => {
+    set({ loading: true, error: null });
+    try {
+      const { data } = await authService.googleLogin(idToken);
+      if (data.data?.token) {
+        save("token", data.data.token);
+      }
+      const user = data.data?.user || data.data;
+      if (user) save("user", user);
+      set({
+        user,
+        loading: false,
+      });
+      initializeSocket();
+      const notifStore = useNotificationStore.getState();
+      notifStore.listenForSocketEvents();
+      notifStore.registerForPushNotificationsAsync();
+      notifStore.fetchNotifications();
+      return true;
+    } catch (err: unknown) {
+      set({
+        error: getErrorMessage(err),
         loading: false,
       });
       return false;
@@ -231,9 +276,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       const { data } = await authService.updateMe(updates);
       set({ user: data.data, loading: false });
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
       set({
-        error: err.response?.data?.message || err.message,
+        error: getErrorMessage(err),
         loading: false,
       });
       return false;
@@ -264,8 +309,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await authService.genOtp(email);
       return true;
-    } catch (err: any) {
-      set({ error: err.response?.data?.message || err.message, loading: false });
+    } catch (err: unknown) {
+      set({ error: getErrorMessage(err), loading: false });
       return false;
     } finally {
       set({ loading: false });
@@ -278,8 +323,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       const { data } = await authService.verifyOtp(email, otp);
       if (data.token) save("token", data.token);
       return true;
-    } catch (err: any) {
-      set({ error: err.response?.data?.message || err.message, loading: false });
+    } catch (err: unknown) {
+      set({ error: getErrorMessage(err), loading: false });
       return false;
     } finally {
       set({ loading: false });
@@ -291,8 +336,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await authService.resetPassword(newPassword);
       return true;
-    } catch (err: any) {
-      set({ error: err.response?.data?.message || err.message, loading: false });
+    } catch (err: unknown) {
+      set({ error: getErrorMessage(err), loading: false });
       return false;
     } finally {
       set({ loading: false });
@@ -304,8 +349,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await authService.changePassword(oldPassword, newPassword);
       return true;
-    } catch (err: any) {
-      set({ error: err.response?.data?.message || err.message, loading: false });
+    } catch (err: unknown) {
+      set({ error: getErrorMessage(err), loading: false });
       return false;
     } finally {
       set({ loading: false });

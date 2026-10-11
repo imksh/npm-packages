@@ -21,7 +21,7 @@ const Header = () => {
   const { user } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
-  const headerRef = useRef<HTMLHeadingElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
 
   // Close mobile menu on scroll
   useEffect(() => {
@@ -44,7 +44,7 @@ const Header = () => {
   }, [setIsMobilemenuOpen]);
 
   return (
-    <header ref={headerRef as any} className="sticky top-0 z-40 p-4">
+    <header ref={headerRef} className="sticky top-0 z-40 p-4">
       <div className="max-w-7xl mx-auto relative">
         {/* Main Navbar Bar */}
         <div className="bg-primary text-primary-content rounded-full shadow-lg px-5 py-2.5 flex items-center justify-between relative">

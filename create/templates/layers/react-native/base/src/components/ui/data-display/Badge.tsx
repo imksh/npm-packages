@@ -1,4 +1,3 @@
-import React from "react";
 import { View, ViewProps } from "react-native";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../../constants/Colors";
@@ -80,7 +79,7 @@ export default function Badge({
     <View
       style={[
         {
-          backgroundColor: vStyles.bg as any,
+          backgroundColor: vStyles.bg,
           height: sStyles.height,
           paddingHorizontal: sStyles.px,
           borderRadius: 9999,
