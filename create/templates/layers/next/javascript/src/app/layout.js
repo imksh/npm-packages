@@ -4,14 +4,12 @@ import Scroll from "../components/common/Scroll";
 import SEO from "../components/common/SEO";
 import "../index.css";
 import appConfig from "../config/appConfig";
-
 export const metadata = {
   title: appConfig.app.name,
   description: "A Next.js starter kit with App Router",
   manifest: "/manifest.json",
   themeColor: "#4f46e5",
 };
-
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
@@ -28,7 +26,7 @@ export default function RootLayout({ children }) {
         <div className="min-h-screen bg-base-100 text-base-content font-sans">
           <Toaster position="top-right" />
           <Scroll />
-          
+
           {children}
         </div>
       </body>

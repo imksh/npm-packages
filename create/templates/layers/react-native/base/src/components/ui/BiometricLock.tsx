@@ -5,8 +5,8 @@ import { authenticateAsync } from "@/services/biometric.service";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "nativewind";
-import { Txt } from "./common/Typography";
-import Button from "./ui/buttons/Button";
+import { Txt } from "../common/Typography";
+import Button from "../ui/buttons/Button";
 import appConfig from "@/config/appConfig";
 
 export default function BiometricLock({ children }: { children: React.ReactNode }) {
@@ -29,12 +29,12 @@ export default function BiometricLock({ children }: { children: React.ReactNode 
 
     const subscription = AppState.addEventListener("change", (nextAppState: AppStateStatus) => {
       // App went to background
-      if (appState.current.match(/active/) && nextAppState.match(/inactive|background/)) {
+      if (appState.current?.match(/active/) && nextAppState.match(/inactive|background/)) {
         backgroundTime.current = Date.now();
       }
 
       // App came to foreground
-      if (appState.current.match(/inactive|background/) && nextAppState === "active") {
+      if (appState.current?.match(/inactive|background/) && nextAppState === "active") {
         if (isBiometricEnabled && !isAppLocked && backgroundTime.current) {
           const timeInBackground = Date.now() - backgroundTime.current;
           // lockDuration is in minutes, so multiply by 60000. Give a 10s grace period for 'Immediately' (0) to allow for permission/native modals.
@@ -60,7 +60,7 @@ export default function BiometricLock({ children }: { children: React.ReactNode 
     if (isAuthenticating) return;
     setIsAuthenticating(true);
     
-    const success = await authenticateAsync("Unlock HireMe");
+    const success = await authenticateAsync(`Unlock ${appConfig.app.name}`);
     
     if (success) {
       setIsAppLocked(false);

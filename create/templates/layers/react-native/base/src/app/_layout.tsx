@@ -15,6 +15,9 @@ import { useFonts } from "expo-font";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
+import { LogBox } from "react-native";
+
+LogBox.ignoreLogs(["ImageBackground is deprecated"]);
 
 SplashScreen.preventAutoHideAsync();
 
@@ -30,7 +33,7 @@ export default function RootLayout() {
   const { getMe, isCheckingAuth, loadCachedUser, user } = useAuthStore();
   const { colorScheme, setColorScheme } = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
-  
+
   const segments = useSegments();
   const router = useRouter();
 
@@ -43,7 +46,7 @@ export default function RootLayout() {
   useEffect(() => {
     // Load cached user quickly, then fetch fresh in background
     loadCachedUser().then(() => {
-      getMe();
+      getMe().catch(() => {});
     });
 
     // Load saved theme
@@ -92,10 +95,6 @@ export default function RootLayout() {
             <Stack.Screen
               name="(auth)"
               options={{ headerShown: false, animation: "fade" }}
-            />
-            <Stack.Screen
-              name="doc-viewer"
-              options={{ presentation: "fullScreenModal" }}
             />
           </Stack>
         </BiometricLock>

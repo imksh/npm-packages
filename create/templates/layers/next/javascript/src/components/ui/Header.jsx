@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -10,13 +11,12 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { getInitials } from "../../utils/getInitials";
 import { motion, AnimatePresence } from "framer-motion";
 import { navigation } from "../../config/navigation";
-
 const Header = () => {
-  const { 
-    theme, 
-    toggleTheme, 
-    isMobileMenuOpened: isMobileMenuOpen, 
-    setMobileMenuOpened: setIsMobilemenuOpen 
+  const {
+    theme,
+    toggleTheme,
+    isMobileMenuOpened: isMobileMenuOpen,
+    setMobileMenuOpened: setIsMobilemenuOpen,
   } = useUiStore();
   const { user } = useAuthStore();
   const router = useRouter();
@@ -28,7 +28,9 @@ const Header = () => {
     const handleScroll = () => {
       setIsMobilemenuOpen(false);
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [setIsMobilemenuOpen]);
 
@@ -42,7 +44,6 @@ const Header = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [setIsMobilemenuOpen]);
-
   return (
     <header ref={headerRef} className="sticky top-0 z-40 p-4">
       <div className="max-w-7xl mx-auto relative">
@@ -52,7 +53,11 @@ const Header = () => {
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-2">
               {appConfig.app.logo ? (
-                <img src={appConfig.app.logo} alt="logo" className="h-10 w-10" />
+                <img
+                  src={appConfig.app.logo}
+                  alt="logo"
+                  className="h-10 w-10"
+                />
               ) : (
                 <div className="flex items-center">
                   <div className="w-8 h-8 rounded-full bg-base-100/25 flex items-center justify-center text-primary-content shadow-inner">
@@ -70,12 +75,10 @@ const Header = () => {
           {/* Center: Dynamic Navigation */}
           <nav className="hidden lg:flex items-center gap-6 text-sm font-medium absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
             {navigation.map((item) => (
-              <Link 
+              <Link
                 key={item.path}
-                href={item.path} 
-                className={`hover:text-primary transition-colors ${
-                  pathname === item.path ? "text-white font-bold" : "text-white/80"
-                }`}
+                href={item.path}
+                className={`hover:text-primary transition-colors ${pathname === item.path ? "text-white font-bold" : "text-white/80"}`}
               >
                 {item.title}
               </Link>
@@ -133,10 +136,21 @@ const Header = () => {
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -40 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -40 }}
-              transition={{ duration: 0.3 }}
+              initial={{
+                opacity: 0,
+                y: -40,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              exit={{
+                opacity: 0,
+                y: -40,
+              }}
+              transition={{
+                duration: 0.3,
+              }}
               className="lg:hidden mt-3 bg-primary backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 overflow-hidden text-primary-content absolute w-full"
             >
               <div className="p-4 space-y-2">
@@ -146,9 +160,7 @@ const Header = () => {
                     key={item.path}
                     href={item.path}
                     onClick={() => setIsMobilemenuOpen(false)}
-                    className={`block px-4 py-3 rounded-xl hover:bg-white/10 transition-colors font-semibold ${
-                      pathname === item.path ? "bg-white/15 text-white" : "text-white/80"
-                    }`}
+                    className={`block px-4 py-3 rounded-xl hover:bg-white/10 transition-colors font-semibold ${pathname === item.path ? "bg-white/15 text-white" : "text-white/80"}`}
                   >
                     {item.title}
                   </Link>
@@ -205,8 +217,12 @@ const Header = () => {
                         alt="avatar"
                       />
                       <div className="text-left">
-                        <div className="font-bold text-sm text-white">{user.name}</div>
-                        <div className="text-xs text-white/70 truncate max-w-[180px]">{user.email}</div>
+                        <div className="font-bold text-sm text-white">
+                          {user.name}
+                        </div>
+                        <div className="text-xs text-white/70 truncate max-w-[180px]">
+                          {user.email}
+                        </div>
                       </div>
                     </div>
                     <button
@@ -228,5 +244,4 @@ const Header = () => {
     </header>
   );
 };
-
 export default Header;

@@ -1,6 +1,6 @@
 "use client";
-import React from "react";
 
+import React from "react";
 const COLOR_STYLES = {
   blue: {
     icon: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
@@ -53,7 +53,6 @@ const COLOR_STYLES = {
       "border-error/50 shadow-sm ring-1 ring-error/20 bg-gradient-to-br from-base-100 to-error/[0.03]",
   },
 };
-
 export const StatsCard = ({
   title,
   value,
@@ -80,7 +79,6 @@ export const StatsCard = ({
           ? `${percentage}%`
           : percentage
         : null;
-
   const renderBadge = () => {
     if (!badge) return null;
     if (React.isValidElement(badge)) return badge;
@@ -93,7 +91,6 @@ export const StatsCard = ({
       </span>
     );
   };
-
   const renderTrend = () => {
     if (!trend) return null;
     if (React.isValidElement(trend)) return trend;
@@ -101,9 +98,7 @@ export const StatsCard = ({
     const isPos = t.isPositive ?? true;
     return (
       <span
-        className={`inline-flex items-center gap-0.5 text-xs font-semibold ${
-          isPos ? "text-success" : "text-error"
-        }`}
+        className={`inline-flex items-center gap-0.5 text-xs font-semibold ${isPos ? "text-success" : "text-error"}`}
       >
         <span>{isPos ? "↑" : "↓"}</span>
         <span>{t.value}</span>
@@ -113,15 +108,10 @@ export const StatsCard = ({
       </span>
     );
   };
-
   return (
     <div
       onClick={onClick}
-      className={`card bg-base-100 border transition-all duration-200 p-4 rounded-2xl ${
-        onClick ? "cursor-pointer hover:shadow-sm active:scale-[0.99]" : ""
-      } ${
-        active ? styles.activeBorder : "border-base-200 hover:border-base-300"
-      } ${className}`}
+      className={`card bg-base-100 border transition-all duration-200 p-4 rounded-2xl ${onClick ? "cursor-pointer hover:shadow-sm active:scale-[0.99]" : ""} ${active ? styles.activeBorder : "border-base-200 hover:border-base-300"} ${className}`}
     >
       {/* Top row: Title and Icon */}
       <div className="flex items-center justify-between gap-2">
@@ -164,5 +154,4 @@ export const StatsCard = ({
     </div>
   );
 };
-
 export default StatsCard;

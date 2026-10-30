@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { IoClose } from "react-icons/io5";
 import { useUiStore } from "../../store/useUiStore";
-
 const sizes = {
   sm: "max-w-sm",
   md: "max-w-md",
@@ -16,7 +15,6 @@ const sizes = {
   "7xl": "max-w-7xl",
   full: "max-w-7xl",
 };
-
 const Modal = ({
   open,
   onClose,
@@ -33,7 +31,6 @@ const Modal = ({
   height,
 }) => {
   const setModalOpen = useUiStore((state) => state.setModalOpen);
-
   useEffect(() => {
     if (open) {
       setModalOpen(true);
@@ -42,25 +39,19 @@ const Modal = ({
       };
     }
   }, [open, setModalOpen]);
-
   useEffect(() => {
     if (!open || !closeOnEsc) return;
-
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
         onClose?.();
       }
     };
-
     document.addEventListener("keydown", handleKeyDown);
-
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [open, closeOnEsc, onClose]);
-
   if (!open) return null;
-
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       {/* Backdrop */}
@@ -83,7 +74,13 @@ const Modal = ({
           animate-in zoom-in-95 fade-in duration-200
           ${className}
         `}
-        style={height ? { height } : undefined}
+        style={
+          height
+            ? {
+                height,
+              }
+            : undefined
+        }
       >
         {/* Header */}
         {!hideHeader && (title || showCloseButton) && (
@@ -120,5 +117,4 @@ const Modal = ({
     document.body,
   );
 };
-
 export default Modal;

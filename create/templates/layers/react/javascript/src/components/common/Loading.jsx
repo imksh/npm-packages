@@ -1,7 +1,6 @@
 import React from "react";
 import LottieAnimation from "./LottieIcon";
 import loader from "../../assets/animations/loading.json";
-
 const Loading = ({
   className = "w-60 h-60",
   bgClass = "bg-base-100",
@@ -15,5 +14,4 @@ const Loading = ({
     </div>
   );
 };
-
 export default Loading;

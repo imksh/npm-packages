@@ -21,6 +21,7 @@ import { Portal } from "react-native-paper";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../constants/Colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Txt } from "../common/Typography";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -36,6 +37,10 @@ export interface DrawerProps {
   widthPercent?: number; // backwards compatibility alias for left/right
   showHandle?: boolean;
   zIndex?: number;
+  title?: string;
+  subtitle?: string;
+  titlePosition?: "center" | "left" | "right";
+  footer?: React.ReactNode;
 }
 
 export default function Drawer({
@@ -48,6 +53,10 @@ export default function Drawer({
   widthPercent,
   showHandle = true,
   zIndex = 50,
+  title,
+  subtitle,
+  titlePosition = "center",
+  footer,
 }: DrawerProps) {
   const { colorScheme } = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
@@ -252,6 +261,59 @@ export default function Drawer({
 
   if (!isRendered && !isOpen) return null;
 
+  const headerAlign =
+    titlePosition === "left"
+      ? "items-start"
+      : titlePosition === "right"
+        ? "items-end"
+        : "items-center";
+
+  const renderHeader = () => {
+    if (!title && !subtitle) return null;
+    return (
+      <View
+        className={`pb-3 ${
+          !showHandle && position === "bottom" ? "pt-5" : ""
+        } ${headerAlign}`}
+      >
+        {title ? (
+          <Txt
+            variant="lg"
+            weight="bold"
+            align={titlePosition}
+            className="text-base-content"
+          >
+            {title}
+          </Txt>
+        ) : null}
+        {subtitle ? (
+          <Txt
+            variant="xs"
+            align={titlePosition}
+            className="text-base-content/60 mt-0.5"
+          >
+            {subtitle}
+          </Txt>
+        ) : null}
+      </View>
+    );
+  };
+
+  const renderFooter = () => {
+    if (!footer) return null;
+    return (
+      <View
+        className="pt-2"
+        style={{
+          paddingBottom:
+            position === "bottom" ? Math.max(insets.bottom, 16) : 16,
+        }}
+      >
+        {footer}
+      </View>
+    );
+  };
+
   return (
     <Portal>
       <KeyboardAvoidingView
@@ -278,20 +340,26 @@ export default function Drawer({
                 {showHandle && (
                   <GestureDetector gesture={panGesture}>
                     <View
-                      className="items-center pt-4 pb-6 bg-base-100 rounded-t-[30px]"
+                      className={`items-center pt-4 ${
+                        title || subtitle ? "pb-3" : "pb-6"
+                      } bg-base-100 rounded-t-[30px]`}
                       style={{ zIndex: 10 }}
                     >
                       <View className="w-16 h-1.5 rounded-full bg-base-300" />
                     </View>
                   </GestureDetector>
                 )}
+                {renderHeader()}
                 <View className="flex-1 px-6">{children}</View>
+                {renderFooter()}
               </View>
             )}
 
             {position === "top" && (
               <View className="flex-1">
+                {renderHeader()}
                 <View className="flex-1 px-6">{children}</View>
+                {renderFooter()}
                 {showHandle && (
                   <GestureDetector gesture={panGesture}>
                     <View
@@ -307,7 +375,11 @@ export default function Drawer({
 
             {position === "left" && (
               <View className="flex-1 flex-row">
-                <View className="flex-1 px-6">{children}</View>
+                <View className="flex-1">
+                  {renderHeader()}
+                  <View className="flex-1 px-6">{children}</View>
+                  {renderFooter()}
+                </View>
                 {showHandle && (
                   <GestureDetector gesture={panGesture}>
                     <View
@@ -333,7 +405,11 @@ export default function Drawer({
                     </View>
                   </GestureDetector>
                 )}
-                <View className="flex-1 px-6">{children}</View>
+                <View className="flex-1">
+                  {renderHeader()}
+                  <View className="flex-1 px-6">{children}</View>
+                  {renderFooter()}
+                </View>
               </View>
             )}
           </Animated.View>

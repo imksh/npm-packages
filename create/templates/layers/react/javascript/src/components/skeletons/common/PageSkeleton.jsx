@@ -1,5 +1,4 @@
 import Skeleton from "./Skeleton";
-
 const PageSkeleton = () => {
   return (
     <div className="space-y-8">
@@ -15,5 +14,4 @@ const PageSkeleton = () => {
     </div>
   );
 };
-
 export default PageSkeleton;

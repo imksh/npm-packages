@@ -1,7 +1,7 @@
 "use client";
-import React from "react";
-import { X } from "lucide-react";
 
+import React, { InputHTMLAttributes } from "react";
+import { X } from "lucide-react";
 export const Input = React.forwardRef(
   (
     {
@@ -26,12 +26,9 @@ export const Input = React.forwardRef(
         <input
           ref={ref}
           value={value}
-          className={`input input-bordered w-full ${sizeClass} ${icon ? "pl-10" : ""} ${
-            onClear && value ? "pr-10" : ""
-          } ${className}`}
+          className={`input input-bordered w-full ${sizeClass} ${icon ? "pl-10" : ""} ${onClear && value ? "pr-10" : ""} ${className}`}
           {...props}
         />
-
         {onClear && value && (
           <button
             type="button"
@@ -46,5 +43,4 @@ export const Input = React.forwardRef(
     );
   },
 );
-
 Input.displayName = "Input";

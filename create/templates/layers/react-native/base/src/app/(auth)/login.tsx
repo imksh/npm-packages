@@ -181,7 +181,7 @@ export default function LoginScreen() {
               <Txt
                 variant="md"
                 className="text-primary text-xs"
-                onPress={() => router.push("/(auth)/forgot-password")}
+                onPress={() => router.navigate("/(auth)/forgot-password")}
               >
                 Forgot Password?
               </Txt>

@@ -18,6 +18,7 @@ import Animated, {
   Extrapolation,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
+import appConfig from "@/config/appConfig";
 
 const { width, height } = Dimensions.get("window");
 
@@ -616,7 +617,7 @@ export const LocationLoader = ({ onReady }: LocationLoaderProps) => {
             <Ionicons name="home" size={17} color="#fff" />
           </View>
           <Txt style={{ color: "#fff", fontFamily: "InterExtraBold", fontSize: 20, letterSpacing: -0.5 }}>
-            rentro
+            {appConfig.app.name}
           </Txt>
         </View>
       </Animated.View>

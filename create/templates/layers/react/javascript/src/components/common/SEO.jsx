@@ -1,9 +1,7 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-
 const SEO = ({ title, description, keywords, canonical, noIndex = false }) => {
   const location = useLocation();
-
   useEffect(() => {
     // TITLE
     if (title) {
@@ -39,7 +37,6 @@ const SEO = ({ title, description, keywords, canonical, noIndex = false }) => {
       link.rel = "canonical";
       document.head.appendChild(link);
     }
-
     link.href = canonical || `https://shreebaglamukhi.com${location.pathname}`;
 
     // ROBOTS
@@ -49,11 +46,8 @@ const SEO = ({ title, description, keywords, canonical, noIndex = false }) => {
       robots.name = "robots";
       document.head.appendChild(robots);
     }
-
     robots.content = noIndex ? "noindex,nofollow" : "index,follow";
   }, [title, description, keywords, canonical, noIndex, location.pathname]);
-
   return null;
 };
-
 export default SEO;

@@ -1,7 +1,7 @@
 "use client";
+
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
 export const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   if (totalPages <= 1) return null;
 
@@ -40,7 +40,6 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   for (let i = startMobilePage; i <= endMobilePage; i++) {
     mobilePages.push(i);
   }
-
   const baseBtnClass =
     "relative inline-flex items-center justify-center min-w-8 h-8 sm:min-w-9 sm:h-9 px-1.5 sm:px-2 text-xs sm:text-sm font-medium transition-all duration-200 rounded-full bg-base-100 hover:bg-base-200 text-base-content/70 hover:text-base-content focus:z-10 focus:outline-none focus:ring-2 focus:ring-primary/50 shadow-sm";
   const activeBtnClass =
@@ -49,7 +48,6 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     "relative inline-flex items-center justify-center min-w-8 h-8 sm:min-w-9 sm:h-9 px-1.5 sm:px-2 text-xs sm:text-sm font-medium transition-all duration-200 rounded-full bg-base-100 text-base-content/30 cursor-not-allowed shadow-sm";
   const ellipsisClass =
     "relative inline-flex items-center justify-center min-w-8 h-8 sm:min-w-9 sm:h-9 px-1 sm:px-2 text-xs sm:text-sm font-medium text-base-content/40 cursor-default";
-
   return (
     <>
       {/* Mobile / Small Screen: 3 page circles + ellipses + boundary pages */}
@@ -166,5 +164,4 @@ export const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     </>
   );
 };
-
 export default Pagination;

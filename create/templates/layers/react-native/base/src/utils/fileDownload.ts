@@ -30,7 +30,7 @@ export const downloadFileString = async (
           const byteArray = new Uint8Array(byteNumbers);
           byteArrays.push(byteArray);
         }
-        blob = new Blob(byteArrays, { type: mimeType });
+        blob = new Blob(byteArrays as BlobPart[], { type: mimeType });
       } else {
         blob = new Blob([content], { type: mimeType });
       }

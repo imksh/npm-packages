@@ -27,7 +27,7 @@ export default function Switch({
 }: SwitchProps) {
   const { colorScheme } = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
-  
+
   const progress = useSharedValue(value ? 1 : 0);
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export default function Switch({
     const backgroundColor = interpolateColor(
       progress.value,
       [0, 1],
-      [theme.base300, theme.primary]
+      [theme.base300, theme.primary],
     );
     return { backgroundColor };
   });
@@ -54,22 +54,53 @@ export default function Switch({
       activeOpacity={0.8}
       disabled={disabled}
       onPress={() => onChange && onChange(!value)}
-      style={[{ flexDirection: "row", alignItems: "center", opacity: disabled ? 0.5 : 1 }, style]}
+      style={[
+        {
+          flexDirection: "row",
+          alignItems: "center",
+          opacity: disabled ? 0.5 : 1,
+        },
+        style,
+      ]}
     >
       <Animated.View
         style={[
-          { width: 44, height: 24, borderRadius: 12, padding: 2, justifyContent: "center" },
+          {
+            width: 44,
+            height: 24,
+            borderRadius: 12,
+            padding: 2,
+            justifyContent: "center",
+          },
           trackStyle,
         ]}
       >
         <Animated.View
           style={[
-            { width: 20, height: 20, borderRadius: 10, backgroundColor: "#fff", elevation: 2, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 2 },
+            {
+              width: 20,
+              height: 20,
+              borderRadius: 10,
+              backgroundColor: "#fff",
+              elevation: 2,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.2,
+              shadowRadius: 2,
+            },
             thumbStyle,
           ]}
         />
       </Animated.View>
-      {label && <Txt color={theme.baseContent} variant="base" style={{ marginLeft: 10 }}>{label}</Txt>}
+      {label && (
+        <Txt
+          color={theme.baseContent}
+          variant="base"
+          style={{ marginLeft: 10 }}
+        >
+          {label}
+        </Txt>
+      )}
     </TouchableOpacity>
   );
 }

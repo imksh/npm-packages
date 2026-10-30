@@ -1,31 +1,29 @@
 "use client";
+
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  Mail,
-  Lock,
-  User,
-  Eye,
-  EyeOff,
-  ArrowLeft,
-  GraduationCap,
-} from "lucide-react";
+import { Mail, Lock, User, Eye, EyeOff, GraduationCap } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 import Loading from "../../components/common/Loading";
-
 const Login = () => {
   const router = useRouter();
-  const { login, signup, sendOtp, loading, isCheckingAuth, error, user } = useAuthStore();
-
+  const { login, signup, sendOtp, loading, isCheckingAuth, error, user } =
+    useAuthStore();
   const [mode, setMode] = useState("login"); // "login" | "signup"
   const [showPassword, setShowPassword] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", password: "", otp: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    otp: "",
+  });
   const [otpSent, setOtpSent] = useState(false);
-
   const handleChange = (e) =>
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-
+    setForm((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   const handleSubmit = async (e) => {
     e.preventDefault();
     let ok;
@@ -42,11 +40,9 @@ const Login = () => {
       }
     }
   };
-
   if (isCheckingAuth || user) {
     return <Loading />;
   }
-
   return (
     <div className="min-h-dvh w-screen bg-base-100 text-base-content flex items-center justify-center p-4 font-sans">
       <div className="relative w-full max-w-md">
@@ -75,11 +71,7 @@ const Login = () => {
                 setMode("login");
                 setOtpSent(false);
               }}
-              className={`tab flex-1 rounded-xl text-sm font-bold transition-all ${
-                mode === "login"
-                  ? "tab-active bg-primary text-primary-content!"
-                  : ""
-              }`}
+              className={`tab flex-1 rounded-xl text-sm font-bold transition-all ${mode === "login" ? "tab-active bg-primary text-primary-content!" : ""}`}
             >
               Sign In
             </button>
@@ -89,11 +81,7 @@ const Login = () => {
                 setMode("signup");
                 setOtpSent(false);
               }}
-              className={`tab flex-1 rounded-xl text-sm font-bold transition-all ${
-                mode === "signup"
-                  ? "tab-active bg-primary text-primary-content!"
-                  : ""
-              }`}
+              className={`tab flex-1 rounded-xl text-sm font-bold transition-all ${mode === "signup" ? "tab-active bg-primary text-primary-content!" : ""}`}
             >
               Sign Up
             </button>
@@ -231,5 +219,4 @@ const Login = () => {
     </div>
   );
 };
-
 export default Login;

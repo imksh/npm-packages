@@ -11,11 +11,8 @@ import {
 } from "../controllers/auth.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
 import { apiLimiter } from "../middleware/rateLimiter.js";
-
 const router = express.Router();
-
 router.use(apiLimiter);
-
 router.post("/send-signup-otp", genSignupOtp);
 router.post("/signup", signup);
 router.post("/login", login);
@@ -24,5 +21,4 @@ router.post("/logout", logout);
 router.get("/me", protect, getMe);
 router.put("/me", protect, updateMe);
 router.post("/push-token", protect, savePushToken);
-
 export default router;

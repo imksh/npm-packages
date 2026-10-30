@@ -3,13 +3,17 @@ export const SuccessResponse = (
   statusCode,
   message = "Success",
   data = null,
-  pagination = undefined,
+  pagination,
 ) => {
   return res.status(statusCode).json({
     success: statusCode < 400,
     statusCode,
     message,
     data,
-    ...(pagination && { pagination }),
+    ...(pagination
+      ? {
+          pagination,
+        }
+      : {}),
   });
 };

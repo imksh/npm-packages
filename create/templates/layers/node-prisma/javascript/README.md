@@ -1,10 +1,10 @@
-# Node.js Prisma Backend Boilerplate
+# Node.js TypeScript Prisma Backend Boilerplate
 
-A production-ready Node.js & Express boilerplate project with best-practice architectures, modular routing, and Prisma ORM integration.
+A production-ready, strongly-typed Node.js & Express boilerplate project with best-practice architectures, modular routing, Prisma ORM, and TSX engine compilation.
 
 ## Features
 
-- ⚙️ **Modular Architecture:** Express application setup decoupled into `app.js` (middleware + router wiring) and `index.js` (server initialization & db connection).
+- ⚙️ **Modular Architecture:** Express application setup decoupled into `app.ts` (middleware + router wiring) and `index.ts` (server initialization & db connection).
 - 🗄️ **Prisma ORM:** Built-in PostgreSQL datasource configuration and schema mapping for `User`, `Otp`, and `PushSubscription` models.
 - 📝 **Colorized Logging:** Zero-dependency custom logger with timestamped success, warning, info, and error layouts.
 - 🛡️ **Security Out-of-the-Box:** Pre-configured with Helmet headers, CORS policies, and global rate limiters (`apiLimiter`, `authLimiter`, `uploadLimiter`).
@@ -13,6 +13,7 @@ A production-ready Node.js & Express boilerplate project with best-practice arch
 - 🖼️ **File Uploads:** Cloudinary integration utilizing Multer memory buffers for secure, single or multi-file uploads.
 - 🔌 **Socket.io Setup:** Pre-installed Socket.io hooks mapping connected user sessions to active sockets.
 - ✉️ **Web Push:** Push notifications integration powered by VAPID key generators and web-push subscriptions.
+- 📦 **TSX Engine:** Fast TS runner with native ESM specifier resolution support.
 
 ## Getting Started
 
@@ -21,7 +22,7 @@ A production-ready Node.js & Express boilerplate project with best-practice arch
 Create a `.env` file in the root directory (based on `.env.example`):
 
 ```env
-PORT=5001
+PORT=5002
 JWT_SECRET=your_super_secret_jwt_key
 DATABASE_URL=postgresql://user:password@localhost:5432/db_name
 
@@ -52,8 +53,11 @@ npm run db:push
 # Generate Prisma Client types
 npm run db:generate
 
-# Start development server with reload
+# Start development server with reload (via tsx)
 npm run dev
+
+# Build the project to JS
+npm run build
 ```
 
 ## API Endpoints

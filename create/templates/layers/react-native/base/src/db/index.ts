@@ -3,7 +3,7 @@ import * as SQLite from 'expo-sqlite';
 import * as schema from './schema';
 
 // Open the local database. If it doesn't exist, it will be created.
-const expoDb = SQLite.openDatabaseSync('imksh.db');
+const expoDb = SQLite.openDatabaseSync('imksh.test.db');
 
 // Pass the database instance to Drizzle
 export const db = drizzle(expoDb, { schema });

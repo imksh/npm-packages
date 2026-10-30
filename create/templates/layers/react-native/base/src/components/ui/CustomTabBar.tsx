@@ -1,22 +1,33 @@
 import React from "react";
-import { View, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../constants/Colors";
 import { getTabConfig } from "../../config/tabNavigation";
 import { LinearGradient } from "expo-linear-gradient";
-import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import type {
+  BottomTabBarProps,
+  BottomTabNavigationOptions,
+} from "expo-router/tabs";
 
 interface TabItemProps {
   isFocused: boolean;
-  onPress: () => void;
-  onLongPress: () => void;
+  isCenterButton?: boolean;
+  onPress?: () => void;
+  onLongPress?: () => void;
   iconName: keyof typeof Ionicons.glyphMap;
+  label?: string;
   colors: (typeof Colors)[keyof typeof Colors];
 }
 
-const TabItem = ({
+const TabItem = React.memo(({
   isFocused,
   onPress,
   onLongPress,
@@ -38,8 +49,8 @@ const TabItem = ({
             styles.iconWrapper,
             isFocused && {
               backgroundColor: colors.primary,
-              width: 54,
-              height: 54,
+              width: 50,
+              height: 50,
               borderRadius: 100,
               alignItems: "center",
               justifyContent: "center",
@@ -55,33 +66,50 @@ const TabItem = ({
       </View>
     </TouchableOpacity>
   );
+});
+TabItem.displayName = "TabItem";
+
+export type CustomTabBarProps = BottomTabBarProps & {
+  navigation?: {
+    emit?: (event: Parameters<BottomTabBarProps["emitter"]["emit"]>[0]) => { defaultPrevented?: boolean };
+    navigate?: (name: string, params?: unknown) => void;
+  };
+  showCenterButton?: boolean;
+  centerIcon?: keyof typeof Ionicons.glyphMap;
+  onCenterButtonPress?: () => void;
 };
 
-export interface CustomTabBarProps extends BottomTabBarProps {
-  showCenterButton?: boolean;
-  onCenterButtonPress?: () => void;
-}
-
-export default function CustomTabBar({
-  state,
-  descriptors,
-  navigation,
-  showCenterButton = true,
-  onCenterButtonPress,
-}: CustomTabBarProps) {
+export default function CustomTabBar(props: CustomTabBarProps) {
+  const {
+    state,
+    descriptors,
+    navigation,
+    emitter,
+    navigateToTab,
+    showCenterButton = true,
+    onCenterButtonPress,
+    centerIcon = "add",
+  } = props;
   const insets = useSafeAreaInsets();
   const { colorScheme } = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
 
   const currentRoute = state.routes[state.index];
-  const currentOptions = descriptors[currentRoute.key].options;
-  if (currentOptions.tabBarStyle?.display === "none") {
+  const currentOptions = descriptors[currentRoute.key]?.options as
+    | (BottomTabNavigationOptions & { href?: string | null })
+    | undefined;
+  const flatTabBarStyle = currentOptions?.tabBarStyle
+    ? (StyleSheet.flatten(
+        currentOptions.tabBarStyle as StyleProp<ViewStyle>,
+      ) as ViewStyle | undefined)
+    : undefined;
+  if (flatTabBarStyle?.display === "none") {
     return null;
   }
 
-  // Since we are using a global SafeAreaView, we don't need to manually add bottom safe area
-  const bottomOffset = insets.bottom > 0 ? 5 : 20; // Just a small spacing above the global safe area
-  const totalTabBarHeight = bottomOffset + 70; // 70 is the height of the tab bar container
+  // Small spacing above the bottom
+  const bottomOffset = insets.bottom > 0 ? 5 : 20;
+  const totalTabBarHeight = bottomOffset + 70;
 
   return (
     <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
@@ -110,57 +138,82 @@ export default function CustomTabBar({
         {(() => {
           const children: React.ReactNode[] = [];
 
-          state.routes.forEach((route, index: number) => {
-            const { options } = descriptors[route.key];
-            if (
-              options.href === null ||
-              options.tabBarItemStyle?.display === "none"
-            ) {
-              return;
-            }
+          // Filter out hidden routes (e.g. href === null or display: none)
+          const visibleRoutes = state.routes.filter((route) => {
+            const options = descriptors[route.key]?.options as
+              | (BottomTabNavigationOptions & { href?: string | null })
+              | undefined;
+            const flatItemStyle = options?.tabBarItemStyle
+              ? (StyleSheet.flatten(
+                  options.tabBarItemStyle as StyleProp<ViewStyle>,
+                ) as ViewStyle | undefined)
+              : undefined;
+            return (
+              options?.href !== null &&
+              flatItemStyle?.display !== "none"
+            );
+          });
 
+          visibleRoutes.forEach((route, visibleIndex: number) => {
+            const options = descriptors[route.key]?.options as
+              | (BottomTabNavigationOptions & { href?: string | null })
+              | undefined;
             const tabConfig = getTabConfig(route.name);
             const label =
-              options.tabBarLabel !== undefined
+              typeof options?.tabBarLabel === "string"
                 ? options.tabBarLabel
-                : options.title !== undefined
+                : typeof options?.title === "string"
                   ? options.title
                   : tabConfig?.title || route.name;
 
-            const isFocused = state.index === index;
+            const isFocused = currentRoute?.key === route.key;
 
             const onPress = () => {
-              const event = navigation.emit({
-                type: "tabPress",
-                target: route.key,
-                canPreventDefault: true,
-              });
+              const emitFn = navigation?.emit || emitter?.emit;
+              const event = emitFn
+                ? emitFn({
+                    type: "tabPress",
+                    target: route.key,
+                    canPreventDefault: true,
+                  })
+                : { defaultPrevented: false };
 
-              if (!isFocused && !event.defaultPrevented) {
-                navigation.navigate(route.name, route.params);
+              if (!isFocused && !event?.defaultPrevented) {
+                if (navigateToTab) {
+                  navigateToTab(route.key);
+                } else if (navigation?.navigate) {
+                  navigation.navigate(route.name, route.params);
+                }
               }
             };
 
             const onLongPress = () => {
-              navigation.emit({
-                type: "tabLongPress",
-                target: route.key,
-              });
+              const emitFn = navigation?.emit || emitter?.emit;
+              if (emitFn) {
+                emitFn({
+                  type: "tabLongPress",
+                  target: route.key,
+                });
+              }
             };
 
             const baseIcon = tabConfig?.baseIcon || "home";
-            const iconName = (isFocused ? baseIcon : `${baseIcon}-outline`) as keyof typeof Ionicons.glyphMap;
+            const iconName = (
+              isFocused ? baseIcon : `${baseIcon}-outline`
+            ) as keyof typeof Ionicons.glyphMap;
 
+            // Insert center button in the middle of visible tabs
             if (
               showCenterButton &&
-              index === Math.floor(state.routes.length / 2)
+              visibleIndex === Math.floor(visibleRoutes.length / 2)
             ) {
               children.push(
                 <TabItem
                   key="center-btn"
+                  isCenterButton={true}
                   isFocused={false}
                   onPress={onCenterButtonPress}
-                  iconName="add"
+                  iconName={centerIcon}
                   colors={colors}
                 />,
               );
@@ -197,11 +250,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 40,
     borderWidth: 1,
-    // shadowColor: "#000",
-    // shadowOffset: { width: 0, height: 5 },
-    // shadowOpacity: 0.10,
-    // shadowRadius: 10,
-    elevation: 1,
+    elevation: 0.5,
     left: 0,
     right: 0,
     height: 70,
@@ -220,13 +269,5 @@ const styles = StyleSheet.create({
   iconWrapper: {
     alignItems: "center",
     justifyContent: "center",
-  },
-  activeIndicator: {
-    width: 20,
-    height: 3,
-    borderRadius: 2,
-    marginTop: 6,
-    position: "absolute",
-    bottom: -6,
   },
 });

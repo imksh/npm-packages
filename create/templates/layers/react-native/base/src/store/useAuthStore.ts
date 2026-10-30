@@ -264,7 +264,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       // Always update cache with fresh server data
       if (user) save("user", user);
       set({ user, isCheckingAuth: false });
-      // Network failed — cached user (already loaded) stays in place
+    } catch {
+      // Network failed or offline — cached user (already loaded) stays in place
     } finally {
       set({ isCheckingAuth: false });
     }

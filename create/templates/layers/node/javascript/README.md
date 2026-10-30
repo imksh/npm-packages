@@ -1,10 +1,10 @@
-# Node.js Backend Boilerplate
+# Node.js TypeScript Backend Boilerplate
 
-A production-ready, feature-rich Node.js & Express boilerplate project with best-practice architectures, modular routing, and robust configuration.
+A production-ready, strongly-typed Node.js & Express boilerplate project with best-practice architectures, modular routing, and TypeScript compilation.
 
 ## Features
 
-- ⚙️ **Modular Architecture:** Express application setup decoupled into `app.js` (middleware + router wiring) and `index.js` (server initialization & db connection).
+- ⚙️ **Modular Architecture:** Express application setup decoupled into `app.ts` (middleware + router wiring) and `index.ts` (server initialization & db connection).
 - 📝 **Colorized Logging:** Zero-dependency custom logger with timestamped success, warning, info, and error layouts.
 - 🛡️ **Security Out-of-the-Box:** Pre-configured with Helmet headers, CORS policies, and global rate limiters (`apiLimiter`, `authLimiter`, `uploadLimiter`).
 - 🔑 **Authentication & JWT:** Custom middlewares for route protection, sign-ups, and log-ins with HTTP-only cookie-based tokens.
@@ -12,6 +12,7 @@ A production-ready, feature-rich Node.js & Express boilerplate project with best
 - 🖼️ **File Uploads:** Cloudinary integration utilizing Multer memory buffers for secure, single or multi-file uploads.
 - 🔌 **Socket.io Setup:** Pre-installed Socket.io hooks mapping connected user sessions to active sockets.
 - ✉️ **Web Push:** Push notifications integration powered by VAPID key generators and web-push subscriptions.
+- 📦 **TSX Engine:** Fast runtime TS loader supporting ESM resolutions natively with instant reloads.
 
 ## Getting Started
 
@@ -20,7 +21,7 @@ A production-ready, feature-rich Node.js & Express boilerplate project with best
 Create a `.env` file in the root directory (based on `.env.example`):
 
 ```env
-PORT=5001
+PORT=5002
 JWT_SECRET=your_super_secret_jwt_key
 MONGO_URI=your_mongodb_connection_uri
 
@@ -45,10 +46,13 @@ VAPID_PRIVATE_KEY=your_vapid_private_key
 # Install dependencies
 npm install
 
-# Start development server with reload
+# Start development server with reload (via tsx)
 npm run dev
 
-# Start production server
+# Build the project to JS
+npm run build
+
+# Start production compiled server
 npm start
 ```
 

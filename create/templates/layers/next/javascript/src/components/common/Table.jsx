@@ -1,7 +1,7 @@
 "use client";
+
 import React, { useEffect, useRef } from "react";
 import { Pagination } from "./Pagination";
-
 const Table = ({
   columns = [],
   data = [],
@@ -17,26 +17,23 @@ const Table = ({
   header,
 }) => {
   const observerTarget = useRef(null);
-
   useEffect(() => {
     if (!pagination || !onPageChange || currentPage >= totalPages) return;
-
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
           onPageChange(currentPage + 1);
         }
       },
-      { threshold: 0.1 },
+      {
+        threshold: 0.1,
+      },
     );
-
     if (observerTarget.current) {
       observer.observe(observerTarget.current);
     }
-
     return () => observer.disconnect();
   }, [pagination, onPageChange, currentPage, totalPages]);
-
   return (
     <div
       className={`flex flex-col w-full h-full md:border md:border-base-300 rounded-xl overflow-hidden bg-base-100  ${wrapperClassName}`}
@@ -67,7 +64,9 @@ const Table = ({
           </thead>
           <tbody className="divide-y divide-base-200/60 bg-base-100">
             {loading ? (
-              Array.from({ length: 5 }).map((_, rowIndex) => (
+              Array.from({
+                length: 5,
+              }).map((_, rowIndex) => (
                 <tr key={`skeleton-${rowIndex}`} className="animate-pulse">
                   {columns.map((col, colIndex) => {
                     const isRight = col.headerClass?.includes("text-right");
@@ -77,7 +76,6 @@ const Table = ({
                       typeof col.header === "string"
                         ? col.header.toLowerCase()
                         : "";
-
                     return (
                       <td
                         key={colIndex}
@@ -127,11 +125,7 @@ const Table = ({
                 <tr
                   key={row.id || rowIndex}
                   onClick={() => onRowClick && onRowClick(row)}
-                  className={`transition-all duration-200 group ${
-                    onRowClick
-                      ? "cursor-pointer hover:bg-base-200/30"
-                      : "hover:bg-base-200/10"
-                  }`}
+                  className={`transition-all duration-200 group ${onRowClick ? "cursor-pointer hover:bg-base-200/30" : "hover:bg-base-200/10"}`}
                 >
                   {columns.map((col, colIndex) => {
                     const value = col.accessor ? row[col.accessor] : undefined;
@@ -167,7 +161,9 @@ const Table = ({
       {renderCard && (
         <div className="md:hidden flex flex-col divide-y divide-base-200 overflow-y-auto flex-1">
           {loading ? (
-            Array.from({ length: 4 }).map((_, i) => (
+            Array.from({
+              length: 4,
+            }).map((_, i) => (
               <div
                 key={`card-skeleton-${i}`}
                 className="p-4 flex flex-col gap-3 animate-pulse"
@@ -256,5 +252,4 @@ const Table = ({
     </div>
   );
 };
-
 export default Table;

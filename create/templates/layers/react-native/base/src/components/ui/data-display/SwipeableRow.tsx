@@ -6,7 +6,7 @@ import {
   StyleProp,
   ViewStyle,
 } from "react-native";
-import Swipeable from "react-native-gesture-handler/Swipeable";
+import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../../constants/Colors";
 
@@ -40,8 +40,6 @@ export const SwipeableRow: React.FC<SwipeableRowProps> = ({
 
   const renderActions = (
     actions: SwipeAction[],
-    _progress: unknown,
-    _dragX: unknown,
     isRight: boolean,
   ) => {
     if (actions.length === 0) return null;
@@ -75,16 +73,12 @@ export const SwipeableRow: React.FC<SwipeableRowProps> = ({
   };
 
   return (
-    <Swipeable
+    <ReanimatedSwipeable
       friction={2}
       leftThreshold={40}
       rightThreshold={40}
-      renderLeftActions={(progress, dragX) =>
-        renderActions(leftActions, progress, dragX, false)
-      }
-      renderRightActions={(progress, dragX) =>
-        renderActions(rightActions, progress, dragX, true)
-      }
+      renderLeftActions={() => renderActions(leftActions, false)}
+      renderRightActions={() => renderActions(rightActions, true)}
       onSwipeableOpen={onSwipeOpen}
       onSwipeableClose={onSwipeClose}
       containerStyle={containerStyle}
@@ -92,7 +86,7 @@ export const SwipeableRow: React.FC<SwipeableRowProps> = ({
       <View style={{ flex: 1, backgroundColor: "transparent" }}>
         {children}
       </View>
-    </Swipeable>
+    </ReanimatedSwipeable>
   );
 };
 

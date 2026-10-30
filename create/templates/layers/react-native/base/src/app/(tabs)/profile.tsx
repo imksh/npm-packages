@@ -58,7 +58,7 @@ const Profile = () => {
               />
               <Txt variant="base" className="ml-3 font-semibold">Dark Mode</Txt>
             </View>
-            <Switch checked={colorScheme === "dark"} onChange={handleToggleTheme} />
+            <Switch value={colorScheme === "dark"} onChange={handleToggleTheme} />
           </View>
           
           <View className="flex-row items-center justify-between py-3">
@@ -71,7 +71,7 @@ const Profile = () => {
               <Txt variant="base" className="ml-3 font-semibold">App Lock (Biometrics)</Txt>
             </View>
             <Switch 
-              checked={useAuthStore(state => state.isBiometricEnabled)} 
+              value={useAuthStore(state => state.isBiometricEnabled)} 
               onChange={async () => {
                 const store = useAuthStore.getState();
                 await store.setBiometricEnabled(!store.isBiometricEnabled);

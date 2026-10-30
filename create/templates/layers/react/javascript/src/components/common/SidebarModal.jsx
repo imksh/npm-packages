@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { IoClose } from "react-icons/io5";
 import { useUiStore } from "../../store/useUiStore";
-
 export const SidebarModal = ({
   isOpen,
   onClose,
@@ -36,17 +35,14 @@ export const SidebarModal = ({
   // Handle ESC key
   useEffect(() => {
     if (!isOpen || !closeOnEsc) return;
-
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
         onClose();
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, closeOnEsc, onClose]);
-
   const slideVariants = {
     hidden: {
       x: side === "right" ? "100%" : "-100%",
@@ -72,13 +68,23 @@ export const SidebarModal = ({
       },
     },
   };
-
   const backdropVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.2 } },
-    exit: { opacity: 0, transition: { duration: 0.18 } },
+    hidden: {
+      opacity: 0,
+    },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.2,
+      },
+    },
+    exit: {
+      opacity: 0,
+      transition: {
+        duration: 0.18,
+      },
+    },
   };
-
   const content = (
     <AnimatePresence>
       {isOpen && (
@@ -99,9 +105,7 @@ export const SidebarModal = ({
 
           {/* Sliding Panel */}
           <div
-            className={`fixed inset-y-0 ${
-              side === "right" ? "right-0" : "left-0"
-            } max-w-full flex`}
+            className={`fixed inset-y-0 ${side === "right" ? "right-0" : "left-0"} max-w-full flex`}
           >
             <motion.div
               variants={slideVariants}
@@ -170,10 +174,8 @@ export const SidebarModal = ({
       )}
     </AnimatePresence>
   );
-
   return typeof document !== "undefined"
     ? createPortal(content, document.body)
     : null;
 };
-
 export default SidebarModal;

@@ -4,8 +4,6 @@ import { Txt } from "./Typography";
 
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../constants/Colors";
-import { useTranslation } from "react-i18next";
-
 import { Portal } from "react-native-paper";
 
 export interface ConfirmationToastProps {
@@ -25,9 +23,8 @@ export default function ConfirmationToast({
   cancleText,
   confirmText,
 }: ConfirmationToastProps) {
-  const { t } = useTranslation();
-  const cText = cancleText ?? t("common.cancel");
-  const confText = confirmText ?? t("common.confirm");
+  const cText = cancleText ?? "Cancel";
+  const confText = confirmText ?? "Confirm";
   const { colorScheme } = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
 

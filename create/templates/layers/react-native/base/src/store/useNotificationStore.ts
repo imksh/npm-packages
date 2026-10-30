@@ -4,6 +4,7 @@ import Constants from "expo-constants";
 import { Platform } from "react-native";
 import { getSocket } from "../services/socket.service";
 import { toast } from "../utils/toast";
+import { isExpoGo } from "@/utils/env";
 
 export interface AppNotification {
   id: string;
@@ -91,8 +92,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   registerForPushNotificationsAsync: async () => {
     let token: string | undefined;
 
-    const isExpoGo = Constants.appOwnership === "expo";
-    if (isExpoGo && Platform.OS === "android") {
+    if (isExpoGo() && Platform.OS === "android") {
       return;
     }
 

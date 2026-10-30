@@ -1,7 +1,6 @@
 import React from "react";
 import { ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
-
 export const Tabs = ({
   tabs,
   activeTab,
@@ -13,7 +12,6 @@ export const Tabs = ({
   size = "base",
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
-
   const getTabSizeClass = () => {
     switch (size) {
       case "xs":
@@ -32,7 +30,6 @@ export const Tabs = ({
         return "text-base px-4 h-10 min-h-10";
     }
   };
-
   const getBtnSizeClass = () => {
     switch (size) {
       case "xs":
@@ -51,7 +48,6 @@ export const Tabs = ({
         return "text-base";
     }
   };
-
   const tabSizeClass = getTabSizeClass();
   const btnSizeClass = getBtnSizeClass();
 
@@ -62,7 +58,6 @@ export const Tabs = ({
     document.addEventListener("click", closeMenu);
     return () => document.removeEventListener("click", closeMenu);
   }, [dropdown, isOpen]);
-
   const renderDropdown = () => {
     if (!dropdown) return null;
     const activeItem = tabs.find((t) => t.id === activeTab);
@@ -99,11 +94,7 @@ export const Tabs = ({
                   setIsOpen(false);
                 }}
                 type="button"
-                className={`w-full flex items-center gap-2 px-3 py-2 transition-colors ${size === "base" ? "text-sm" : `text-${size}`} ${
-                  activeTab === tab.id
-                    ? "bg-primary/10 text-primary font-semibold"
-                    : "hover:bg-base-200 text-base-content/80"
-                }`}
+                className={`w-full flex items-center gap-2 px-3 py-2 transition-colors ${size === "base" ? "text-sm" : `text-${size}`} ${activeTab === tab.id ? "bg-primary/10 text-primary font-semibold" : "hover:bg-base-200 text-base-content/80"}`}
               >
                 {tab.icon}
                 {tab.label}
@@ -114,7 +105,6 @@ export const Tabs = ({
       </div>
     );
   };
-
   if (variant === "box") {
     return (
       <>
@@ -128,17 +118,17 @@ export const Tabs = ({
               key={tab.id}
               onClick={() => onChange(tab.id)}
               disabled={disabled}
-              className={`tab ${tabSizeClass} whitespace-nowrap flex items-center rounded-lg gap-2 relative z-0 ${
-                activeTab === tab.id
-                  ? "text-primary-content"
-                  : "text-base-content/70 hover:text-base-content "
-              } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`tab ${tabSizeClass} whitespace-nowrap flex items-center rounded-lg gap-2 relative z-0 ${activeTab === tab.id ? "text-primary-content" : "text-base-content/70 hover:text-base-content "} ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               {activeTab === tab.id && (
                 <motion.div
                   layoutId="activeTabBox"
                   className="absolute inset-0 bg-primary rounded-lg -z-10"
-                  transition={{ type: "spring", duration: 0, bounce: 0.2 }}
+                  transition={{
+                    type: "spring",
+                    duration: 0,
+                    bounce: 0.2,
+                  }}
                 />
               )}
               {tab.icon}
@@ -163,17 +153,17 @@ export const Tabs = ({
             key={tab.id}
             onClick={() => onChange(tab.id)}
             disabled={disabled}
-            className={`tab ${tabSizeClass} whitespace-nowrap relative !border-transparent ${
-              activeTab === tab.id
-                ? "font-semibold text-primary"
-                : "text-base-content/70 hover:text-base-content"
-            } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`tab ${tabSizeClass} whitespace-nowrap relative !border-transparent ${activeTab === tab.id ? "font-semibold text-primary" : "text-base-content/70 hover:text-base-content"} ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             {activeTab === tab.id && (
               <motion.div
                 layoutId="activeTabUnderline"
                 className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
-                transition={{ type: "spring", duration: 0.5, bounce: 0.2 }}
+                transition={{
+                  type: "spring",
+                  duration: 0.5,
+                  bounce: 0.2,
+                }}
               />
             )}
             {tab.icon && <span className="mr-2">{tab.icon}</span>}

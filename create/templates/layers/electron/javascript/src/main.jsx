@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { HashRouter } from "react-router-dom";
-import App from "./App.jsx";
+import App from "./App.js";
 import "./index.css";
 
 // HashRouter is required for Electron because the renderer is served via

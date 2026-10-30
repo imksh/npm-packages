@@ -1,5 +1,4 @@
 import { create } from "zustand";
-
 export const useUiStore = create((set, get) => ({
   open: false,
   collapsed: false,
@@ -7,23 +6,36 @@ export const useUiStore = create((set, get) => ({
   headerTitle: "Dashboard",
   headerActions: null,
   breadcrumbs: null,
-  setBreadcrumbs: (items) => set({ breadcrumbs: items }),
-  setHeaderTitle: (title) => set({ headerTitle: title }),
-  setHeaderActions: (actions) => set({ headerActions: actions }),
-  toggleCollapsed: () => set((state) => ({ collapsed: !state.collapsed })),
-
+  setBreadcrumbs: (items) =>
+    set({
+      breadcrumbs: items,
+    }),
+  setHeaderTitle: (title) =>
+    set({
+      headerTitle: title,
+    }),
+  setHeaderActions: (actions) =>
+    set({
+      headerActions: actions,
+    }),
+  toggleCollapsed: () =>
+    set((state) => ({
+      collapsed: !state.collapsed,
+    })),
   setMobileMenuOpened: (open) => {
-    set({ isMobileMenuOpened: open });
+    set({
+      isMobileMenuOpened: open,
+    });
   },
   toggleMobileMenuOpened: () => {
-    set((state) => ({ isMobileMenuOpened: !state.isMobileMenuOpened }));
+    set((state) => ({
+      isMobileMenuOpened: !state.isMobileMenuOpened,
+    }));
   },
-
   theme:
     typeof window !== "undefined"
       ? localStorage.getItem("theme") || "light"
       : "light",
-
   setTheme: (theme) => {
     if (typeof document !== "undefined") {
       document.documentElement.setAttribute("data-theme", theme);
@@ -31,9 +43,10 @@ export const useUiStore = create((set, get) => ({
     if (typeof window !== "undefined") {
       localStorage.setItem("theme", theme);
     }
-    set({ theme });
+    set({
+      theme,
+    });
   },
-
   toggleTheme: () => {
     const nextTheme = get().theme === "light" ? "dark" : "light";
     if (typeof document !== "undefined") {
@@ -42,24 +55,25 @@ export const useUiStore = create((set, get) => ({
     if (typeof window !== "undefined") {
       localStorage.setItem("theme", nextTheme);
     }
-    set({ theme: nextTheme });
+    set({
+      theme: nextTheme,
+    });
   },
-
   toggleSidebar: () =>
     set((state) => ({
       open: !state.open,
     })),
-
   openSidebar: () =>
     set({
       open: true,
     }),
-
   close: () =>
     set({
       open: false,
     }),
-
   modalOpen: false,
-  setModalOpen: (open) => set({ modalOpen: open }),
+  setModalOpen: (open) =>
+    set({
+      modalOpen: open,
+    }),
 }));

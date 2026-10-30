@@ -1,8 +1,8 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import tailwindcss from '@tailwindcss/vite';
-import electron from 'vite-plugin-electron';
-import renderer from 'vite-plugin-electron-renderer';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import electron from "vite-plugin-electron";
+import renderer from "vite-plugin-electron-renderer";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -12,11 +12,11 @@ export default defineConfig({
     electron([
       {
         // Main process entry
-        entry: 'electron/main.js',
+        entry: "electron/main.ts",
       },
       {
         // Preload script — reload renderer on change
-        entry: 'electron/preload.js',
+        entry: "electron/preload.ts",
         onstart(options) {
           options.reload();
         },
@@ -25,5 +25,5 @@ export default defineConfig({
     renderer(),
   ],
   // Critical: ensures built assets resolve correctly via file:// in production
-  base: './',
+  base: "./",
 });

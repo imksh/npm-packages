@@ -1,5 +1,4 @@
 import Skeleton from "./Skeleton";
-
 const ProfileSkeleton = () => {
   return (
     <div className="flex gap-6 items-center">
@@ -15,5 +14,4 @@ const ProfileSkeleton = () => {
     </div>
   );
 };
-
 export default ProfileSkeleton;

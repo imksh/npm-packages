@@ -80,19 +80,25 @@ export default function ImagePickerModal({
             result.assets.map(async (asset) => {
               let finalUri = asset.uri;
 
-              // Resize image if it's too large to save bandwidth
-              if (asset.width > 1024 || asset.height > 1024) {
-                const resizeAction =
-                  asset.width > asset.height
-                    ? { resize: { width: 1024 } }
-                    : { resize: { height: 1024 } };
+              // Resize image if expo-image-manipulator is available
+              try {
+                // eslint-disable-next-line @typescript-eslint/no-require-imports
+                const ImageManipulator = require("expo-image-manipulator");
+                if (ImageManipulator?.manipulateAsync && (asset.width > 1024 || asset.height > 1024)) {
+                  const resizeAction =
+                    asset.width > asset.height
+                      ? { resize: { width: 1024 } }
+                      : { resize: { height: 1024 } };
 
-                const manipResult = await ImageManipulator.manipulateAsync(
-                  asset.uri,
-                  [resizeAction],
-                  { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG },
-                );
-                finalUri = manipResult.uri;
+                  const manipResult = await ImageManipulator.manipulateAsync(
+                    asset.uri,
+                    [resizeAction],
+                    { compress: 0.7, format: ImageManipulator.SaveFormat?.JPEG ?? "jpeg" },
+                  );
+                  finalUri = manipResult.uri;
+                }
+              } catch {
+                // expo-image-manipulator not installed, use asset.uri
               }
 
               const filename = finalUri.split("/").pop() || "image.jpg";

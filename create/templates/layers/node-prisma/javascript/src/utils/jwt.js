@@ -1,9 +1,12 @@
 import jwt from "jsonwebtoken";
-
 export const generateToken = (user, res) => {
-  const payload = { id: user._id || user.id };
-  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "30d" });
-  
+  const payload = {
+    id: user._id || user.id,
+  };
+  const JWT_SECRET = process.env.JWT_SECRET || "fallbacksecret";
+  const token = jwt.sign(payload, JWT_SECRET, {
+    expiresIn: "30d",
+  });
   if (res) {
     res.cookie("token", token, {
       httpOnly: true,
@@ -14,12 +17,11 @@ export const generateToken = (user, res) => {
   }
   return token;
 };
-
 export const verifyToken = (token) => {
   try {
-    const JWT_SECRET = process.env.JWT_SECRET;
+    const JWT_SECRET = process.env.JWT_SECRET || "fallbacksecret";
     return jwt.verify(token, JWT_SECRET);
-  } catch (error) {
+  } catch {
     return null;
   }
 };

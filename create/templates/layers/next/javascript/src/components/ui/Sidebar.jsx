@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { IoClose } from "react-icons/io5";
@@ -11,7 +12,6 @@ import useWindowSize from "../../hooks/useWindowSize";
 import { useAuthStore } from "../../store/useAuthStore";
 import { GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
 import { CiLogout } from "react-icons/ci";
-
 const Sidebar = () => {
   const { open, close, collapsed, toggleCollapsed, theme, toggleTheme } =
     useUiStore();
@@ -19,38 +19,64 @@ const Sidebar = () => {
   const { width } = useWindowSize();
   const pathname = usePathname();
   const router = useRouter();
-  const isMobile = width < 1024;
+  const isMobile = width < 1024; // lg breakpoint
 
   const showSidebar = !isMobile || open;
-
   const handleLogout = async () => {
     await logout();
     close();
     router.replace("/login");
   };
-
   return (
     <>
+      {/* Overlay with AnimatePresence */}
       <AnimatePresence>
         {isMobile && open && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            initial={{
+              opacity: 0,
+            }}
+            animate={{
+              opacity: 1,
+            }}
+            exit={{
+              opacity: 0,
+            }}
+            transition={{
+              duration: 0.2,
+            }}
             className="fixed inset-0 bg-base-100/40 z-40 lg:hidden"
             onClick={close}
           />
         )}
       </AnimatePresence>
 
+      {/* Sidebar with AnimatePresence */}
       <AnimatePresence>
         {showSidebar && (
           <motion.aside
-            initial={isMobile ? { x: "-100%" } : false}
-            animate={{ x: 0 }}
-            exit={isMobile ? { x: "-100%" } : undefined}
-            transition={{ type: "tween", duration: 0.25, ease: "easeInOut" }}
+            initial={
+              isMobile
+                ? {
+                    x: "-100%",
+                  }
+                : false
+            }
+            animate={{
+              x: 0,
+            }}
+            exit={
+              isMobile
+                ? {
+                    x: "-100%",
+                  }
+                : undefined
+            }
+            transition={{
+              type: "tween",
+              duration: 0.25,
+              ease: "easeInOut",
+            }}
             className={`
               fixed lg:static top-0 left-0 z-50
               h-screen bg-base-200 border-r border-base-300
@@ -63,7 +89,11 @@ const Sidebar = () => {
             <div className="h-16 border-b border-base-300 flex items-center justify-between px-5">
               <div className="flex items-center gap-3">
                 {appConfig.app.logo ? (
-                  <img src={appConfig.app.logo} alt="" className="w-8 h-8 rounded-lg" />
+                  <img
+                    src={appConfig.app.logo}
+                    alt=""
+                    className="w-8 h-8 rounded-lg"
+                  />
                 ) : (
                   <div className="flex items-center">
                     <div className="bg-primary w-8 h-8 rounded-lg flex items-center justify-center text-primary-content font-bold">
@@ -87,12 +117,16 @@ const Sidebar = () => {
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 overflow-y-auto p-2.5 space-y-1" data-lenis-prevent>
+            <nav
+              className="flex-1 overflow-y-auto p-2.5 space-y-1"
+              data-lenis-prevent
+            >
               {navigation.map((item) => {
                 const Icon = item.icon;
                 const isActive =
-                  item.path === "/" ? pathname === "/" : pathname.startsWith(item.path);
-
+                  item.path === "/"
+                    ? pathname === "/"
+                    : pathname.startsWith(item.path);
                 return (
                   <Link
                     key={item.path}
@@ -103,20 +137,23 @@ const Sidebar = () => {
                       ${isActive ? "bg-primary text-primary-content" : "hover:bg-base-300"}
                       ${collapsed ? "justify-center px-0" : ""}`}
                   >
-                    <Icon size={18} className={`shrink-0 ${collapsed ? "mr-auto" : ""}`} />
+                    <Icon
+                      size={18}
+                      className={`shrink-0 ${collapsed ? "mr-auto" : ""}`}
+                    />
                     {!collapsed && (
-                      <span className="font-medium whitespace-nowrap">{item.title}</span>
+                      <span className="font-medium whitespace-nowrap">
+                        {item.title}
+                      </span>
                     )}
                   </Link>
                 );
               })}
             </nav>
 
-            {/* Footer */}
+            {/* Footer with Actions */}
             <div
-              className={`p-3 border-t border-base-300/50 shrink-0 flex gap-2 ${
-                collapsed ? "flex-col items-center justify-center" : "flex-row items-center justify-between"
-              }`}
+              className={`p-3 border-t border-base-300/50 shrink-0 flex gap-2 ${collapsed ? "flex-col items-center justify-center" : "flex-row items-center justify-between"}`}
             >
               <button
                 onClick={handleLogout}
@@ -126,7 +163,9 @@ const Sidebar = () => {
                 <CiLogout size={18} />
               </button>
 
-              <div className={`flex items-center gap-2 ${collapsed ? "flex-col" : ""}`}>
+              <div
+                className={`flex items-center gap-2 ${collapsed ? "flex-col" : ""}`}
+              >
                 <button
                   onClick={toggleTheme}
                   className="flex items-center gap-3 hover:opacity-80 transition-opacity"
@@ -153,7 +192,11 @@ const Sidebar = () => {
                   className="btn btn-sm btn-circle btn-outline border-none text-base-content/70 hover:text-base-content hover:bg-base-300/60 hidden md:flex"
                   title={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
                 >
-                  {collapsed ? <GoSidebarExpand size={18} /> : <GoSidebarCollapse size={18} />}
+                  {collapsed ? (
+                    <GoSidebarExpand size={18} />
+                  ) : (
+                    <GoSidebarCollapse size={18} />
+                  )}
                 </button>
               </div>
             </div>
@@ -163,5 +206,4 @@ const Sidebar = () => {
     </>
   );
 };
-
 export default Sidebar;

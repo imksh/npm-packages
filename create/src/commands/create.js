@@ -41,7 +41,6 @@ export default async function createCommand(projectName, options) {
     'mern-react-native',
     'electron',
     'electron-ts',
-    'production-fullstack',
     'fullstack-prisma'
   ];
   if (!validTemplates.includes(template)) {

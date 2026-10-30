@@ -1,12 +1,10 @@
 "use client";
-import { ReactNode } from "react";
+
 import SidebarHeader from "../ui/SidebarHeader";
 import Sidebar from "../ui/Sidebar";
 import { useUiStore } from "../../store/useUiStore";
-
 const SidebarLayout = ({ children }) => {
   const { headerTitle, headerActions } = useUiStore();
-
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />
@@ -21,5 +19,4 @@ const SidebarLayout = ({ children }) => {
     </div>
   );
 };
-
 export default SidebarLayout;

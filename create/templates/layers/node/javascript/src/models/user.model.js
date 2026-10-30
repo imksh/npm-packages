@@ -1,5 +1,4 @@
-import mongoose from "mongoose";
-
+import mongoose, { Document } from "mongoose";
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -7,7 +6,6 @@ const userSchema = new mongoose.Schema(
       required: [true, "Name is required"],
       trim: true,
     },
-
     email: {
       type: String,
       required: [true, "Email is required"],
@@ -35,15 +33,15 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin", "other"],
       default: "user",
     },
-
     expoPushTokens: [
       {
         type: String,
       },
     ],
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+  },
 );
-
 const User = mongoose.model("User", userSchema);
 export default User;

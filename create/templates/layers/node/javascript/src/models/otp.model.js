@@ -1,5 +1,4 @@
-import mongoose from "mongoose";
-
+import mongoose, { Document } from "mongoose";
 const otpSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -15,7 +14,5 @@ const otpSchema = new mongoose.Schema({
     expires: 300,
   },
 });
-
 const Otp = mongoose.model("Otp", otpSchema);
-
 export default Otp;

@@ -1,7 +1,7 @@
 "use client";
+
 import React from "react";
 import { motion } from "motion/react";
-
 const ToggleSwitch = ({ checked, onChange, label, className }) => {
   return (
     <div
@@ -10,16 +10,10 @@ const ToggleSwitch = ({ checked, onChange, label, className }) => {
     >
       <span className="text-sm font-bold">{label}</span>
       <div
-        className={`w-12 h-6 flex items-center rounded-full p-1 transition-all duration-300 shadow-inner border ${
-          checked
-            ? "bg-gradient-to-r from-emerald-400 to-cyan-500 border-transparent shadow-emerald-500/20"
-            : "bg-base-300 border-base-300/50"
-        }`}
+        className={`w-12 h-6 flex items-center rounded-full p-1 transition-all duration-300 shadow-inner border ${checked ? "bg-gradient-to-r from-emerald-400 to-cyan-500 border-transparent shadow-emerald-500/20" : "bg-base-300 border-base-300/50"}`}
       >
         <motion.div
-          className={`w-4 h-4 rounded-full shadow ${
-            checked ? "bg-white" : "bg-base-content/40"
-          }`}
+          className={`w-4 h-4 rounded-full shadow ${checked ? "bg-white" : "bg-base-content/40"}`}
           layout
           initial={false}
           animate={{
@@ -35,5 +29,4 @@ const ToggleSwitch = ({ checked, onChange, label, className }) => {
     </div>
   );
 };
-
 export default ToggleSwitch;

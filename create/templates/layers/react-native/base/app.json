@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/images/logo/icon.png",
-      "bundleIdentifier": "com.anonymous.mobile"
+      "bundleIdentifier": "io.github.imksh.mobile"
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +19,7 @@
         "monochromeImage": "./assets/images/logo/icon.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.mobile",
+      "package": "io.github.imksh.mobile",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.ACCESS_FINE_LOCATION",

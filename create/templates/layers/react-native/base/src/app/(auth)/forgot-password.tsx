@@ -179,7 +179,7 @@ export default function ForgotPasswordScreen() {
             <Txt
               variant="md"
               className="text-primary text-sm"
-              onPress={() => router.push("/(auth)/login")}
+              onPress={() => router.navigate("/(auth)/login")}
             >
               Sign in
             </Txt>

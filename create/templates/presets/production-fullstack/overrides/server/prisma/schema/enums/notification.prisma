@@ -1,6 +1,0 @@
-enum NotificationType {
-  ALERT
-  REMINDER
-  MESSAGE
-  SYSTEM
-}

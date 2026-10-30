@@ -13,6 +13,7 @@ export type TxtVariant =
   | "xs"
   | "sm"
   | "base"
+  | "regular"
   | "md"
   | "lg"
   | "xl"
@@ -21,7 +22,11 @@ export type TxtVariant =
   | "4xl"
   | "5xl"
   | "6xl"
-  | "7xl";
+  | "7xl"
+  | "h1"
+  | "h2"
+  | "h3"
+  | "h4";
 
 export interface TxtProps extends TextProps {
   variant?: TxtVariant;
@@ -50,17 +55,22 @@ export const Txt = ({
         return { fontFamily: FontFamily.regular, fontSize: 10 };
       case "sm":
         return { fontFamily: FontFamily.regular, fontSize: 12 };
+      case "regular":
       case "base":
         return { fontFamily: FontFamily.regular, fontSize: 14 };
       case "md":
         return { fontFamily: FontFamily.medium, fontSize: 16 };
       case "lg":
+      case "h4":
         return { fontFamily: FontFamily.semibold, fontSize: 18 };
       case "xl":
+      case "h3":
         return { fontFamily: FontFamily.bold, fontSize: 20 };
       case "2xl":
+      case "h2":
         return { fontFamily: FontFamily.bold, fontSize: 24 };
       case "3xl":
+      case "h1":
         return { fontFamily: FontFamily.extrabold, fontSize: 30 };
       case "4xl":
         return { fontFamily: FontFamily.extrabold, fontSize: 36 };

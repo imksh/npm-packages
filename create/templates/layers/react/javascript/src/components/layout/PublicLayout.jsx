@@ -1,6 +1,5 @@
 import { Outlet } from "react-router-dom";
 import Header from "../ui/Header";
-
 const PublicLayout = () => {
   return (
     <>
@@ -9,5 +8,4 @@ const PublicLayout = () => {
     </>
   );
 };
-
 export default PublicLayout;

@@ -7,17 +7,42 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum AttachmentType {
+  IMAGE
+  DOCUMENT
+  VIDEO
+  PDF
+  OTHER
+}
+
+model Attachment {
+  id       String         @id @default(uuid())
+  publicId String
+  url      String
+  name     String
+  type     AttachmentType
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Back-relations
+  avatar User? @relation("avatar")
+}
+
 model User {
-  id               String             @id @default(uuid())
-  email            String             @unique
-  name             String
-  phone            String?
-  password         String
-  role             String             @default("user")
-  avatarUrl        String?
-  avatarPublicId   String?
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  id       String  @id @default(uuid())
+  email    String  @unique
+  name     String
+  phone    String?
+  password String
+  role     String  @default("user")
+
+  avatarId String?     @unique
+  avatar   Attachment? @relation("avatar", fields: [avatarId], references: [id])
+
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
   pushSubscriptions PushSubscription[]
 }
 

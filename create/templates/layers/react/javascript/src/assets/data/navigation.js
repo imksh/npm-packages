@@ -1,5 +1,4 @@
 import { FaHome, FaUser, FaCog, FaBook } from "react-icons/fa";
-
 export const navigation = [
   {
     title: "Home",

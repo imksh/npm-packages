@@ -9,7 +9,6 @@ import useWindowSize from "../../hooks/useWindowSize";
 import { useAuthStore } from "../../store/useAuthStore";
 import { GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
 import { CiLogout } from "react-icons/ci";
-
 const Sidebar = () => {
   const { open, close, collapsed, toggleCollapsed, theme, toggleTheme } =
     useUiStore();
@@ -18,17 +17,24 @@ const Sidebar = () => {
   const isMobile = width < 1024; // lg breakpoint
 
   const showSidebar = !isMobile || open;
-
   return (
     <>
       {/* Overlay with AnimatePresence */}
       <AnimatePresence>
         {isMobile && open && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            initial={{
+              opacity: 0,
+            }}
+            animate={{
+              opacity: 1,
+            }}
+            exit={{
+              opacity: 0,
+            }}
+            transition={{
+              duration: 0.2,
+            }}
             className="fixed inset-0 bg-base-100/40 z-40 lg:hidden"
             onClick={close}
           />
@@ -39,10 +45,28 @@ const Sidebar = () => {
       <AnimatePresence>
         {showSidebar && (
           <motion.aside
-            initial={isMobile ? { x: "-100%" } : false}
-            animate={{ x: 0 }}
-            exit={isMobile ? { x: "-100%" } : undefined}
-            transition={{ type: "tween", duration: 0.25, ease: "easeInOut" }}
+            initial={
+              isMobile
+                ? {
+                    x: "-100%",
+                  }
+                : false
+            }
+            animate={{
+              x: 0,
+            }}
+            exit={
+              isMobile
+                ? {
+                    x: "-100%",
+                  }
+                : undefined
+            }
+            transition={{
+              type: "tween",
+              duration: 0.25,
+              ease: "easeInOut",
+            }}
             className={`
               fixed lg:static top-0 left-0 z-50
               h-screen bg-base-200 border-r border-base-300
@@ -108,7 +132,6 @@ const Sidebar = () => {
                       return false;
                     }
                   }
-
                   if (!item.allowedRoles) return true; // visible to all
                   // System-level ADMIN always gets full access
                   if (user?.role === "ADMIN") return true;
@@ -118,20 +141,15 @@ const Sidebar = () => {
                 })
                 .map((item) => {
                   const Icon = item.icon;
-
                   return (
                     <NavLink
                       key={item.path}
                       to={item.path}
                       onClick={isMobile ? close : undefined}
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 rounded-box px-4 py-3 duration-0  h-12 
-                      ${
-                        isActive
-                          ? "bg-primary text-primary-content"
-                          : "hover:bg-base-300"
-                      } ${collapsed ? "justify-center px-0" : ""}`
-                      }
+                      className={({
+                        isActive,
+                      }) => `flex items-center gap-3 rounded-box px-4 py-3 duration-0  h-12 
+                      ${isActive ? "bg-primary text-primary-content" : "hover:bg-base-300"} ${collapsed ? "justify-center px-0" : ""}`}
                       title={collapsed ? item.title : ""}
                     >
                       <Icon
@@ -151,11 +169,7 @@ const Sidebar = () => {
 
             {/* Footer with Actions */}
             <div
-              className={`p-3 border-t border-base-300/50 shrink-0 flex gap-2 ${
-                collapsed
-                  ? "flex-col items-center justify-center"
-                  : "flex-row items-center justify-between"
-              }`}
+              className={`p-3 border-t border-base-300/50 shrink-0 flex gap-2 ${collapsed ? "flex-col items-center justify-center" : "flex-row items-center justify-between"}`}
             >
               <button
                 onClick={() => {
@@ -211,5 +225,4 @@ const Sidebar = () => {
     </>
   );
 };
-
 export default Sidebar;

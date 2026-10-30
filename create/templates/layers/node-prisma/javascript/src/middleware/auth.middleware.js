@@ -1,8 +1,7 @@
 import { verifyToken } from "../utils/jwt.js";
 import logger from "../utils/logger.js";
-import { prisma } from "../config/db.js";
+import { prisma } from "../config/prisma.js";
 import { ApiError } from "../utils/ApiError.js";
-
 export const protect = async (req, res, next) => {
   let token;
   if (req.cookies?.token) {
@@ -13,29 +12,26 @@ export const protect = async (req, res, next) => {
   ) {
     token = req.headers.authorization.split(" ")[1];
   }
-
   if (!token) {
     return next(new ApiError(401, "Not authorized, no token provided"));
   }
-
   try {
     const decoded = verifyToken(token);
     if (!decoded) {
       return next(new ApiError(401, "Not authorized, invalid token"));
     }
-
     const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
+      where: {
+        id: decoded.id,
+      },
     });
-
     if (!user) {
       return next(new ApiError(401, "Not authorized, user not found"));
     }
-
-    // Exclude password
-    const safeUser = { ...user };
+    const safeUser = {
+      ...user,
+    };
     delete safeUser.password;
-
     req.user = safeUser;
     return next();
   } catch (error) {

@@ -21,6 +21,17 @@ export const authService = {
   updateMe: (data: FormData | Record<string, unknown>) => api.put("/auth/me", data),
 
   logout: () => api.post("/auth/logout"),
+  
+  genOtp: (email: string) => api.post("/auth/forgot-password-otp", { email }),
+
+  verifyOtp: (email: string, otp: string) =>
+    api.post("/auth/verify-otp", { email, otp }),
+
+  resetPassword: (password: string) =>
+    api.post("/auth/reset-password", { password }),
+
+  changePassword: (oldPassword: string, newPassword: string) =>
+    api.post("/auth/change-password", { oldPassword, newPassword }),
 
   savePushToken: (token: string) => api.post("/auth/push-token", { token }),
 };

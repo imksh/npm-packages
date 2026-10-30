@@ -1,4 +1,4 @@
-import { jsx } from "react/jsx-runtime";
+import React from "react";
 import { motion } from "framer-motion";
 const pageVariants = {
   initial: {
@@ -20,15 +20,17 @@ const pageTransition = {
   duration: 0.3,
 };
 const PageTransition = ({ children, className = "" }) => {
-  return /* @__PURE__ */ jsx(motion.div, {
-    initial: "initial",
-    animate: "in",
-    exit: "out",
-    variants: pageVariants,
-    transition: pageTransition,
-    className: `h-full w-full ${className}`,
-    children,
-  });
+  return (
+    <motion.div
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+      transition={pageTransition}
+      className={`h-full w-full ${className}`}
+    >
+      {children}
+    </motion.div>
+  );
 };
-var PageTransition_default = PageTransition;
-export { PageTransition_default as default };
+export default PageTransition;

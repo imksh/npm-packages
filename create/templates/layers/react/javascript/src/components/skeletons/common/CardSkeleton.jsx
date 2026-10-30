@@ -1,5 +1,4 @@
 import Skeleton from "./Skeleton";
-
 const CardSkeleton = () => {
   return (
     <div className="card bg-base-100 shadow border border-base-300">
@@ -17,5 +16,4 @@ const CardSkeleton = () => {
     </div>
   );
 };
-
 export default CardSkeleton;

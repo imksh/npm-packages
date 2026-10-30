@@ -70,7 +70,7 @@ export async function composeTemplate(presetName, targetDir, projectName) {
       overwrite: true, // later layers intentionally overwrite earlier ones
       filter: (src) => {
         const basename = path.basename(src);
-        return basename !== ".DS_Store";
+        return basename !== ".DS_Store" && basename !== "node_modules" && basename !== ".git";
       },
     });
   }
@@ -81,7 +81,10 @@ export async function composeTemplate(presetName, targetDir, projectName) {
     if (fs.existsSync(overridesDir)) {
       await fs.copy(overridesDir, targetDir, {
         overwrite: true,
-        filter: (src) => path.basename(src) !== ".DS_Store",
+        filter: (src) => {
+          const basename = path.basename(src);
+          return basename !== ".DS_Store" && basename !== "node_modules" && basename !== ".git";
+        },
       });
     }
   }

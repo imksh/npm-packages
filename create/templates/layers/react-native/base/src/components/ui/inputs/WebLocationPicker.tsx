@@ -54,7 +54,7 @@ export default function WebLocationPicker({
 
   const [currentCenter, setCurrentCenter] = useState(mapCenter);
 
-  const webViewRef = useRef<WebView>(null);
+  const webViewRef = useRef<WebView | null>(null);
 
   useEffect(() => {
     if (initialCoordinate?.latitude && initialCoordinate?.longitude) {

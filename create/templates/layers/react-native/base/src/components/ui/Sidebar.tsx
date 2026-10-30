@@ -162,7 +162,7 @@ export default function Sidebar({
                 <TouchableOpacity
                   onPress={() => {
                     onClose();
-                    router.push("/(tenant)/profile");
+                    router.navigate("/profile" as Href);
                   }}
                   className="w-12 h-12 rounded-full bg-primary items-center justify-center"
                   style={{
@@ -213,11 +213,11 @@ export default function Sidebar({
                 {menuItems.map((item, index) => (
                   <MenuItem
                     key={index}
-                    icon={item.icon}
+                    icon={item.icon as keyof typeof Ionicons.glyphMap}
                     label={item.label}
                     onPress={() => {
                       onClose();
-                      router.push(item.route as Href);
+                      router.navigate(item.route as Href);
                     }}
                     colors={colors}
                   />

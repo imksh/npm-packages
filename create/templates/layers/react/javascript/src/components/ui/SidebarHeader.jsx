@@ -1,11 +1,8 @@
 import { FiMenu } from "react-icons/fi";
 import { useUiStore } from "../../store/useUiStore";
-
 import { Breadcrumbs } from "../common/Breadcrumbs";
-
 const SidebarHeader = ({ title = "Dashboard", actions = null }) => {
   const { toggleSidebar, breadcrumbs } = useUiStore();
-
   return (
     <header className="sticky top-0 z-30 h-16 bg-base-200 backdrop-blur border-b border-base-200 flex items-center justify-between px-4 lg:px-6">
       <div className="flex items-center gap-3">
@@ -27,5 +24,4 @@ const SidebarHeader = ({ title = "Dashboard", actions = null }) => {
     </header>
   );
 };
-
 export default SidebarHeader;

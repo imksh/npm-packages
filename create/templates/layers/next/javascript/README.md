@@ -38,10 +38,10 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - **Tailwind CSS & FlyonUI**: Pre-configured utility-first styling with beautiful UI components.
 - **Framer Motion**: Ready to use for smooth animations and transitions.
 - **Zustand**: Lightweight global state management (e.g., `useAuthStore`, `useUiStore`).
-- **Axios**: Configured API client with interceptors (`src/config/api.js`).
+- **Axios**: Configured API client with interceptors (`src/config/api.ts`).
 - **PWA Ready**: Integrated `@ducanh2912/next-pwa` with a configured `manifest.json`.
 - **Smooth Scrolling**: Lenis smooth scrolling integrated via the `useLenis` hook.
-- **API Routes**: Configured Next.js Route Handlers (e.g. `src/app/api/hello/route.js`).
+- **API Routes**: Configured Next.js Route Handlers (e.g. `src/app/api/hello/route.ts`).
 - **Proxy setup**: `next.config.mjs` is configured to proxy `/api/:path*` requests to your backend port.
 
 ## Project Structure

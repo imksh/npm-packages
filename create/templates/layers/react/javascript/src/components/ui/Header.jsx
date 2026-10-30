@@ -8,7 +8,6 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { getInitials } from "../../utils/getInitials";
 import { motion, AnimatePresence } from "framer-motion";
 import { navigation } from "../../config/navigation";
-
 const Header = () => {
   const {
     theme,
@@ -26,7 +25,9 @@ const Header = () => {
     const handleScroll = () => {
       setIsMobilemenuOpen(false);
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [setIsMobilemenuOpen]);
 
@@ -40,7 +41,6 @@ const Header = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [setIsMobilemenuOpen]);
-
   return (
     <header ref={headerRef} className="sticky top-0 z-40 p-4">
       <div className="max-w-7xl mx-auto relative">
@@ -71,11 +71,7 @@ const Header = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`hover:text-primary transition-colors ${
-                  location === item.path
-                    ? "text-white font-bold"
-                    : "text-white/80"
-                }`}
+                className={`hover:text-primary transition-colors ${location === item.path ? "text-white font-bold" : "text-white/80"}`}
               >
                 {item.title}
               </Link>
@@ -133,10 +129,21 @@ const Header = () => {
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -40 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -40 }}
-              transition={{ duration: 0.3 }}
+              initial={{
+                opacity: 0,
+                y: -40,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              exit={{
+                opacity: 0,
+                y: -40,
+              }}
+              transition={{
+                duration: 0.3,
+              }}
               className="lg:hidden mt-3 bg-primary backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 overflow-hidden text-primary-content absolute w-full"
             >
               <div className="p-4 space-y-2">
@@ -146,11 +153,7 @@ const Header = () => {
                     key={item.path}
                     to={item.path}
                     onClick={() => setIsMobilemenuOpen(false)}
-                    className={`block px-4 py-3 rounded-xl hover:bg-white/10 transition-colors font-semibold ${
-                      location === item.path
-                        ? "bg-white/15 text-white"
-                        : "text-white/80"
-                    }`}
+                    className={`block px-4 py-3 rounded-xl hover:bg-white/10 transition-colors font-semibold ${location === item.path ? "bg-white/15 text-white" : "text-white/80"}`}
                   >
                     {item.title}
                   </Link>
@@ -234,5 +237,4 @@ const Header = () => {
     </header>
   );
 };
-
 export default Header;

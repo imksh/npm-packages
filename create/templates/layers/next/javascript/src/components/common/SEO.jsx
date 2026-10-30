@@ -1,16 +1,9 @@
 "use client";
+
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-
-const SEO = ({
-  title,
-  description,
-  keywords,
-  canonical,
-  noIndex = false,
-}) => {
+const SEO = ({ title, description, keywords, canonical, noIndex = false }) => {
   const pathname = usePathname();
-
   useEffect(() => {
     // TITLE
     if (title) {
@@ -46,10 +39,7 @@ const SEO = ({
       link.rel = "canonical";
       document.head.appendChild(link);
     }
-
-    link.href =
-      canonical ||
-      `https://shreebaglamukhi.com${pathname}`;
+    link.href = canonical || `https://shreebaglamukhi.com${pathname}`;
 
     // ROBOTS
     let robots = document.querySelector("meta[name='robots']");
@@ -58,11 +48,8 @@ const SEO = ({
       robots.name = "robots";
       document.head.appendChild(robots);
     }
-
     robots.content = noIndex ? "noindex,nofollow" : "index,follow";
   }, [title, description, keywords, canonical, noIndex, pathname]);
-
   return null;
 };
-
 export default SEO;

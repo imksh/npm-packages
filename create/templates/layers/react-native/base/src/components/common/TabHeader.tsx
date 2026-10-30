@@ -11,10 +11,14 @@ export default function TabHeader({
   title,
   actions,
   showMenuButton = false,
+  showBackButton = false,
+  onBack,
 }: {
   title?: string;
   actions?: React.ReactNode;
   showMenuButton?: boolean;
+  showBackButton?: boolean;
+  onBack?: () => void;
 }) {
   const { colorScheme } = useColorScheme();
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
@@ -32,7 +36,20 @@ export default function TabHeader({
         }}
       >
         <View className="flex-row items-center flex-1 mr-4">
-          {showMenuButton && (
+          {showBackButton && (
+            <TouchableOpacity
+              onPress={onBack}
+              activeOpacity={0.7}
+              className="w-10 h-10 rounded-full bg-base-200/80 items-center justify-center mr-3 border border-base-300/10 shadow-sm"
+            >
+              <Ionicons
+                name="arrow-back-outline"
+                color={colors.baseContent}
+                size={22}
+              />
+            </TouchableOpacity>
+          )}
+          {showMenuButton && !showBackButton && (
             <TouchableOpacity
               onPress={() => setIsSidebarOpen(true)}
               activeOpacity={0.7}
@@ -45,7 +62,12 @@ export default function TabHeader({
               />
             </TouchableOpacity>
           )}
-          <Txt variant="xl" className="text-primary">
+          <Txt
+            variant="2xl"
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.8}
+          >
             {title}
           </Txt>
         </View>

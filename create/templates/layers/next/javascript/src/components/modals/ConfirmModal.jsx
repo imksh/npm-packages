@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -7,7 +8,6 @@ import {
   FaCircleCheck,
   FaCircleXmark,
 } from "react-icons/fa6";
-
 const variants = {
   warning: {
     icon: FaTriangleExclamation,
@@ -34,7 +34,6 @@ const variants = {
     button: "btn-info",
   },
 };
-
 const ConfirmModal = ({
   open,
   variant = "warning",
@@ -50,23 +49,17 @@ const ConfirmModal = ({
 }) => {
   useEffect(() => {
     if (!open || !closeOnEsc) return;
-
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
         onCancel?.();
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
-
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [open, closeOnEsc, onCancel]);
-
   if (!open) return null;
-
   const style = variants[variant || "warning"];
   const Icon = style.icon;
-
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center">
       {/* Backdrop */}
@@ -123,5 +116,4 @@ const ConfirmModal = ({
     document.body,
   );
 };
-
 export default ConfirmModal;

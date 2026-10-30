@@ -1,12 +1,15 @@
-import React, { useState } from "react";
-import { View, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Pressable,
+  LayoutAnimation,
+  StyleProp,
+  ViewStyle,
+} from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  measure,
-  useAnimatedRef,
-  runOnUI,
 } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import { useColorScheme } from "nativewind";
@@ -15,68 +18,185 @@ import { Txt } from "../../common/Typography";
 
 export interface AccordionProps {
   title: string;
+  subtitle?: string;
+  icon?: keyof typeof Ionicons.glyphMap;
+  badge?: string;
+  badgeVariant?: "primary" | "success" | "warning" | "neutral";
+  defaultOpen?: boolean;
+  isOpen?: boolean;
+  onToggle?: (open: boolean) => void;
   children: React.ReactNode;
+  containerStyle?: StyleProp<ViewStyle>;
+  headerStyle?: StyleProp<ViewStyle>;
+  contentStyle?: StyleProp<ViewStyle>;
+  containerClassName?: string;
 }
 
-export default function Accordion({ title, children }: AccordionProps) {
+export default function Accordion({
+  title,
+  subtitle,
+  icon,
+  badge,
+  badgeVariant = "primary",
+  defaultOpen = false,
+  isOpen: controlledIsOpen,
+  onToggle,
+  children,
+  containerStyle,
+  headerStyle,
+  contentStyle,
+  containerClassName = "",
+}: AccordionProps) {
   const { colorScheme } = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
-  const [isOpen, setIsOpen] = useState(false);
-  const heightValue = useSharedValue(0);
-  const progress = useSharedValue(0);
-  const aref = useAnimatedRef<View>();
+  const isControlled = controlledIsOpen !== undefined;
+  const [internalOpen, setInternalOpen] = useState(defaultOpen);
+  const open = isControlled ? controlledIsOpen : internalOpen;
 
-  const toggleAccordion = () => {
-    if (isOpen) {
-      heightValue.value = withTiming(0, { duration: 300 });
-      progress.value = withTiming(0, { duration: 300 });
-      setIsOpen(false);
-    } else {
-      runOnUI(() => {
-        "worklet";
-        const measurement = measure(aref);
-        if (measurement) {
-          heightValue.value = withTiming(measurement.height, { duration: 300 });
-          progress.value = withTiming(1, { duration: 300 });
-        }
-      })();
-      setIsOpen(true);
+  const progress = useSharedValue(open ? 1 : 0);
+
+  useEffect(() => {
+    progress.value = withTiming(open ? 1 : 0, { duration: 250 });
+  }, [open]);
+
+  const handleToggle = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    if (!isControlled) {
+      setInternalOpen(!open);
     }
+    onToggle?.(!open);
   };
-
-  const bodyStyle = useAnimatedStyle(() => ({
-    height: heightValue.value,
-    opacity: progress.value,
-    overflow: "hidden",
-  }));
 
   const iconStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${progress.value * 180}deg` }],
   }));
 
+  const getBadgeColors = () => {
+    switch (badgeVariant) {
+      case "success":
+        return { bg: theme.success + "20", text: theme.success };
+      case "warning":
+        return { bg: theme.warning + "25", text: theme.warning };
+      case "neutral":
+        return { bg: theme.baseContent + "15", text: theme.baseContent };
+      case "primary":
+      default:
+        return { bg: theme.primary + "20", text: theme.primary };
+    }
+  };
+
+  const badgeColors = getBadgeColors();
+
   return (
-    <View style={{ backgroundColor: theme.base200, borderRadius: 12, marginBottom: 8, overflow: "hidden" }}>
-      <TouchableOpacity
-        activeOpacity={0.7}
-        onPress={toggleAccordion}
-        style={{ padding: 16, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}
+    <View
+      className={`rounded-2xl border mb-3 overflow-hidden ${containerClassName}`}
+      style={[
+        {
+          backgroundColor: theme.base200,
+          borderColor: theme.base300,
+        },
+        containerStyle,
+      ]}
+    >
+      <Pressable
+        onPress={handleToggle}
+        android_ripple={{ color: theme.base300 }}
+        style={[
+          {
+            paddingVertical: 14,
+            paddingHorizontal: 16,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          },
+          headerStyle,
+        ]}
       >
-        <Txt color={theme.baseContent} weight="semibold" variant="md">{title}</Txt>
-        <Animated.View style={iconStyle}>
-          <Ionicons name="chevron-down" size={24} color={theme.baseContent} />
-        </Animated.View>
-      </TouchableOpacity>
-      
-      <Animated.View style={bodyStyle}>
         <View
-          style={{ position: "absolute", width: "100%", paddingHorizontal: 16, paddingBottom: 16 }}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            flex: 1,
+            marginRight: 8,
+          }}
         >
-          {/* This inner view is measured */}
-          <Animated.View ref={aref}>
-            {children}
+          {icon && (
+            <View
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 12,
+                backgroundColor: theme.primary + "15",
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: 12,
+              }}
+            >
+              <Ionicons name={icon} size={20} color={theme.primary} />
+            </View>
+          )}
+          <View style={{ flex: 1 }}>
+            <Txt color={theme.baseContent} weight="bold" variant="md">
+              {title}
+            </Txt>
+            {subtitle ? (
+              <Txt
+                color={theme.baseContent}
+                variant="xs"
+                style={{ opacity: 0.6, marginTop: 2 }}
+              >
+                {subtitle}
+              </Txt>
+            ) : null}
+          </View>
+        </View>
+
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          {badge ? (
+            <View
+              style={{
+                paddingHorizontal: 8,
+                paddingVertical: 3,
+                borderRadius: 9999,
+                backgroundColor: badgeColors.bg,
+              }}
+            >
+              <Txt color={badgeColors.text} variant="xs" weight="medium">
+                {badge}
+              </Txt>
+            </View>
+          ) : null}
+          <Animated.View style={iconStyle}>
+            <Ionicons
+              name="chevron-down"
+              size={20}
+              color={theme.baseContent}
+              style={{ opacity: 0.7 }}
+            />
           </Animated.View>
         </View>
-      </Animated.View>
+      </Pressable>
+
+      {open && (
+        <View
+          style={[
+            {
+              borderTopWidth: 1,
+              borderTopColor: theme.base300,
+              padding: 16,
+            },
+            contentStyle,
+          ]}
+        >
+          {children}
+        </View>
+      )}
     </View>
   );
 }

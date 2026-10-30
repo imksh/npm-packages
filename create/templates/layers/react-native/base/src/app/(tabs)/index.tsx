@@ -273,7 +273,7 @@ const Index = () => {
                         FaceID or TouchID
                       </Txt>
                     </VStack>
-                    <Switch checked={isEnabled} onChange={setIsEnabled} />
+                    <Switch value={isEnabled} onChange={setIsEnabled} />
                   </HStack>
 
                   <Divider />

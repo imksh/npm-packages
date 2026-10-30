@@ -6,7 +6,10 @@ export default function TextArea({ labelOnBorder, ...props }: InputProps) {
     <Input
       multiline
       numberOfLines={4}
-      containerStyle={[{ height: 120, alignItems: "flex-start", paddingTop: 12 }, props.containerStyle]}
+      containerStyle={[
+        { height: 120, alignItems: "flex-start" },
+        props.containerStyle,
+      ]}
       textAlignVertical="top"
       labelOnBorder={labelOnBorder}
       {...props}

@@ -1,9 +1,19 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, ScrollView, LayoutChangeEvent } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  ScrollView,
+  LayoutChangeEvent,
+} from "react-native";
 import { useColorScheme } from "nativewind";
 import { Colors } from "../../../constants/Colors";
 import { Txt } from "../../common/Typography";
-import Animated, { useAnimatedStyle, withTiming, useSharedValue, Easing } from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  withTiming,
+  useSharedValue,
+  Easing,
+} from "react-native-reanimated";
 
 export interface TabItem {
   id: string;
@@ -66,7 +76,6 @@ export default function Tabs({
       indicatorWidth.value = withTiming(tabWidths[activeTab], config);
       indicatorPosition.value = withTiming(tabXs[activeTab], config);
     }
-     
   }, [activeTab, tabWidths, tabXs]);
 
   const indicatorStyle = useAnimatedStyle(() => {
@@ -136,6 +145,8 @@ export default function Tabs({
             }}
           >
             <Txt
+              numberOfLines={1}
+              adjustsFontSizeToFit
               variant="md"
               style={{
                 fontSize: sStyles.fontSize,
@@ -144,8 +155,8 @@ export default function Tabs({
                   variant === "button" && isActive
                     ? theme.primaryContent
                     : isActive
-                    ? theme.primary
-                    : theme.baseContent,
+                      ? theme.primary
+                      : theme.baseContent,
                 opacity: !isActive && variant === "button" ? 0.7 : 1,
               }}
             >

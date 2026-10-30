@@ -1,5 +1,7 @@
 import React from "react";
-import { View, ViewProps, FlexAlignType } from "react-native";
+import { View, ViewProps } from "react-native";
+
+export type FlexAlignType = "flex-start" | "flex-end" | "center" | "stretch" | "baseline";
 
 export interface StackProps extends ViewProps {
   direction?: "row" | "column";

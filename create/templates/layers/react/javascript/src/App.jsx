@@ -13,7 +13,6 @@ import Unauthorized from "./components/common/Unauthorized";
 import ProtectedRoute from "./components/layout/ProtectedRoute";
 import PublicLayout from "./components/layout/PublicLayout";
 import SidebarLayout from "./components/layout/SidebarLayout";
-
 const App = () => {
   const { getMe, isCheckingAuth } = useAuthStore();
 
@@ -23,7 +22,6 @@ const App = () => {
   useEffect(() => {
     getMe();
   }, []);
-
   if (isCheckingAuth) {
     return (
       <div className="flex h-screen items-center justify-center bg-base-100">
@@ -31,7 +29,6 @@ const App = () => {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-base-100 text-base-content">
       <Toaster position="top-right" />
@@ -41,7 +38,7 @@ const App = () => {
 
         {/* <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
-        </Route> */}
+         </Route> */}
 
         {/* Auth Page Routes */}
         <Route path="/login" element={<Login />} />
@@ -64,5 +61,4 @@ const App = () => {
     </div>
   );
 };
-
 export default App;

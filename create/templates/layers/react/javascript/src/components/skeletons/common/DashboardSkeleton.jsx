@@ -1,5 +1,4 @@
 import CardSkeleton from "./CardSkeleton";
-
 const DashboardSkeleton = () => {
   return (
     <div className="space-y-8">
@@ -13,5 +12,4 @@ const DashboardSkeleton = () => {
     </div>
   );
 };
-
 export default DashboardSkeleton;

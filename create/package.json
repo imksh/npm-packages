@@ -1,15 +1,13 @@
 {
   "name": "@imksh/create",
-  "version": "1.0.32",
+  "version": "1.0.35",
   "description": "A production-ready create for scaffolding modern applications.",
   "type": "module",
   "bin": {
     "imksh": "./bin/index.js"
   },
   "scripts": {
-    "test": "node scripts/test-presets.js",
-    "test:snapshot": "node scripts/snapshot-presets.js",
-    "test:regression": "node scripts/test-presets.js"
+    "sync:templates": "node scripts/derive-js.js"
   },
   "files": [
     "bin",
@@ -44,8 +42,12 @@
     "ora": "^8.0.1"
   },
   "devDependencies": {
+    "@babel/core": "^8.0.10",
+    "@babel/plugin-syntax-jsx": "^8.0.1",
+    "@babel/preset-typescript": "^8.0.7",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
+    "prettier": "^3.9.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   TextInput,
@@ -16,8 +16,6 @@ export interface InputProps extends TextInputProps {
   leftIcon?: keyof typeof Ionicons.glyphMap;
   rightIcon?: keyof typeof Ionicons.glyphMap;
   onRightIconPress?: () => void;
-  placeHolder?: string;
-  style?: import("react-native").StyleProp<import("react-native").ViewStyle>;
   helperText?: string;
   containerStyle?: import("react-native").StyleProp<
     import("react-native").ViewStyle
@@ -36,7 +34,6 @@ export default function Input({
   onRightIconPress,
   helperText,
   style,
-  placeHolder = "",
   containerStyle,
   labelOnBorder = false,
   className = "mb-2",
@@ -48,6 +45,59 @@ export default function Input({
   const theme = Colors[colorScheme ?? "light"];
   const [isFocused, setIsFocused] = useState(false);
 
+  const {
+    value,
+    defaultValue,
+    onChangeText,
+    onFocus,
+    onBlur,
+    autoCorrect,
+    spellCheck,
+    autoComplete,
+    ...restProps
+  } = props;
+
+  const isControlled = value !== undefined;
+  const initialValue =
+    value !== undefined && value !== null
+      ? String(value)
+      : defaultValue !== undefined && defaultValue !== null
+        ? String(defaultValue)
+        : "";
+
+  const lastNativeTextRef = useRef<string>(initialValue);
+  const [externalVersion, setExternalVersion] = useState(0);
+
+  const inputRef = useRef<TextInput | null>(null);
+
+  // Sync external changes (e.g. form reset, barcode scan, clear button, value clamping).
+  // If `props.value` differs from the last text reported natively:
+  // - If focused: update native props without remounting to keep keyboard and focus.
+  // - If not focused: bump externalVersion so native input remounts with new defaultValue.
+  useEffect(() => {
+    if (isControlled) {
+      const incoming =
+        value !== null && value !== undefined ? String(value) : "";
+      if (incoming === lastNativeTextRef.current) {
+        return;
+      }
+
+      lastNativeTextRef.current = incoming;
+
+      if (isFocused) {
+        inputRef.current?.setNativeProps({ text: incoming });
+        return;
+      }
+
+      setExternalVersion((v) => v + 1);
+    }
+  }, [value, isControlled, isFocused]);
+
+  const handleChangeText = (text: string) => {
+    lastNativeTextRef.current = text;
+    onChangeText?.(text);
+  };
+
   const borderColor = error
     ? theme.error
     : isFocused
@@ -58,6 +108,13 @@ export default function Input({
   const inputFontSize = size === "sm" ? 14 : size === "lg" ? 18 : 16;
   const iconSize = size === "sm" ? 16 : size === "lg" ? 24 : 20;
   const labelSize = size === "sm" ? "xs" : size === "lg" ? "lg" : "base";
+
+  const effectiveDefaultValue = isControlled
+    ? value !== null && value !== undefined
+      ? String(value)
+      : ""
+    : defaultValue;
+
   return (
     <View
       className={`${className} relative ${props.editable === false ? "opacity-50" : ""}`}
@@ -123,6 +180,9 @@ export default function Input({
         )}
 
         <TextInput
+          ref={inputRef}
+          key={externalVersion}
+          defaultValue={effectiveDefaultValue}
           style={[
             {
               flex: 1,
@@ -133,16 +193,19 @@ export default function Input({
             style,
           ]}
           placeholderTextColor={theme.secondary}
-          placeholder={placeHolder}
+          autoCorrect={autoCorrect ?? false}
+          spellCheck={spellCheck ?? false}
+          autoComplete={autoComplete}
           onFocus={(e) => {
             setIsFocused(true);
-            props.onFocus?.(e);
+            onFocus?.(e);
           }}
           onBlur={(e) => {
             setIsFocused(false);
-            props.onBlur?.(e);
+            onBlur?.(e);
           }}
-          {...props}
+          onChangeText={handleChangeText}
+          {...restProps}
         />
 
         {rightIcon && (
